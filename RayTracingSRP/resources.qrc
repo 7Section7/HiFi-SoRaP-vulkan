@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/models/cube0.mtl</file>
+        <file>resources/models/cube0.pix</file>
+        <file>resources/models/cube0_nplat.in</file>
+        <file>resources/images/mountain.png</file>
+        <file>resources/shaders/fshader1.glsl</file>
+        <file>resources/shaders/vshader1.glsl</file>
+        <file>resources/images/chartIcon.png</file>
+        <file>resources/images/satelliteIcon.png</file>
+        <file>resources/images/satelliteIcon2.png</file>
+        <file>resources/images/lock.jpg</file>
+        <file>resources/images/unlock.jpg</file>
+        <file>resources/images/balanceIcon.png</file>
+        <file>resources/images/noiseTexture.png</file>
+        <file>resources/images/infoLogo.png</file>
+        <file>resources/images/infoIcon3.png</file>
+        <file>resources/images/white.png</file>
+        <file>resources/images/green.png</file>
+        <file>resources/images/download.jpg</file>
+        <file>resources/images/startButton.png</file>
+        <file>resources/images/resetButton2.png</file>
+        <file>resources/images/resetButton.png</file>
+        <file>resources/images/stop.png</file>
+        <file>resources/models/cube0.obj</file>
+        <file>resources/shaders/zbuffer_fshader.glsl</file>
+        <file>resources/shaders/raytrace_multiple_scattering_fshader.glsl</file>
+        <file>resources/shaders/render_fshader.glsl</file>
+        <file>resources/sphere1.obj</file>
+        <file>resources/sphere1.mtl</file>
+    </qresource>
+</RCC>

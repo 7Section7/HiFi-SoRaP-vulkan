@@ -1,0 +1,10 @@
+# Blender MTL File: 'boxplate_array01.blend'
+# Material Count: 2
+
+newmtl bus
+Kd 0.1
+Ks 0.4
+
+newmtl solararray
+Kd 0.197
+Ks 0.057

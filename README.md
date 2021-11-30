@@ -50,22 +50,22 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 
 2. You need to choose a method (the model you want to use to approximate the SRP force):
 
-	Cannonball (CPU): considers the shape of the spacecraft to be a sphere. Ypu can set the area of the sphere (A) and the reflectivity
+	<u>Cannonball (CPU)</u>: considers the shape of the spacecraft to be a sphere. Ypu can set the area of the sphere (A) and the reflectivity
 	property (Cr).
 	
-	NPlate (CPU): considers the shape of the spacecraft to be represented as a set of flat plates (you need to load a file that contains
+	<u>NPlate (CPU)</u>: considers the shape of the spacecraft to be represented as a set of flat plates (you need to load a file that contains
 	the number of plates, and then, for each plate, a new line with the area, specular reflectivity property, diffuse reflectivity
 	property, and normal of the plate; you can see an example in the resources/model directory).
 	
-	RayTrace (CPU): for each cell of a grid defined by the number of cells (Nx x Ny) a ray is casted against the triangular mesh of the
+	<u>RayTrace (CPU)</u>: for each cell of a grid defined by the number of cells (Nx x Ny) a ray is casted against the triangular mesh of the
 	spacecraft. Then, it is computed the SRP force on the intersected triangle. The user can set the grid and secondary and diffuse
 	rays.
 	
-	RayTrace (GPU): Similar to the CPU version, in this case the computation is done in the GPU. The user can set the secondary and diffuse rays.
-		(Nx = Ny = 512 by default).
+	<u>RayTrace (GPU)</u>: Similar to the CPU version, in this case the computation is done in the GPU. The user can set the secondary and diffuse rays.
+	(Nx = Ny = 512 by default).
 
 3. You need to choose what action you want to perform:
-	Visualize spacecraft: when the user press the start button in the Visualize Spacecraft tab, it will show a 3D viewer of the spacecraft with
+	<u>Visualize spacecraft</u>: when the user press the start button in the Visualize Spacecraft tab, it will show a 3D viewer of the spacecraft with
 	its 3 axes and the sunlight direction. Then, the user can set the initial rotation of the spacecraft by interacting with
 	the three sliders. Each one of them corresponds to one of the local axes of the spacecraft. 
 	
@@ -81,7 +81,7 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 	the heat map colours to represent in blue the forces with lower magnitudes and in red the ones with higher magnitudes. Also, in this
 	window it indicates which is the lowest and the highest magnitude among the accelerations that were computed.
 	
-	Visualize Graphics: it computes the SRP acceleration considering a set of pairs of azimuth and elevation angles. The user can select the
+	<u>Visualize Graphics</u>: it computes the SRP acceleration considering a set of pairs of azimuth and elevation angles. The user can select the
 	azimuth and the elevation steps (they indicate how many points are used to discretize sample points from a sphere).
 	
 	if a GPU-based method was selected, another option would be added to this tab and it allows the user to visualize the results obtained
@@ -91,7 +91,7 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 	components of the acceleration (x, y and z) and also its magnitude (see Fig. 17 and 18). In addition, the user can download the result
 	as a txt file.
 		
-	Compare Graphics: this option allows the user to compare the result of two graphics that were previously generated. It is important to have this
+	<u>Compare Graphics</u>: this option allows the user to compare the result of two graphics that were previously generated. It is important to have this
 	tool of comparison because it lets the user to compute the difference between two already computed graphics. Also, it shows the mean
 	square error (MSE) and the maximum difference between the points on the charts.
 		

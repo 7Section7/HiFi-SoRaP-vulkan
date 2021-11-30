@@ -169,7 +169,7 @@ vec3 computeForce(int triangleIdx,vec3 L, float Apix){
 bool hitTriangle(vec3 point, vec3 L, int triangleIdx, out vec3 hitPoint){
 
     float tMin=1.e-5f;
-    float tMax= 100000000000f;
+    float tMax= 10000000.f;
 
     Triangle t = getTriangle(triangleIdx);
 
@@ -225,7 +225,7 @@ bool hitTriangle(vec3 point, vec3 L, int triangleIdx, out vec3 hitPoint){
 int hit(vec3 point, vec3 L, out vec3 hitPoint){
 
     vec3 intPoint;
-    float depMin = 100000000000f;
+    float depMin = 10000000.f;
     int triangleIdx;
     int hitTriangleIdx = -1;
 

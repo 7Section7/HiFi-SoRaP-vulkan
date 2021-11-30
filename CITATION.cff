@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Zardain Rodríguez"
+  given-names: "Leandro Iván"
+  orcid: "https://orcid.org/0000-0002-6433-0573"
+- family-names: "Puig"
+  given-names: "Anna"
+  orcid: "https://orcid.org/0000-0001-7762-1647"
+- family-names: "Farrés"
+  given-names: "Ariadna"
+  orcid: "https://orcid.org/0000-0001-7762-1647"
+title: "RayTracingSRP"
+version: 1.0.0
+date-released: 2021-11-30
+url: "https://github.com/leandroizr/RayTracingSRP-shared-version-"

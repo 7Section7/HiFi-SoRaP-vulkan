@@ -25,10 +25,15 @@ user does not need to install them on their computer.
 
 <b>Installation guide</b>
 
+It is required to have the 3.30 version of OpenGL.
 In order to compile this project it is recommended to install Qt 5.14.2 (Qt creator 4.12.4). It is a framework that allows you
-to code in C++ and GLSL for the shaders (GPU). Operative Systems recommended: Linux, macOs.
+to code and compile easily in C++ and GLSL for the shaders (GPU).
 
-Instructions (for linux and macos):
+Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
+
+Operative Systems recommended: Linux, macOs.
+
+Instructions (for linux):
 
 1. Install OpenGL, run: "sudo apt-get install libgl-dev"
 

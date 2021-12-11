@@ -1,5 +1,12 @@
 #include "visualizationwindow.h"
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
 
 VisualizationWindow::VisualizationWindow(QWidget *parent):QWidget(parent)
 {
@@ -65,7 +72,6 @@ VisualizationWindow::VisualizationWindow(QWidget *parent):QWidget(parent)
     gLayout->addLayout(surfaces[3].vLayout, 2,2);
 
     this->setLayout(gLayout);
-
 }
 
 VisualizationWindow::~VisualizationWindow()
@@ -78,7 +84,6 @@ VisualizationWindow::~VisualizationWindow()
     surfaces[1].container->close();
     surfaces[2].container->close();
     surfaces[3].container->close();
-
 }
 
 void VisualizationWindow::plotResults(Grid *results,  QString name)

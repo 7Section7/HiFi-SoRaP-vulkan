@@ -1,5 +1,13 @@
 #version 330
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
 

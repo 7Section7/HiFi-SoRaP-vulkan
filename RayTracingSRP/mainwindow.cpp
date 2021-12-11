@@ -1,5 +1,13 @@
-
 #include "mainwindow.h"
+
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -204,7 +212,6 @@ void MainWindow::loadUserParameters(){
             msgBox.exec();
             return;
         }
-
     }
     errorCode=1;
 }

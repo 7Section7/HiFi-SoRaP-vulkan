@@ -3,6 +3,14 @@
 #include <QFile>
 #include <QRegularExpression>
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 Object::Object()
 {
     mesh = NULL;
@@ -72,7 +80,6 @@ void Object::draw(std::unique_ptr<QGLShaderProgram> &program_){
         glUniform3f(diffuseLocation,diffuseColor.x(),diffuseColor.y(),diffuseColor.z());
 
         glBindVertexArray( vao );
-
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawArrays( GL_TRIANGLES, 0, mesh->replicatedVertices.size());

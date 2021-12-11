@@ -1,4 +1,13 @@
 #version 330
+
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 layout (location = 0)out vec4 gAlbedo;
 layout (location = 1) out vec3 gNormal;
 
@@ -61,7 +70,6 @@ void main (void) {
     else if(debugMode == 3){ //Debug light direction
         gAlbedo = vec4(L,1);
     }
-
 
     //Drawing the light axes as yellow.
     if(length(worldNormal.xyz)<0.1f)

@@ -1,8 +1,15 @@
 #include "grid.h"
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 Grid::Grid(int sizeX, int sizeZ):sizeX(sizeX),sizeZ(sizeZ)
 {
-
     grid.resize(sizeX*sizeZ);
     minF =  std::numeric_limits<double>::infinity();
     minFx = std::numeric_limits<double>::infinity();
@@ -13,7 +20,6 @@ Grid::Grid(int sizeX, int sizeZ):sizeX(sizeX),sizeZ(sizeZ)
     maxFx = -std::numeric_limits<double>::infinity();
     maxFy = -std::numeric_limits<double>::infinity();
     maxFz = -std::numeric_limits<double>::infinity();
-
 }
 
 Output Grid::operator ()(int i, int j) const
@@ -131,5 +137,3 @@ Grid *Grid::getNormalizedOutput()
     }
     return normGrid;
 }
-
-

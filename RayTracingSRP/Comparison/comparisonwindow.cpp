@@ -1,5 +1,13 @@
 #include "comparisonwindow.h"
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 void ComparisonWindow::setResults(CategoryResult *value, int maxSRPModels)
 {
     results = value;
@@ -178,7 +186,6 @@ ComparisonWindow::ComparisonWindow(QWidget *parent):QWidget(parent)
     QObject::connect(compareButton, &QToolButton::pressed, [this]() {
                 this->computeDifference();
             });
-
 }
 
 ComparisonWindow::~ComparisonWindow()

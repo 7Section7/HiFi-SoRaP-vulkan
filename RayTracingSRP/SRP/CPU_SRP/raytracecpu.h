@@ -1,6 +1,14 @@
 #ifndef RAYTRACECPU_H
 #define RAYTRACECPU_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "SRP/advancedsrp.h"
 
 struct HitInfo{
@@ -22,16 +30,18 @@ struct RayTraceStep{
   int currentComputation;
 };
 
+/*
+ * This class implements the RayTrace (CPU) method.
+ */
 class RayTraceCPU: public AdvancedSRP
 {
-
     int numSecondaryRays;
     int numDiffuseRays;
     int reflectionType;
     float seed;
     QVector3D pixel;
-public:
 
+public:
     RayTraceCPU();
     void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
 

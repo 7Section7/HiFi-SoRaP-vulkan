@@ -1,6 +1,14 @@
 #ifndef RESULT_H
 #define RESULT_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "DataVisualization/grid.h"
 #include <QString>
 
@@ -10,7 +18,6 @@
 
 class Result
 {
-
     Grid *output;
     QString name;
 

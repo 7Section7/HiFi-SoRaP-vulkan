@@ -15,8 +15,8 @@ double Output::getElevation() const
     return elevation;
 }
 
-Output::Output(){
-
+Output::Output()
+{
 }
 
 Output::Output(double az, double el, double ffx, double ffy, double ffz)

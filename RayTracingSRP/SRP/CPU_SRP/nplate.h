@@ -1,7 +1,19 @@
 #ifndef NPLATE_H
 #define NPLATE_H
+
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "SRP/basicsrp.h"
 
+/*
+ * This class implements the NPlate method.
+ */
 class NPlate: public BasicSRP
 {
     void fsrp_nplate(int N, double xs[], double fs[]);

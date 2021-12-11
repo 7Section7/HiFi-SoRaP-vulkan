@@ -1,6 +1,14 @@
 #ifndef GRID_H
 #define GRID_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include <vector>
 #include <QVector3D>
 #include <QVector2D>
@@ -33,7 +41,6 @@ public:
 
     double minFx,minFy,minFz,minF;
     double maxFx,maxFy,maxFz,maxF;
-
 };
 
 #endif // GRID_H

@@ -1,6 +1,14 @@
 #ifndef SRP_H
 #define SRP_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include <vector>
 #include <QVector3D>
 #include <stdio.h>
@@ -19,7 +27,6 @@ static double DEFAULT_DOUBLE_ARRAY[] = {0,0,0};
  */
 class SRP
 {
-
 protected:
     QProgressBar* progressBar;
     bool stopExecution;
@@ -29,8 +36,8 @@ protected:
 
     Object *satellite;
     void saveResultsToFile(float xpix, QVector3D& cm,Grid *results);
-public:
 
+public:
     SRP();
     virtual void computeSRP(Grid *results) = 0;
     virtual QVector3D computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ) = 0;

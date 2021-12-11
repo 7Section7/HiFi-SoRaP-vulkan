@@ -1,5 +1,13 @@
 #include "light.h"
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 Light::Light()
 {
     lightDir = QVector3D(1,0,0);

@@ -1,6 +1,14 @@
 #ifndef TRIANGLEMESH_H
 #define TRIANGLEMESH_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include <vector>
 #include <QVector3D>
 #include <math.h>

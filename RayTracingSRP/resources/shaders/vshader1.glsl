@@ -1,5 +1,13 @@
 #version 330
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 layout (location = 0) in vec4 vertex;
 layout (location = 1) in vec4 normal;
 layout (location = 2) in float pd;

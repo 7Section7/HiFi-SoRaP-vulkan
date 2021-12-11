@@ -1,11 +1,19 @@
 #ifndef CATEGORYRESULT_H
 #define CATEGORYRESULT_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "result.h"
 #include "unordered_map"
 
 /*
- * This class stores for one of the implemented method, all the results that this method has produced.
+ * This class stores, for one of the implemented methods, all the results that this method has produced.
  */
 
 class CategoryResult

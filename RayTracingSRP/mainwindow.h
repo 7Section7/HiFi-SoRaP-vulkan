@@ -1,6 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include <QtWidgets>
 //#include "glwidget.h"
 #include "GLVisualization/glwindow.h"
@@ -28,9 +36,8 @@ class GLWidget;
 QT_END_NAMESPACE
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
-
 
 /*
  * This class creates the main window for this application.
@@ -70,7 +77,6 @@ private slots:
     void on_pushButton_2_clicked(bool checked);
 
 private:
-
     Ui::MainWindow *ui;
 
     QLineEdit * infoSatellite;

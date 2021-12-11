@@ -1,6 +1,14 @@
 #ifndef ADVANCEDGPU_H
 #define ADVANCEDGPU_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "SRP/advancedsrp.h"
 #include "MeshObjects/object.h"
 #include "MeshObjects/lineobject.h"
@@ -15,9 +23,13 @@
 
 enum DebugMode{NoDebug=0,ShowOutputForces=1,ShowFaceNormals=2,ShowLightDir=3, DebugPrecision1=4, DebugPrecision2=5};
 
+/*
+ * This class is in charge of managing the communication between the CPU and GPU for the computation of the SRP method.
+ */
 class AdvancedGPU :  public Object,public AdvancedSRP
 {
 Q_OBJECT
+
 public:
     struct ForceSRP{
         QTimer * timer;
@@ -28,7 +40,6 @@ public:
     };
 
 protected:
-
     int debugMode=NoDebug;
 
     std::string fragmentShaderFileGPU;

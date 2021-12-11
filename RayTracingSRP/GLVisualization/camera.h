@@ -1,4 +1,3 @@
-
 #ifndef CAMERAH
 #define CAMERAH
 
@@ -18,6 +17,9 @@ const double kMaxRotationX = M_PI / 2;
 
 const double kAngleIncrement = 0.01;
 
+/*
+ * This class contains the information of the camera where the observer is watching.
+ */
 class Camera {
  private:
   /**
@@ -319,7 +321,6 @@ class Camera {
   void updateView(Eigen::Matrix4f rotationMatrix,std::unique_ptr<QGLShaderProgram> &program, float distance=3.0f);
 
   void updateProjection(double left, double right, double bottom, double top, std::unique_ptr<QGLShaderProgram> &program);
-
 };
 
 }  //  namespace datavisualization

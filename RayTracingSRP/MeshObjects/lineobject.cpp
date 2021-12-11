@@ -1,5 +1,13 @@
 #include "lineobject.h"
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 LineObject::LineObject()
 {
     diffuseColor = QVector3D(1,1,0);
@@ -24,8 +32,6 @@ void LineObject::initializeBuffers()
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0,  0);
     glEnableVertexAttribArray(0);
-
-
 
     glBindBuffer(GL_ARRAY_BUFFER,0);
 }

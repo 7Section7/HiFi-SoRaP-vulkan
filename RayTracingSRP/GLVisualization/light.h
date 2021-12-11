@@ -1,11 +1,22 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "Lib/common.h"
 #include <qvector3d.h>
 #include <QGLShaderProgram>
 #include <memory>
 
+/*
+ * This class contains the information of a light source.
+ */
 class Light
 {
     QVector3D lightDir;

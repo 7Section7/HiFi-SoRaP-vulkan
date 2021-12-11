@@ -1,5 +1,12 @@
 #version 330
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
 
 #define Reflective 0
 #define Transparent 1

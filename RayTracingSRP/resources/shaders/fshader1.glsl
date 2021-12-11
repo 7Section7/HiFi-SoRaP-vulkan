@@ -1,5 +1,13 @@
 #version 330
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 smooth in vec4 worldNormal;
 smooth in vec4 worldVertex;
 
@@ -13,7 +21,6 @@ uniform mat4 model;
 out vec4 fragColor;
 
 uniform vec3 diffuse;
-
 
 /*
   This computes which color assign to the pixel. It is based on the formula of blinn-phong.

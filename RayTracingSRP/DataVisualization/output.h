@@ -1,6 +1,14 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include <QVector3D>
 #include <limits>
 #include <stdio.h>
@@ -11,7 +19,6 @@
  */
 class Output
 {
-
     double azimuth;
     double elevation;
     QVector3D forces;

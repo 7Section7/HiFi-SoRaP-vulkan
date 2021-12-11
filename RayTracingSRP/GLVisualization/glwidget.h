@@ -1,6 +1,14 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include <QGLShaderProgram>
 
 #include <QtWidgets>
@@ -88,6 +96,7 @@ class GLWidget : public QGLWidget
     void init();
 
     bool readFile(const std::string filename, std::string *shaderSource);
+
     /**
      * @brief initializeGL Initializes OpenGL variables and loads, compiles and
      * links shaders.

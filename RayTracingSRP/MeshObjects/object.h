@@ -1,6 +1,14 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "Lib/common.h"
 
 #include <QObject>
@@ -50,7 +58,6 @@ public:
     void setDiffuseColor(const QVector3D &value);
 
     int getNumMaterials();
-
 };
 
 #endif // OBJECT_H

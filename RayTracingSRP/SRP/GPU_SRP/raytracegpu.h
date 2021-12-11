@@ -1,9 +1,21 @@
 #ifndef RAYTRACE_H
 #define RAYTRACE_H
 
+/***********************************************************************
+ +
+ * Project: RayTracingSRP
+ * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
+ * Created on: 30 Nov 2021
+ *
+ ***********************************************************************/
+
 #include "MeshObjects/object.h"
 //#include <QOpenGLTexture>
 #include "SRP/GPU_SRP/advancedgpu.h"
+
+/*
+ * This class contains the information needed for a raytrace (gpu-version) method.
+ */
 class RayTraceGPU
 {
     int numSecondaryRays;

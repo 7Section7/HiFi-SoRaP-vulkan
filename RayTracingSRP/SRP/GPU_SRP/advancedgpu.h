@@ -31,85 +31,85 @@ class AdvancedGPU :  public Object,public AdvancedSRP
 Q_OBJECT
 
 public:
-    struct ForceSRP{
-        QTimer * timer;
-        QEventLoop * loop;
-        Light * light;
-        bool isComputed=false;
-        QVector3D force;
-    };
+	struct ForceSRP{
+		QTimer * timer;
+		QEventLoop * loop;
+		Light * light;
+		bool isComputed=false;
+		QVector3D force;
+	};
 
 protected:
-    int debugMode=NoDebug;
+	int debugMode=NoDebug;
 
-    std::string fragmentShaderFileGPU;
-    std::string fragmentShaderRenderGPU;
+	std::string fragmentShaderFileGPU;
+	std::string fragmentShaderRenderGPU;
 
-    unsigned int rboDepth;
-    unsigned int index;
+	unsigned int rboDepth;
+	unsigned int index;
 
-    unsigned int programId;
-    GLuint gBuffer, gPosition, gNormal, gAlbedo;
-    dataVisualization::Camera *camera;
+	unsigned int programId;
+	GLuint gBuffer, gPosition, gNormal, gAlbedo;
+	dataVisualization::Camera *camera;
 
-    int width, height;
-    Object *satellite;
-    Light *light;
+	int width, height;
+	Object *satellite;
+	Light *light;
 
-    QVector3D computedForce;
+	QVector3D computedForce;
 
-    std::vector<QEventLoop *>loops;
-    std::vector<QTimer *>timers;
+	std::vector<QEventLoop *>loops;
+	std::vector<QTimer *>timers;
 
 public:
-    std::unique_ptr<QGLShaderProgram> programGPU;
-    std::unique_ptr<QGLShaderProgram> programRenderGPU;
-    bool renderNeeded;
-    std::vector<unsigned int> forcesToCompute;
-    std::vector<unsigned int> computedForces;
+	std::unique_ptr<QGLShaderProgram> programGPU;
+	std::unique_ptr<QGLShaderProgram> programRenderGPU;
+	bool renderNeeded;
+	std::vector<unsigned int> forcesToCompute;
+	std::vector<unsigned int> computedForces;
 
-    std::unordered_map<unsigned int, ForceSRP*> forces;
+	std::unordered_map<unsigned int, ForceSRP*> forces;
 
-    AdvancedGPU();
+	AdvancedGPU();
 
-    static Eigen::Matrix4f getLightView(dataVisualization::Camera &camera, Light &light, Object* satellite);
+	static Eigen::Matrix4f getLightView(dataVisualization::Camera &camera, Light &light, Object* satellite);
 
-    QVector3D getComputedForce() const;
-    void setComputedForce(const QVector3D &value);
+	QVector3D getComputedForce() const;
+	void setComputedForce(const QVector3D &value);
 
-    // Object interface
+	// Object interface
 public:
-    void initializeGL(int width, int height, Object *obj);
-    virtual void initializeBuffers()=0;
-    virtual void draw(std::unique_ptr<QGLShaderProgram> &program, Object * satellite)=0;
-    void debugDraw(std::unique_ptr<QGLShaderProgram> &program, Object * satellite);
+	void initializeGL(int width, int height, Object *obj);
+	virtual void initializeBuffers()=0;
+	virtual void draw(std::unique_ptr<QGLShaderProgram> &program, Object * satellite)=0;
+	void debugDraw(std::unique_ptr<QGLShaderProgram> &program, Object * satellite);
 
-    void showForces();
-    void showNormals();
-    void showNothing();
+	void showForces();
+	void showNormals();
+	void showNothing();
 
-    // SRP interface
+	// SRP interface
 public:
-    void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
+	void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
 
-    Light *getLight() const;
-    void setLight(Light *value);
+	Light *getLight() const;
+	void setLight(Light *value);
 
-    int getWidth() const;
-    void setWidth(int value);
+	int getWidth() const;
+	void setWidth(int value);
 
-    int getHeight() const;
-    void setHeight(int value);
+	int getHeight() const;
+	void setHeight(int value);
 
-    dataVisualization::Camera *getCamera() const;
+	dataVisualization::Camera *getCamera() const;
 
-    std::string getFragmentShaderFileGPU() const;
-    void setFragmentShaderFileGPU(const std::string &value);
+	std::string getFragmentShaderFileGPU() const;
+	void setFragmentShaderFileGPU(const std::string &value);
 
-    std::string getFragmentShaderRenderGPU() const;
+	std::string getFragmentShaderRenderGPU() const;
 
 signals:
-    void render();
+	void render();
 };
 
 #endif // RAYTRACINGGPU_H

@@ -19,24 +19,24 @@
  */
 class Output
 {
-    double azimuth;
-    double elevation;
-    QVector3D forces;
+	double azimuth;
+	double elevation;
+	QVector3D forces;
 
 public:
-    Output();
-    Output(double az, double el, double ffx, double ffy, double ffz);
+	Output();
+	Output(double az, double el, double ffx, double ffy, double ffz);
 
-    QVector3D getOutputWithMeanForces();
-    QVector3D getOutputWithForceX();
-    QVector3D getOutputWithForceY();
-    QVector3D getOutputWithForceZ();
+	QVector3D getOutputWithMeanForces();
+	QVector3D getOutputWithForceX();
+	QVector3D getOutputWithForceY();
+	QVector3D getOutputWithForceZ();
 
-    void save(FILE* fo);
+	void save(FILE* fo);
 
-    QVector3D getForces() const;
-    double getAzimuth() const;
-    double getElevation() const;
+	QVector3D getForces() const;
+	double getAzimuth() const;
+	double getElevation() const;
 };
 
 #endif // OUTPUT_H

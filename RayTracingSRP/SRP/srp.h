@@ -28,38 +28,38 @@ static double DEFAULT_DOUBLE_ARRAY[] = {0,0,0};
 class SRP
 {
 protected:
-    QProgressBar* progressBar;
-    bool stopExecution;
-    int step_AZ, step_EL;
-    std::string output;
-    float msat;
+	QProgressBar* progressBar;
+	bool stopExecution;
+	int step_AZ, step_EL;
+	std::string output;
+	float msat;
 
-    Object *satellite;
-    void saveResultsToFile(float xpix, QVector3D& cm,Grid *results);
+	Object *satellite;
+	void saveResultsToFile(float xpix, QVector3D& cm,Grid *results);
 
 public:
-    SRP();
-    virtual void computeSRP(Grid *results) = 0;
-    virtual QVector3D computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ) = 0;
-    virtual QVector3D computeSRP(QVector3D lightDir,Eigen::Matrix4f& satelliteRotation) = 0;
-    virtual void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY) = 0;
-    virtual void saveResults(Grid *results);
+	SRP();
+	virtual void computeSRP(Grid *results) = 0;
+	virtual QVector3D computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ) = 0;
+	virtual QVector3D computeSRP(QVector3D lightDir,Eigen::Matrix4f& satelliteRotation) = 0;
+	virtual void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY) = 0;
+	virtual void saveResults(Grid *results);
 
-    int getAzimuthStep() const;
-    void setAzimuthStep(int value);
-    int getElevationStep() const;
-    void setElevationStep(int value);
-    std::string getOutput() const;
-    void setOutput(const std::string &value);
-    float getMsat() const;
-    void setMsat(float value);
+	int getAzimuthStep() const;
+	void setAzimuthStep(int value);
+	int getElevationStep() const;
+	void setElevationStep(int value);
+	std::string getOutput() const;
+	void setOutput(const std::string &value);
+	float getMsat() const;
+	void setMsat(float value);
 
-    Object *getSatellite() const;
-    void setSatellite(Object *value);
-    QProgressBar *getProgressBar() const;
-    void setProgressBar(QProgressBar *value);
-    bool getStopExecution() const;
-    void setStopExecution(bool value);
+	Object *getSatellite() const;
+	void setSatellite(Object *value);
+	QProgressBar *getProgressBar() const;
+	void setProgressBar(QProgressBar *value);
+	bool getStopExecution() const;
+	void setStopExecution(bool value);
 };
 
 #endif // SRP_H

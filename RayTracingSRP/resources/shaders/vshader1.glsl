@@ -31,18 +31,17 @@ uniform mat3 normalMatrix;
 
 void main()
 {
-    gl_Position = projection*view*model*vertex;
-    gl_Position = gl_Position/gl_Position.w;
+	gl_Position = projection*view*model*vertex;
+	gl_Position = gl_Position/gl_Position.w;
 
-    worldVertex = vertex;
-    vec3 newNormal = normalMatrix*normal.xyz;
-    vec4 newNormal2 = vec4(newNormal,0);
-    worldNormal = normal;
+	worldVertex = vertex;
+	vec3 newNormal = normalMatrix*normal.xyz;
+	vec4 newNormal2 = vec4(newNormal,0);
+	worldNormal = normal;
 
-    fragmentPD=pd;
-    fragmentPS=ps;
-    fragmentRefIdx=refIdx;
-    fragmentReflectiveness=reflectiveness;
-
+	fragmentPD=pd;
+	fragmentPS=ps;
+	fragmentRefIdx=refIdx;
+	fragmentReflectiveness=reflectiveness;
 
 }

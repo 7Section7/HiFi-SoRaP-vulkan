@@ -18,16 +18,16 @@
 
 class CategoryResult
 {
-    std::vector<Result> results;
-    std::unordered_map<size_t,int> repetitions;
+	std::vector<Result> results;
+	std::unordered_map<size_t,int> repetitions;
 public:
-    CategoryResult();
+	CategoryResult();
 
-    int addResult(QString name, Grid* output);
+	int addResult(QString name, Grid* output);
 
-    std::vector<Result>& getResults();
-    void setResults(const std::vector<Result> &value);
-    int getRepetitions(QString name);
+	std::vector<Result>& getResults();
+	void setResults(const std::vector<Result> &value);
+	int getRepetitions(QString name);
 };
 
 #endif // CATEGORYRESULT_H

@@ -14,19 +14,19 @@ Result::Result()
 
 Grid *Result::getOutput() const
 {
-    return output;
+	return output;
 }
 
 void Result::setOutput(Grid *value)
 {
-    output = value;
+	output = value;
 }
 QString Result::getName() const
 {
-    return name;
+	return name;
 }
 
 void Result::setName(const QString &value)
 {
-    name = value;
+	name = value;
 }

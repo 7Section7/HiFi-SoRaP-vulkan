@@ -21,26 +21,26 @@
  */
 class Grid
 {
-    std::vector<Output> grid;
-    int sizeX,sizeZ;
+	std::vector<Output> grid;
+	int sizeX,sizeZ;
 
 public:
-    Grid(int sizeX, int sizeZ);
-    Output operator ()(int i,int j) const;
-    Output & operator ()(int i,int j);
+	Grid(int sizeX, int sizeZ);
+	Output operator ()(int i,int j) const;
+	Output & operator ()(int i,int j);
 
-    QVector2D getSizes();
+	QVector2D getSizes();
 
-    void saveData(int AZstep, int ELstep,std::string output);
+	void saveData(int AZstep, int ELstep,std::string output);
 
-    void save(FILE* fo);
+	void save(FILE* fo);
 
-    void updateExtremeValues();
+	void updateExtremeValues();
 
-    Grid *getNormalizedOutput();
+	Grid *getNormalizedOutput();
 
-    double minFx,minFy,minFz,minF;
-    double maxFx,maxFy,maxFz,maxF;
+	double minFx,minFy,minFz,minF;
+	double maxFx,maxFy,maxFz,maxF;
 };
 
 #endif // GRID_H

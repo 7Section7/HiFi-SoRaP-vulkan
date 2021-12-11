@@ -21,43 +21,43 @@
  */
 class Object: public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
-    std::vector<Material> materials;
-    std::vector<float> replicatedMaterialsPS,replicatedMaterialsPD;
-    std::vector<float> replicatedMaterialsRefIdx;
-    std::vector<int> replicatedMaterialsReflectiveness;
+	std::vector<Material> materials;
+	std::vector<float> replicatedMaterialsPS,replicatedMaterialsPD;
+	std::vector<float> replicatedMaterialsRefIdx;
+	std::vector<int> replicatedMaterialsReflectiveness;
 
-    void sendMaterialsToGPU(std::unique_ptr<QGLShaderProgram> &program);
+	void sendMaterialsToGPU(std::unique_ptr<QGLShaderProgram> &program);
 
 protected:
-    TriangleMesh* mesh;
+	TriangleMesh* mesh;
 
-    GLuint buffer;
-    GLuint vao;
+	GLuint buffer;
+	GLuint vao;
 
-    QVector3D diffuseColor;
+	QVector3D diffuseColor;
 
 public:
-    Object();
-    virtual void initializeBuffers();
-    virtual void draw(std::unique_ptr<QGLShaderProgram> &program);
-    void setMesh(TriangleMesh * mesh);
-    void prepareMaterialsToGPU();
-    Box3D computeBoundingBox();
-    bool isLoaded();
-    int loadOBJ(char *nameobj, char *namemtl);
-    TriangleMesh* getMesh();
-    Material& getMaterial(int i);
-    void setReflectivenessInMaterials(Reflectiveness r);
-    void setRefractiveIndexInMaterials(float refIdx);
+	Object();
+	virtual void initializeBuffers();
+	virtual void draw(std::unique_ptr<QGLShaderProgram> &program);
+	void setMesh(TriangleMesh * mesh);
+	void prepareMaterialsToGPU();
+	Box3D computeBoundingBox();
+	bool isLoaded();
+	int loadOBJ(char *nameobj, char *namemtl);
+	TriangleMesh* getMesh();
+	Material& getMaterial(int i);
+	void setReflectivenessInMaterials(Reflectiveness r);
+	void setRefractiveIndexInMaterials(float refIdx);
 
-    void sendObjectToGPU(std::unique_ptr<QGLShaderProgram> &program);
+	void sendObjectToGPU(std::unique_ptr<QGLShaderProgram> &program);
 
-    QVector3D getDiffuseColor() const;
-    void setDiffuseColor(const QVector3D &value);
+	QVector3D getDiffuseColor() const;
+	void setDiffuseColor(const QVector3D &value);
 
-    int getNumMaterials();
+	int getNumMaterials();
 };
 
 #endif // OBJECT_H

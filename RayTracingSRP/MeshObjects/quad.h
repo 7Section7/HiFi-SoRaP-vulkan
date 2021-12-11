@@ -17,9 +17,9 @@
 class Quad : public Object
 {
 public:
-    Quad();
+	Quad();
 
-    void initializeBuffers();
+	void initializeBuffers();
 };
 
 #endif // QUAD_H

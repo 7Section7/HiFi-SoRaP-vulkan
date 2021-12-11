@@ -19,13 +19,13 @@ enum Reflectiveness{Reflective, Transparent, Lambertian};
 class Material
 {
 public:
-    QString namemat;
-    double ps, pd;
-    Reflectiveness r;
-    float refIdx;
+	QString namemat;
+	double ps, pd;
+	Reflectiveness r;
+	float refIdx;
 
-    Material();
-    Material( QString aMaterialName );
+	Material();
+	Material( QString aMaterialName );
 };
 
 #endif // MATERIAL_H

@@ -19,19 +19,19 @@
  */
 class Light
 {
-    QVector3D lightDir;
-    QVector3D rightDir,upDir;
+	QVector3D lightDir;
+	QVector3D rightDir,upDir;
 public:
-    Light();
+	Light();
 
-    void toGPU(std::unique_ptr<QGLShaderProgram> &program);
+	void toGPU(std::unique_ptr<QGLShaderProgram> &program);
 
-    QVector3D getLightDir() const;
-    void setLightDir(const QVector3D &value);
-    QVector3D getRightDir() const;
-    void setRightDir(const QVector3D &value);
-    QVector3D getUpDir() const;
-    void setUpDir(const QVector3D &value);
+	QVector3D getLightDir() const;
+	void setLightDir(const QVector3D &value);
+	QVector3D getRightDir() const;
+	void setRightDir(const QVector3D &value);
+	QVector3D getUpDir() const;
+	void setUpDir(const QVector3D &value);
 };
 
 #endif // LIGHT_H

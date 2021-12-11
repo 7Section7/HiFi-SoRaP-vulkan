@@ -32,23 +32,23 @@ uniform vec3 diffuse;
 //This shader is used for rendering textures.
 void main (void) {
 
-    float ps=fragmentPS;
-    float pd=fragmentPD;
-    vec3 N = normalize(worldNormal.xyz);
-    vec3 L = normalize(lightDirection.xyz);
-    float costh = dot(N, L);
-    if(costh>0){
-        N=-N;
-        costh=-costh;
-    }
+	float ps=fragmentPS;
+	float pd=fragmentPD;
+	vec3 N = normalize(worldNormal.xyz);
+	vec3 L = normalize(lightDirection.xyz);
+	float costh = dot(N, L);
+	if(costh>0){
+		N=-N;
+		costh=-costh;
+	}
 
-    fragColor =vec4(0.5f*vec3(worldVertex.x+1,worldVertex.y+1,worldVertex.z+1),1);
+	fragColor =vec4(0.5f*vec3(worldVertex.x+1,worldVertex.y+1,worldVertex.z+1),1);
 
-    vec2 texCoords = 0.5f*(vec2(worldVertex.x+1,worldVertex.y+1));
-    vec3 result = texture(gAlbedo,texCoords).xyz;
-    vec3 normal = texture(gNormal,texCoords).xyz;
+	vec2 texCoords = 0.5f*(vec2(worldVertex.x+1,worldVertex.y+1));
+	vec3 result = texture(gAlbedo,texCoords).xyz;
+	vec3 normal = texture(gNormal,texCoords).xyz;
 
-    fragColor = vec4(result,1.0f);
-    if(debugMode==2) fragColor = vec4(normal,1.0f);
+	fragColor = vec4(result,1.0f);
+	if(debugMode==2) fragColor = vec4(normal,1.0f);
 
 }

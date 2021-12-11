@@ -25,24 +25,24 @@
 
 class ComparisonWindow: public QWidget
 {
-    CategoryResult *results;
+	CategoryResult *results;
 
-    QComboBox *leftBox, *rightBox;
+	QComboBox *leftBox, *rightBox;
 
-    QToolButton *compareButton;
-    QLabel *errorComparison, *errorComparisonExtraInfo;
+	QToolButton *compareButton;
+	QLabel *errorComparison, *errorComparisonExtraInfo;
 
-    std::unordered_map<int,QVector3D> map;
-    std::vector<VisualizationWindow*> visualizationWindows;
+	std::unordered_map<int,QVector3D> map;
+	std::vector<VisualizationWindow*> visualizationWindows;
 
 public:
-    ComparisonWindow(QWidget *parent = 0);
-    ~ComparisonWindow();
+	ComparisonWindow(QWidget *parent = 0);
+	~ComparisonWindow();
 
-    void setResults(CategoryResult *value,int maxSRPModels);
+	void setResults(CategoryResult *value,int maxSRPModels);
 
 private slots:
-    void computeDifference();
+	void computeDifference();
 };
 
 #endif // COMPARISONWINDOW_H

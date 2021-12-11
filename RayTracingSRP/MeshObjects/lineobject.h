@@ -17,10 +17,10 @@
 class LineObject : public Object
 {
 public:
-    LineObject();
+	LineObject();
 
-    void initializeBuffers();
-    void draw(std::unique_ptr<QGLShaderProgram> &program);
+	void initializeBuffers();
+	void draw(std::unique_ptr<QGLShaderProgram> &program);
 };
 
 #endif // LINEOBJECT_H

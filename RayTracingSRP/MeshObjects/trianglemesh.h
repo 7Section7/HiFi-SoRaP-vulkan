@@ -34,29 +34,28 @@
 class TriangleMesh
 {
 public:
+	std::vector<QVector3D> faceNormals;
+	std::vector<QVector3D> vertices;
+	std::vector<Triangle> faces;
 
-    std::vector<QVector3D> faceNormals;
-    std::vector<QVector3D> vertices;
-    std::vector<Triangle> faces;
+	std::vector<vec4> replicatedVertices, replicatedNormals;
+	std::vector<int> indexedFaces;
 
-    std::vector<vec4> replicatedVertices, replicatedNormals;
-    std::vector<int> indexedFaces;
+	Eigen::Vector3f min_, max_;
 
-    Eigen::Vector3f min_, max_;
+	TriangleMesh();
+	bool hitTriangle(vec3 point, vec3 L, int triangleIdx, vec3& hitPoint);
+	int hitTriangle(double pix[], double ray[], Triangle to,double Pint[]);
 
-    TriangleMesh();
-    bool hitTriangle(vec3 point, vec3 L, int triangleIdx, vec3& hitPoint);
-    int hitTriangle(double pix[], double ray[], Triangle to,double Pint[]);
+	void computeVertexNormals();
+	void prepareDataToGPU();
 
-    void computeVertexNormals();
-    void prepareDataToGPU();
+	void computeBoundingBox();
 
-    void computeBoundingBox();
-
-    void sendMeshToGPU(std::unique_ptr<QGLShaderProgram> &program);
+	void sendMeshToGPU(std::unique_ptr<QGLShaderProgram> &program);
 private:
-    int solveCramer(double A[][3], double b[], double x[]);
-    double det3(double A[][3]);
+	int solveCramer(double A[][3], double b[], double x[]);
+	double det3(double A[][3]);
 };
 
 #endif // TRIANGLEMESH_H

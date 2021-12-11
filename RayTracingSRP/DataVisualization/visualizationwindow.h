@@ -32,35 +32,35 @@ enum VisualizationMode{MeanF=0,Fx=1,Fy=2,Fz=3};
 
 class VisualizationWindow: public QWidget
 {
-    struct Surface{
-        Q3DSurface surface;
-        QWidget *container;
-        QVBoxLayout *vLayout;
-    };
+	struct Surface{
+		Q3DSurface surface;
+		QWidget *container;
+		QVBoxLayout *vLayout;
+	};
 
-    QWidget *widget;
-    QGridLayout * gLayout;
-    QVBoxLayout *vLayout;
+	QWidget *widget;
+	QGridLayout * gLayout;
+	QVBoxLayout *vLayout;
 
-    int ELstep, AZstep;
+	int ELstep, AZstep;
 
-    Grid *results;
+	Grid *results;
 
-    void plotSurface(Grid * results,  VisualizationMode mode);
+	void plotSurface(Grid * results,  VisualizationMode mode);
 
 public:
-    VisualizationWindow(QWidget *parent = 0);
-    ~VisualizationWindow();
-    void plotResults(Grid *results,  QString name);
+	VisualizationWindow(QWidget *parent = 0);
+	~VisualizationWindow();
+	void plotResults(Grid *results,  QString name);
 
-    Surface surfaces[MAX_SUFACES];
+	Surface surfaces[MAX_SUFACES];
 
-    void setAZstep(int value);
+	void setAZstep(int value);
 
-    void setELstep(int value);
+	void setELstep(int value);
 
 public slots:
-    void saveResults();
+	void saveResults();
 };
 
 #endif // VISUALIZATIONWINDOW_H

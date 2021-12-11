@@ -15,12 +15,12 @@
 class Triangle
 {
 public:
-    int v1, v2, v3;
-    int rf;
-    int nn;
-    double A;
+	int v1, v2, v3;
+	int rf;
+	int nn;
+	double A;
 
-    Triangle();
+	Triangle();
 };
 
 #endif // TRIANGLE_H

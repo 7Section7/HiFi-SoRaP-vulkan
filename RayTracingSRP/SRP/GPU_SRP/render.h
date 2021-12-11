@@ -21,9 +21,9 @@
 class Render : public AdvancedGPU
 {
 public:
-    Render();
-    virtual void initializeBuffers();
-    void draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite);
+	Render();
+	virtual void initializeBuffers();
+	void draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite);
 };
 
 #endif // RAYCASTGPU_H

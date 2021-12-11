@@ -80,13 +80,13 @@ const GLfloat  DegreesToRadians = M_PI / 180.0;
 using namespace Common;
 
 typedef struct {
-      vec3 pmin;
-      GLfloat a, h, p;
+	  vec3 pmin;
+	  GLfloat a, h, p;
 } Box3D;
 
 typedef struct {
-      vec2 pmin;
-      float a, h;
+	  vec2 pmin;
+	  float a, h;
 } Box2D;
 
 

@@ -18,16 +18,16 @@
 
 class Result
 {
-    Grid *output;
-    QString name;
+	Grid *output;
+	QString name;
 
 public:
-    Result();
+	Result();
 
-    QString getName() const;
-    void setName(const QString &value);
-    Grid *getOutput() const;
-    void setOutput(Grid *value);
+	QString getName() const;
+	void setName(const QString &value);
+	Grid *getOutput() const;
+	void setOutput(Grid *value);
 };
 
 #endif // RESULT_H

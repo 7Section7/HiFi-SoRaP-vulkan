@@ -17,6 +17,9 @@ and decide which approximation should be used.
 It also includes the possibility  of  visualizing  the  spacecraft  model  and  the  accelerations  for  a  better
 understanding of them.
 
+It was created by me (Leandro Zardaín Rodríguez, leandrozardain@gmail.com) under the guidance of the professors Anna Puig (annapuig@ub.edu) & Ariadna Farrés (ariadna.farres@gmail.com) for my Master degree thesis on 2019. We have made an article about this where you can get more information about this project:
+<b>Farres, Ariadna & Puig, Anna & Zardaín, Leandro. (2020). High-fidelity Modeling and Visualizing of Solar Radiation Pressure: A Framework for High-fidelity Analysis. </b>
+
 <b>Project software architecture</b>
 
 The solution that is proposed in this thesis consists of a C++ application,  using the Qt framework.  It was coded in C++

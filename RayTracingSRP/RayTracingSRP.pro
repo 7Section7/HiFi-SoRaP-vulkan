@@ -76,7 +76,6 @@ SOURCES +=  \
     SRP/CPU_SRP/canball.cpp \
     SRP/CPU_SRP/nplate.cpp \
     SRP/CPU_SRP/raytracecpu.cpp \
-    Lib/common.cpp \
     Lib/glm/core/func_common.inl \
     Lib/glm/core/func_exponential.inl \
     Lib/glm/core/func_geometric.inl \

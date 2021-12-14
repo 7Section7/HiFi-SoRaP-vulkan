@@ -28,7 +28,8 @@ user does not need to install them on their computer.
 
 <b>Installation guide</b>
 
-It is required to have the 3.30 version of OpenGL.
+It is required to have the 3.3 version of OpenGL (and 3.30 of GLSL).
+We have used the version 9.3.0 of gcc compiler.
 In order to compile this project it is recommended to install Qt 5.14.2 (Qt creator 4.12.4). It is a framework that allows you
 to code and compile easily in C++ and GLSL for the shaders (GPU).
 
@@ -44,6 +45,7 @@ Instructions (for linux):
 3. Open a terminal where the file was downloaded and run: "chmod +x <downloaded_file_name>"
 4. Run: "./<downloaded_file_name>" (it will open a Qt setup window, it will ask you to sign up and choose where to install Qt)
 	Choose custom installation and select the version of Qt you want to install (we have used Qt 5.14.2).
+	Select also "Qt datavisualization" on "Additional libraries".
 	It weights around 9GB and make take some time.
 5. Open QtCreator and load the project.
 	[If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator" ]

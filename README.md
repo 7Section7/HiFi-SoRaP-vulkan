@@ -45,6 +45,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Open a terminal where the file was downloaded and run: "chmod +x <downloaded_file_name>". Then, run: "./<downloaded_file_name>". 
 
     * Check the things in the Qt installer as here:
+
     ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
 
     * Try to open QtCreator and load the project. [If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator" ]
@@ -63,6 +64,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
 
     * Check the things in the Qt installer as here:
+
     ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
 
 
@@ -80,6 +82,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
 
     * Check the things in the Qt installer as here:
+
     ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
 
 

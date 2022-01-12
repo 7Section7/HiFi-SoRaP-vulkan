@@ -3,7 +3,7 @@
 The  aim  of  this  project  is  to  develop  an  efficient  way  of  computing  the solar  radiation  pressure
 acceleration  that  acts  on  a  spacecraft.
 
-This acceleration is produced by the impact of the photons emitted by the Sun onto a spacecraft ’s surface.
+This acceleration is produced by the impact of the photons emitted by the Sun onto a spacecraft â€™s surface.
 This collision generates an acceleration which affects its motion and has a relevant effect on a long-term propagation.
 
 This proposal studies which models can be used to approximate the computation of this acceleration.
@@ -17,8 +17,8 @@ and decide which approximation should be used.
 It also includes the possibility  of  visualizing  the  spacecraft  model  and  the  accelerations  for  a  better
 understanding of them.
 
-It was created by me (Leandro Zarda�n Rodr�guez, leandrozardain@gmail.com) under the guidance of the professors Anna Puig (annapuig@ub.edu) & Ariadna Farr�s (ariadna.farres@gmail.com) for my Master degree thesis on 2019. We have made an article about this where you can get more information about this project:
-<b>Farres, Ariadna & Puig, Anna & Zarda�n, Leandro. (2020). High-fidelity Modeling and Visualizing of Solar Radiation Pressure: A Framework for High-fidelity Analysis. </b>
+It was created by me (Leandro Zardaín Rodríguez, leandrozardain@gmail.com) under the guidance of the professors Anna Puig (annapuig@ub.edu) & Ariadna Farrés (ariadna.farres@gmail.com) for my Master degree thesis on 2019. We have made an article about this where you can get more information about this project:
+<b>Farres, Ariadna & Puig, Anna & Zardaín, Leandro. (2020). High-fidelity Modeling and Visualizing of Solar Radiation Pressure: A Framework for High-fidelity Analysis. </b>
 
 <b>Project software architecture</b>
 
@@ -33,24 +33,33 @@ We have used the version 9.3.0 of gcc compiler.
 In order to compile this project it is recommended to install Qt 5.14.2 (Qt creator 4.12.4). It is a framework that allows you
 to code and compile easily in C++ and GLSL for the shaders (GPU).
 
+Operative Systems recommended: Linux, macOs. (It can also be run on Windows)
+
+1. Install Qt
+
 Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
 
-Operative Systems recommended: Linux, macOs.
+Only on linux: Open a terminal where the file was downloaded and run: "chmod +x <downloaded_file_name>". Then, run: "./<downloaded_file_name>". 
 
-Instructions (for linux):
+Check the things in the Qt installer as here:
 
-1. Install OpenGL, run: "sudo apt-get install libgl-dev"
+![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
 
-2. Download Qt installer from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
-3. Open a terminal where the file was downloaded and run: "chmod +x <downloaded_file_name>"
-4. Run: "./<downloaded_file_name>" (it will open a Qt setup window, it will ask you to sign up and choose where to install Qt)
-	Choose custom installation and select the version of Qt you want to install (we have used Qt 5.14.2).
-	Select also "Qt datavisualization" on "Additional libraries".
-	It weights around 9GB and make take some time.
-5. Open QtCreator and load the project.
-	[If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator" ]
+Only on linux: Try to open QtCreator and load the project. [If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator" ]
 
-6. Now you can edit the project, compile it and run it.
+2. Install OpenGL for linux and Mac (on Windows it is already added).
+
+On linux, run: "sudo apt-get install libgl-dev".
+On Mac, install last version of Xcode and XQuartz from the Mac AppStore.
+
+3. Only on Windows: Install Visual Studio (this is needed for the C++ compiler) and check the next things:
+
+![VS_steps](https://user-images.githubusercontent.com/6904485/149152665-ffe51f07-ad75-4711-beac-c75b1060a6ab.PNG)
+![VS_steps2](https://user-images.githubusercontent.com/6904485/149152672-6210fcf0-6909-4be9-8bd5-1d8b7adc7db1.PNG)
+![VS_steps3](https://user-images.githubusercontent.com/6904485/149152680-9a990ba6-70cf-4f7a-b716-b91333e084b5.PNG)
+![VS_steps4](https://user-images.githubusercontent.com/6904485/149152686-69a68e1b-f912-46ca-b4bc-20ac3dadeb91.PNG)
+![VS_steps5](https://user-images.githubusercontent.com/6904485/149152695-248869c0-7d05-43d9-b361-ff01afec9caa.PNG)
+
 
 <b>User guide: step by step</b>
 
@@ -81,12 +90,12 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 	its 3 axes and the sunlight direction. Then, the user can set the initial rotation of the spacecraft by interacting with
 	the three sliders. Each one of them corresponds to one of the local axes of the spacecraft. 
 	
-	For example, in the first slider, it appears ’X’ in red and this indicates that the red line in the 3D viewer correspond to the x axis. 	
+	For example, in the first slider, it appears â€™Xâ€™ in red and this indicates that the red line in the 3D viewer correspond to the x axis. 	
 	The user can also rotate the scene by pressing the right button of the mouse. It will not affect the computation of the SRP
 	accelerations because it is modifying the orientation and position of the observer (camera) and nor the model neither the sunlight
 	direction. And having pressed the left button, the user can zoom in and zoom out.
 	
-	Also, it allows the user to compute and visualize particular accelerations by rotating the spacecraft after having pressed the ’Start’
+	Also, it allows the user to compute and visualize particular accelerations by rotating the spacecraft after having pressed the â€™Startâ€™
 	button and consequently, interacted with the sliders.
 	
 	These accelerations that will appear in the 3D scene would have a different colour depending on their magnitudes. It was chosen to use
@@ -99,7 +108,7 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 	if a GPU-based method was selected, another option would be added to this tab and it allows the user to visualize the results obtained
 	from SRP accelerations while the computation of the global accelerations is being done.
 	
-	If the user pressed the ’Start’ button, these accelerations would be represented in a window with four 3D viewers showing each one of the
+	If the user pressed the â€™Startâ€™ button, these accelerations would be represented in a window with four 3D viewers showing each one of the
 	components of the acceleration (x, y and z) and also its magnitude (see Fig. 17 and 18). In addition, the user can download the result
 	as a txt file.
 		

@@ -89,8 +89,13 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 2. Regarding OpenGL:
     * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll", it can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
 
-3. Install Visual Studio (this is needed for the C++ compiler) and check the next things:
+3. Install Visual Studio (this is needed for the C++ compiler):
+    * You need to choose which version of Visual Studio you want, we recommend the 2022 Community version.
+
 ![VS_steps](https://user-images.githubusercontent.com/6904485/149152665-ffe51f07-ad75-4711-beac-c75b1060a6ab.PNG)
+
+    * Check the next things when installing Visual Studio:
+	
 ![VS_steps2](https://user-images.githubusercontent.com/6904485/149152672-6210fcf0-6909-4be9-8bd5-1d8b7adc7db1.PNG)
 ![VS_steps3](https://user-images.githubusercontent.com/6904485/149152680-9a990ba6-70cf-4f7a-b716-b91333e084b5.PNG)
 ![VS_steps4](https://user-images.githubusercontent.com/6904485/149152686-69a68e1b-f912-46ca-b4bc-20ac3dadeb91.PNG)

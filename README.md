@@ -161,7 +161,7 @@ You need to choose what action you want to do:
     if a GPU-based method was selected, another option would be added to this tab and it allows the user to visualize the results obtained
     from SRP accelerations while the computation of the global accelerations is being done.
 
-    If the user pressed the â€™Startâ€™ button, these accelerations would be represented in a window with four 3D viewers showing each one of the
+    If the user pressed the "Start" button, these accelerations would be represented in a window with four 3D viewers showing each one of the
     components of the acceleration (x, y and z) and also its magnitude (see Fig. 17 and 18). In addition, the user can download the result
     as a txt file.
 
@@ -169,6 +169,4 @@ You need to choose what action you want to do:
 tool of comparison because it lets the user to compute the difference between two already computed graphics. Also, it shows the mean
 square error (MSE) and the maximum difference between the points on the charts.
 </details>
-
-
 

@@ -90,7 +90,7 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 	its 3 axes and the sunlight direction. Then, the user can set the initial rotation of the spacecraft by interacting with
 	the three sliders. Each one of them corresponds to one of the local axes of the spacecraft. 
 	
-	For example, in the first slider, it appears â€™Xâ€™ in red and this indicates that the red line in the 3D viewer correspond to the x axis. 	
+	For example, in the first slider, it appears "X" in red and this indicates that the red line in the 3D viewer correspond to the x axis. 	
 	The user can also rotate the scene by pressing the right button of the mouse. It will not affect the computation of the SRP
 	accelerations because it is modifying the orientation and position of the observer (camera) and nor the model neither the sunlight
 	direction. And having pressed the left button, the user can zoom in and zoom out.
@@ -115,19 +115,3 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 	<u>Compare Graphics</u>: this option allows the user to compare the result of two graphics that were previously generated. It is important to have this
 	tool of comparison because it lets the user to compute the difference between two already computed graphics. Also, it shows the mean
 	square error (MSE) and the maximum difference between the points on the charts.
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		

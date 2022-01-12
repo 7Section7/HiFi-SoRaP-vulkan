@@ -112,7 +112,7 @@ the spacecraft. In addition, you can set its weight. In the resources/model dire
 <details>
 <summary>2. Choose a Method to compute SRP Acceleration</summary>
 
-You must to choose a method (the model you want to use to approximate the SRP force):
+You need to choose a method (the model you want to use to approximate the SRP force):
 
 * **Cannonball (CPU)**: considers the shape of the spacecraft to be a sphere. Ypu can set the area of the sphere (A) and the reflectivity
     property (Cr).
@@ -133,7 +133,7 @@ You must to choose a method (the model you want to use to approximate the SRP fo
 <details>
 <summary>3. Choose an Action to perform</summary>
 	
-You must choose what action you want to do:
+You need to choose what action you want to do:
 	
 * **Visualize spacecraft**: when the user press the start button in the Visualize Spacecraft tab, it will show a 3D viewer of the spacecraft with
     its 3 axes and the sunlight direction. Then, the user can set the initial rotation of the spacecraft by interacting with

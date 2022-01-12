@@ -47,10 +47,12 @@ Check the things in the Qt installer as here:
 
 Only on linux: Try to open QtCreator and load the project. [If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator" ]
 
-2. Install OpenGL for linux and Mac (on Windows it is already added).
+2. Install OpenGL for linux and Mac:
 
 On linux, run: "sudo apt-get install libgl-dev".
 On Mac, install last version of Xcode and XQuartz from the Mac AppStore.
+
+On Windows, it is already installed. However, if it requires you the file "glext.dll", it can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
 
 3. Only on Windows: Install Visual Studio (this is needed for the C++ compiler) and check the next things:
 

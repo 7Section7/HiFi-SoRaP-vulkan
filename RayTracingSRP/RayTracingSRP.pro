@@ -8,7 +8,9 @@ QT       += core gui opengl
 #QT       += widgets
 QT       += datavisualization
 
-
+win32 {
+LIBS += $$PWD/Lib/glext.lib
+}
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

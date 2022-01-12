@@ -444,7 +444,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 
 	QFont font2;
 	font2.setBold(true);
-	font2.setWeight(100);
+    font2.setWeight(99);
 
 	int numFiability=0;
 	int numPerformance=0;

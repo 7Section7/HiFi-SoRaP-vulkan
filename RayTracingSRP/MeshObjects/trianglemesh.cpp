@@ -15,12 +15,18 @@ TriangleMesh::TriangleMesh()
 	faces.clear();
 	faceNormals.clear();
 	//vertexNormals.clear();
-	min_ = Eigen::Vector3f(std::numeric_limits<float>::max(),
-						   std::numeric_limits<float>::max(),
-						   std::numeric_limits<float>::max());
+
+#ifdef _WIN32
+    min_ = Eigen::Vector3f(99999,99999,99999);
+#else
+    min_ = Eigen::Vector3f(std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max());
+#endif
+
 	max_ = Eigen::Vector3f(std::numeric_limits<float>::lowest(),
 						   std::numeric_limits<float>::lowest(),
-						   std::numeric_limits<float>::lowest());
+                           std::numeric_limits<float>::lowest());
 }
 
 bool TriangleMesh::hitTriangle(vec3 point, vec3 L, int triangleIdx, vec3& hitPoint){
@@ -223,22 +229,39 @@ void TriangleMesh::prepareDataToGPU(){
 
 void TriangleMesh::computeBoundingBox()
 {
-	min_ = Eigen::Vector3f(std::numeric_limits<float>::max(),
-						   std::numeric_limits<float>::max(),
-						   std::numeric_limits<float>::max());
+
+#ifdef _WIN32
+    min_ = Eigen::Vector3f(99999,99999,99999);
+#else
+    min_ = Eigen::Vector3f(std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max(),
+                           std::numeric_limits<float>::max());
+#endif
+
 	max_ = Eigen::Vector3f(std::numeric_limits<float>::lowest(),
 						   std::numeric_limits<float>::lowest(),
 						   std::numeric_limits<float>::lowest());
 
 	const int kVertices = vertices.size();
-	for (int i = 0; i < kVertices; ++i) {
-	  min_[0] = std::min(min_[0], vertices[i].x());
-	  min_[1] = std::min(min_[1], vertices[i].y());
-	  min_[2] = std::min(min_[2], vertices[i].z());
+    for (int i = 0; i < kVertices; ++i)
+    {
+#ifdef _WIN32
+        min_[0] = min(min_[0], vertices[i].x());
+        min_[1] = min(min_[1], vertices[i].y());
+        min_[2] = min(min_[2], vertices[i].z());
 
-	  max_[0] = std::max(max_[0], vertices[i].x());
-	  max_[1] = std::max(max_[1], vertices[i].y());
-	  max_[2] = std::max(max_[2], vertices[i].z());
+        max_[0] = max(max_[0], vertices[i].x());
+        max_[1] = max(max_[1], vertices[i].y());
+        max_[2] = max(max_[2], vertices[i].z());
+#else
+        min_[0] = std::min(min_[0], vertices[i].x());
+        min_[1] = std::min(min_[1], vertices[i].y());
+        min_[2] = std::min(min_[2], vertices[i].z());
+
+        max_[0] = std::max(max_[0], vertices[i].x());
+        max_[1] = std::max(max_[1], vertices[i].y());
+        max_[2] = std::max(max_[2], vertices[i].z());
+#endif
 	}
 }
 

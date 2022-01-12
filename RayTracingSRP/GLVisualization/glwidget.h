@@ -58,7 +58,7 @@ class GLWidget : public QGLWidget
 
 	RenderMode renderMode;
 
-	Eigen::Matrix4f satelliteRotation;
+    Eigen::Matrix<float,4,4,Eigen::DontAlign> satelliteRotation;
 	float previousAxisX,previousAxisY,previousAxisZ;
 	bool firstRotation;
 

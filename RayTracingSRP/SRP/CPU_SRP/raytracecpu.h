@@ -12,25 +12,6 @@
 
 #include "SRP/advancedsrp.h"
 
-struct HitInfo{
-	QVector3D currentPoint;
-	QVector3D currentL;
-	QVector3D currentN;
-	QVector3D currentImportance;
-	float currentPS;
-	float currentPD;
-	float currentRefIdx;
-	int currentReflectiveness;
-};
-
-struct RayTraceStep{
-  HitInfo hitInfo;
-
-  QVector3D force;
-  int currentStep;
-  int currentComputation;
-};
-
 /*
  * This class implements the RayTrace (CPU) method.
  */
@@ -59,10 +40,6 @@ private:
 	QVector3D randomInSphere(QVector3D hitPoint);
 	QVector3D randomInSphere();
 	QVector3D computePixelForce(double xs[], double Apix, double pixel[]);
-
-	QVector3D computeScatteredForce(HitInfo &hitInfo, float Apix);
-	QVector3D computeFinalForce( double Apix,double point[], double dir[], double importance[], int numSecondaryRays);
-	void scatter( HitInfo &hitInfo);
 
 	QVector3D rayTrace( double Apix,double point[], double dir[], double importance[], int numSecondaryRays);
 	QVector3D computeForce(int rhit, double xs[],double Apix);

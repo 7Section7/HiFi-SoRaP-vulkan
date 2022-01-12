@@ -43,7 +43,11 @@
   #include <windows.h>
 #endif
 #include <GL/gl.h>
-#include <GL/glext.h>
+#ifdef _WIN32
+  #include <Lib/glew/glext.h>
+#else
+  #include <GL/glext.h>
+#endif
 #endif
 
 

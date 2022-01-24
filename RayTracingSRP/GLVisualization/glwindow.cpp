@@ -295,6 +295,11 @@ void GLWindow::generateAxisInformation(QHBoxLayout *axisLayoutContainer,QHBoxLay
 	axis.spinBox->setSingleStep(10);
 	axis.spinBox->setSuffix(QString(" º"));
 	axis.spinBox->setContentsMargins(0,0,10,0);
+
+#ifdef _WIN32
+    axis.spinBox->setGeometry(10,0,10,10);
+#endif
+
 	axisLayout->addWidget(axis.spinBox);
 
 	axis.slider->setFont(font1);
@@ -303,9 +308,18 @@ void GLWindow::generateAxisInformation(QHBoxLayout *axisLayoutContainer,QHBoxLay
 	axis.slider->setMaximum(180);
 	axis.slider->setSingleStep(10);
 	axis.slider->setOrientation(Qt::Horizontal);
-	axis.slider->setGeometry(10,0,500,10);
 	axis.slider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-	axis.slider->setMinimumWidth(350);
+
+#ifdef _WIN32
+    axis.slider->setGeometry(10,0,50,10);
+    axis.slider->setMinimumWidth(30);
+#else
+    axis.slider->setGeometry(10,0,500,10);
+    axis.slider->setMinimumWidth(350);
+#endif
+
+    axis.slider->setGeometry(10,0,40,10);
+    axis.slider->setMinimumWidth(30);
 	axisLayout->addWidget(axis.slider);
 	axisLayoutContainer->addLayout(axisLayout);
 

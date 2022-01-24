@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>resources/models/cube0.mtl</file>
         <file>resources/models/cube0.pix</file>
-        <file>resources/models/cube0_nplat.in</file>
         <file>resources/images/mountain.png</file>
         <file>resources/shaders/fshader1.glsl</file>
         <file>resources/shaders/vshader1.glsl</file>
@@ -28,5 +27,9 @@
         <file>resources/shaders/render_fshader.glsl</file>
         <file>resources/sphere1.obj</file>
         <file>resources/sphere1.mtl</file>
+        <file>resources/models/cube0_nplat_comma.in</file>
+        <file>resources/models/cube0_nplat_dot.in</file>
+        <file>resources/models/BoxPlate/nplate_boxplate_comma.in</file>
+        <file>resources/models/BoxPlate/nplate_boxplate_dot.in</file>
     </qresource>
 </RCC>

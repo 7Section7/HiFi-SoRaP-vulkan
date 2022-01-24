@@ -108,6 +108,9 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 
 <details>
 <summary>1. Load Spacecraft Model</summary>
+
+![UploadSpacecraft](https://user-images.githubusercontent.com/6904485/150852545-8f3d573e-9505-484b-be6f-1ef3afb178d3.PNG)
+
 You need to load the spacecraft model (OBJ file) which is based on CAD model: it contains the list of vertices, faces 
 and normals (optional). Also, you need a MTL file where is described the reflectivy properties of the surface of
 the spacecraft. In addition, you can set its weight. In the resources/model directory there are examples of this files.
@@ -115,6 +118,8 @@ the spacecraft. In addition, you can set its weight. In the resources/model dire
 
 <details>
 <summary>2. Choose a Method to compute SRP Acceleration</summary>
+
+![ChooseMethod](https://user-images.githubusercontent.com/6904485/150852542-7f6fe732-5e40-465f-84f1-0158ccdd62d4.PNG)
 
 You need to choose a method (the model you want to use to approximate the SRP force):
 
@@ -136,7 +141,9 @@ You need to choose a method (the model you want to use to approximate the SRP fo
 
 <details>
 <summary>3. Choose an Action to perform</summary>
-	
+
+![ChooseAction](https://user-images.githubusercontent.com/6904485/150852539-9c57962f-dbea-4cf9-98f0-20e32776e414.PNG)
+
 You need to choose what action you want to do:
 	
 * **Visualize spacecraft**: when the user press the start button in the Visualize Spacecraft tab, it will show a 3D viewer of the spacecraft with

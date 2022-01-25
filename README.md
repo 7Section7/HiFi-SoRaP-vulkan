@@ -65,8 +65,22 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
     * Check the things in the Qt installer as here:
 
+    ![dataVis](https://user-images.githubusercontent.com/6904485/151007196-a0004404-7bbc-4039-beff-802148c69f2d.png)
     ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
+	
+    Inside the Qt version choosen (for example, "Qt 5.14.2"), enable also the macOS toggle:
+    ![macOs](https://user-images.githubusercontent.com/6904485/151008145-d86ac2fe-71c2-4737-98da-cc9d21e9c213.png)
+	
+    When you open the project, you will need to choose a kit. For example, you can choose the clang one:
+    ![chooseKit](https://user-images.githubusercontent.com/6904485/151008592-0cd47cfe-5ca8-47e7-98c0-ade7fd59c11f.png)
+	
+    On Qt, in case you have a problem compiling the project with qmake:
+	1. Select the tab 'Projects' in the left side tabs. It will take you to the 'Build Settings' page.
+		![imagen](https://user-images.githubusercontent.com/6904485/151010498-9ddac5ae-61bd-403d-8588-fe0805e59226.png)
+	
+	2. Add "INCLUDEPATH+=/opt/X11/include" in the qmake options:
 
+		![imagen](https://user-images.githubusercontent.com/6904485/151009640-527e7ff4-83bc-42e9-9594-19f3c0b5c945.png)
 
 2. Install OpenGL:
 

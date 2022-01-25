@@ -112,7 +112,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     ![VS_steps5](https://user-images.githubusercontent.com/6904485/149152695-248869c0-7d05-43d9-b361-ff01afec9caa.PNG)
 	
 3. Regarding OpenGL:
-    * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll" when running the project on Qt, this dll can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
+    * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll" or the program crashes when running the project on Qt, this dll can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
 
 </details>
 

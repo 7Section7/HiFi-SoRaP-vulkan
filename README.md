@@ -48,7 +48,11 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
     ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
 
-    * Try to open QtCreator and load the project. [If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator" ]
+    * Try to open QtCreator and load the project. 
+	If QtCreator doesn't start, run: "sudo apt-get install --reinstall qtcreator".
+
+    	When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project). In our case, we have used the GCC one: 
+    	![imagen](https://user-images.githubusercontent.com/6904485/151379331-40c20dad-5cae-4305-890c-c8da1f459740.png)
 
 2. Install OpenGL:
 
@@ -71,7 +75,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     Inside the Qt version choosen (for example, "Qt 5.14.2"), enable also the macOS toggle:
     ![macOs](https://user-images.githubusercontent.com/6904485/151008145-d86ac2fe-71c2-4737-98da-cc9d21e9c213.png)
 	
-    When you open the project, you will need to choose a kit. For example, you can choose the clang one:
+    When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project). For example, you can choose the clang one:
     ![chooseKit](https://user-images.githubusercontent.com/6904485/151008592-0cd47cfe-5ca8-47e7-98c0-ade7fd59c11f.png)
 	
     On Qt, in case you have a problem compiling the project with qmake:
@@ -91,15 +95,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 <details>
 <summary>Installation on Windows</summary>
 
-1. Install Qt
-
-    * Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
-
-    * Check the things in the Qt installer as here:
-
-    ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
-
-2. Install Visual Studio (this is needed for the C++ compiler):
+1. Install Visual Studio (this is needed for the C++ compiler):
     * You need to choose which version of Visual Studio you want, we recommend the 2022 Community version.
 
     ![VS_steps](https://user-images.githubusercontent.com/6904485/149152665-ffe51f07-ad75-4711-beac-c75b1060a6ab.PNG)
@@ -111,6 +107,18 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     ![VS_steps4](https://user-images.githubusercontent.com/6904485/149152686-69a68e1b-f912-46ca-b4bc-20ac3dadeb91.PNG)
     ![VS_steps5](https://user-images.githubusercontent.com/6904485/149152695-248869c0-7d05-43d9-b361-ff01afec9caa.PNG)
 	
+2. Install Qt
+
+    * Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
+
+    * Check the things in the Qt installer as here:
+
+    ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
+	
+    * Try to open QtCreator and load the project. When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project).
+    In our case, we have used the MSCV one:
+    	![imagen](https://user-images.githubusercontent.com/6904485/151386955-7840de61-179f-4bcc-a7a9-ff315fe838b1.png)
+
 3. Regarding OpenGL:
     * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll" or the program crashes when running the project on Qt, this dll can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
 

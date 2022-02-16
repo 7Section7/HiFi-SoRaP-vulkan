@@ -175,6 +175,7 @@ the spacecraft. In addition, you can set its weight. In the resources/model dire
 <br/>
 </details>
 
+<br/>
 <details>
 <summary>2. Choose a Method to compute SRP Acceleration</summary>
 

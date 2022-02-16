@@ -174,6 +174,7 @@ and normals (optional). Also, you need a MTL file where is described the reflect
 the spacecraft. In addition, you can set its weight. In the resources/model directory there are examples of this files.
 </details>
 
+<br/>
 <details>
 <summary>2. Choose a Method to compute SRP Acceleration</summary>
 

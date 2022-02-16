@@ -53,8 +53,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
 <br/>
 
-    ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
-
+<a href="https://postimg.cc/Z05jmMWx" target="_blank"><img src="https://i.postimg.cc/fWxPc4Zp/qt-steps.png" alt="qt-steps"/></a><br/><br/>
 <br/>
 
     * Try to open QtCreator and load the project. 
@@ -62,8 +61,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
 <br/>
     	When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project). In our case, we have used the GCC one: 
-    	![imagen](https://user-images.githubusercontent.com/6904485/151379331-40c20dad-5cae-4305-890c-c8da1f459740.png)
-
+<a href="https://postimg.cc/JskPgHsw" target="_blank"><img src="https://i.postimg.cc/13W28pPz/qt-steps2.png" alt="qt-steps2"/></a><br/><br/>
 
 <br/>
 <br/>
@@ -71,7 +69,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
     * Run: "sudo apt-get install libgl-dev".
 	
-<br/>
+<br/><br/>
 </details>
 
 <details>
@@ -86,27 +84,23 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Check the things in the Qt installer as here:
 
 <br/>
-    ![dataVis](https://user-images.githubusercontent.com/6904485/151007196-a0004404-7bbc-4039-beff-802148c69f2d.png)
-    ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
-	
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/SNhw3SDm/qt-steps-mac.png" alt="qt-steps-mac"/></a><br/><br/>	
+    <a href="https://postimg.cc/svtJpfwT" target="_blank"><img src="https://i.postimg.cc/jSjkYLNY/qt-steps-mac2.png" alt="qt-steps-mac2"/></a><br/><br/>	
 <br/>
-    Inside the Qt version choosen (for example, "Qt 5.14.2"), enable also the macOS toggle:
-    ![macOs](https://user-images.githubusercontent.com/6904485/151008145-d86ac2fe-71c2-4737-98da-cc9d21e9c213.png)
-	
+    Inside the Qt version choosen (for example, "Qt 5.14.2"), enable also the macOS toggle:<br/>
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/wMhnMZTK/qt-steps-mac3.png" alt="qt-steps-mac3"/></a><br/><br/>	
 <br/>
     When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project). For example, you can choose the clang one:
-    ![chooseKit](https://user-images.githubusercontent.com/6904485/151008592-0cd47cfe-5ca8-47e7-98c0-ade7fd59c11f.png)
-	
+    <a href='https://postimages.org/' target='_blank'><img src='https://i.postimg.cc/tggTP0fH/qt-step-3-5.png' border='0' alt='qt-step-3-5'/></a>
+
 <br/>
     On Qt, in case you have a problem compiling the project with qmake:
 	1. Select the tab 'Projects' in the left side tabs. It will take you to the 'Build Settings' page.
-		![imagen](https://user-images.githubusercontent.com/6904485/151010498-9ddac5ae-61bd-403d-8588-fe0805e59226.png)
-	
+    <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/pLV3Vsw7/qt-steps-mac4.png" alt="qt-steps-mac4"/></a><br/><br/>	
 <br/>
 	2. Add "INCLUDEPATH+=/opt/X11/include" in the qmake options:
 
-		![imagen](https://user-images.githubusercontent.com/6904485/151009640-527e7ff4-83bc-42e9-9594-19f3c0b5c945.png)
-
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/vTRpQbyL/qt-steps-mac5.png" alt="qt-steps-mac5"/></a><br/><br/>
 <br/>
 <br/>
 2. Install OpenGL:
@@ -122,18 +116,15 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 1. Install Visual Studio (this is needed for the C++ compiler):
     * You need to choose which version of Visual Studio you want, we recommend the 2022 Community version.
 <br/>
-
-    ![VS_steps](https://user-images.githubusercontent.com/6904485/149152665-ffe51f07-ad75-4711-beac-c75b1060a6ab.PNG)
-
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/Xvphdp7k/visual-studio-1.png" alt="visual-studio-1"/></a><br/><br/>
 <br/>
     * Check the next things when installing Visual Studio:
 	
 <br/>
-    ![VS_steps2](https://user-images.githubusercontent.com/6904485/149152672-6210fcf0-6909-4be9-8bd5-1d8b7adc7db1.PNG)
-    ![VS_steps3](https://user-images.githubusercontent.com/6904485/149152680-9a990ba6-70cf-4f7a-b716-b91333e084b5.PNG)
-    ![VS_steps4](https://user-images.githubusercontent.com/6904485/149152686-69a68e1b-f912-46ca-b4bc-20ac3dadeb91.PNG)
-    ![VS_steps5](https://user-images.githubusercontent.com/6904485/149152695-248869c0-7d05-43d9-b361-ff01afec9caa.PNG)
-	
+<a href="https://postimg.cc/8sX4zmWQ" target="_blank"><img src="https://i.postimg.cc/rFMPghwm/visual-studio-2.png" alt="visual-studio-2"/></a><br/><br/>
+<a href="https://postimg.cc/BLqpXhMs" target="_blank"><img src="https://i.postimg.cc/zBhc26hL/visual-studio-3.png" alt="visual-studio-3"/></a><br/><br/>
+    <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/BbGwrp5m/visual-studio-4.png" alt="visual-studio-4"/></a><br/><br/>
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/D0dYnGBn/visual-studio-5.png" alt="visual-studio-5"/></a><br/><br/>	
 <br/>
 <br/>
 2. Install Qt
@@ -144,18 +135,19 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Check the things in the Qt installer as here:
 
 <br/>
-    ![Qt-steps](https://user-images.githubusercontent.com/6904485/149152638-e967d5f9-7c89-495f-b0b2-62e7ebb9e137.PNG)
+<a href="https://postimg.cc/hfJrzQbJ" target="_blank"><img src="https://i.postimg.cc/qMwZF8NG/qt-steps-windows.png" alt="qt-steps-windows"/></a><br/><br/>
 	
 <br/>
     * Try to open QtCreator and load the project. When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project).
     In our case, we have used the MSCV one:
-    	![imagen](https://user-images.githubusercontent.com/6904485/151386955-7840de61-179f-4bcc-a7a9-ff315fe838b1.png)
-
+<a href="https://postimg.cc/tY7r3My4" target="_blank"><img src="https://i.postimg.cc/RVLjzkDK/qt-steps-windows2.png" alt="qt-steps-windows2"/></a><br/><br/>
 <br/>
 <br/>
 3. Regarding OpenGL:
     * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll" or the program crashes when running the project on Qt, this dll can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
 
+<br/>
+<br/>
 </details>
 
 <br/>
@@ -166,87 +158,99 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 <details>
 <summary>1. Load Spacecraft Model</summary>
 
-![UploadSpacecraft](https://user-images.githubusercontent.com/6904485/150852545-8f3d573e-9505-484b-be6f-1ef3afb178d3.PNG)
-
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/3rpst4jL/Load-Object-2.png" alt="Load-Object-2"/></a><br/><br/>
 <br/>
 You need to load the spacecraft model (OBJ file) which is based on CAD model: it contains the list of vertices, faces 
 and normals (optional). Also, you need a MTL file where is described the reflectivy properties of the surface of
 the spacecraft. In addition, you can set its weight. In the resources/model directory there are examples of this files.
 <br/>
+<br/>
 </details>
 
-<br/>
 <details>
 <summary>2. Choose a Method to compute SRP Acceleration</summary>
 
-![ChooseMethod](https://user-images.githubusercontent.com/6904485/150852542-7f6fe732-5e40-465f-84f1-0158ccdd62d4.PNG)
-
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/TPFs9fKM/Select-Method-2.png" alt="Select-Method-2"/></a><br/><br/>
+<br/>
 <br/>
 You need to choose a method (the model you want to use to approximate the SRP force):
 
 <br/>
-* **Cannonball (CPU)**: considers the shape of the spacecraft to be a sphere. Ypu can set the area of the sphere (A) and the reflectivity
+<br/>
+*Cannonball (CPU): considers the shape of the spacecraft to be a sphere. Ypu can set the area of the sphere (A) and the reflectivity
     property (Cr).
 
 <br/>
-* **NPlate (CPU)**: considers the shape of the spacecraft to be represented as a set of flat plates (you need to load a file that contains
+<br/>
+*NPlate (CPU): considers the shape of the spacecraft to be represented as a set of flat plates (you need to load a file that contains
     the number of plates, and then, for each plate, a new line with the area, specular reflectivity property, diffuse reflectivity
     property, and normal of the plate; you can see an example in the resources/model directory).
 
 <br/>
-* **RayTrace (CPU)**: for each cell of a grid defined by the number of cells (Nx x Ny) a ray is casted against the triangular mesh of the
+<br/>
+*RayTrace (CPU): for each cell of a grid defined by the number of cells (Nx x Ny) a ray is casted against the triangular mesh of the
     spacecraft. Then, it is computed the SRP force on the intersected triangle. The user can set the grid and secondary and diffuse
     rays.
 
 <br/>
-* **RayTrace (GPU)**: Similar to the CPU version, in this case the computation is done in the GPU. The user can set the secondary and diffuse rays.
+<br/>
+*RayTrace (GPU): Similar to the CPU version, in this case the computation is done in the GPU. The user can set the secondary and diffuse rays.
     (Nx = Ny = 512 by default).
 
+<br/>
 <br/>
 </details>
 
 <details>
 <summary>3. Choose an Action to perform</summary>
 
-![ChooseAction](https://user-images.githubusercontent.com/6904485/150852539-9c57962f-dbea-4cf9-98f0-20e32776e414.PNG)
-
+<a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/fLSGnkGR/Choose-Action-2.png" alt="Choose-Action-2"/></a><br/><br/>
 <br/>
 You need to choose what action you want to do:
 	
 <br/>
-* **Visualize spacecraft**: when the user press the start button in the Visualize Spacecraft tab, it will show a 3D viewer of the spacecraft with
+<br/>
+* Visualize spacecraft: when the user press the start button in the Visualize Spacecraft tab, it will show a 3D viewer of the spacecraft with
     its 3 axes and the sunlight direction. Then, the user can set the initial rotation of the spacecraft by interacting with
     the three sliders. Each one of them corresponds to one of the local axes of the spacecraft. 
 
+<br/>
 <br/>
     For example, in the first slider, it appears "X" in red and this indicates that the red line in the 3D viewer correspond to the x axis. 	
     The user can also rotate the scene by pressing the right button of the mouse. It will not affect the computation of the SRP
     accelerations because it is modifying the orientation and position of the observer (camera) and nor the model neither the sunlight
     direction. And having pressed the left button, the user can zoom in and zoom out.
 <br/>
+<br/>
 
     Also, it allows the user to compute and visualize particular accelerations by rotating the spacecraft after having pressed the â€™Startâ€™
     button and consequently, interacted with the sliders.
 
+<br/>
+<br/>
     These accelerations that will appear in the 3D scene would have a different colour depending on their magnitudes. It was chosen to use
     the heat map colours to represent in blue the forces with lower magnitudes and in red the ones with higher magnitudes. Also, in this
     window it indicates which is the lowest and the highest magnitude among the accelerations that were computed.
 <br/>
+<br/>
 
-* **Visualize Graphics**: it computes the SRP acceleration considering a set of pairs of azimuth and elevation angles. The user can select the
+* Visualize Graphics: it computes the SRP acceleration considering a set of pairs of azimuth and elevation angles. The user can select the
     azimuth and the elevation steps (they indicate how many points are used to discretize sample points from a sphere).
 
+<br/>
 <br/>
     if a GPU-based method was selected, another option would be added to this tab and it allows the user to visualize the results obtained
     from SRP accelerations while the computation of the global accelerations is being done.
 
+<br/>
 <br/>
     If the user pressed the "Start" button, these accelerations would be represented in a window with four 3D viewers showing each one of the
     components of the acceleration (x, y and z) and also its magnitude (see Fig. 17 and 18). In addition, the user can download the result
     as a txt file.
 
 <br/>
-* **Compare Graphics**: this option allows the user to compare the result of two graphics that were previously generated. It is important to have this
+<br/>
+* Compare Graphics: this option allows the user to compare the result of two graphics that were previously generated. It is important to have this
 tool of comparison because it lets the user to compute the difference between two already computed graphics. Also, it shows the mean
 square error (MSE) and the maximum difference between the points on the charts.
 <br/>

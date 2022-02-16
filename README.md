@@ -45,7 +45,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
 <br/>
 
-    * Open a terminal where the file was downloaded and run: "chmod +x <downloaded_file_name>". Then, run: "./<downloaded_file_name>". 
+    * Open a terminal where the file was downloaded and run: "chmod +x 'downloaded_file_name'". Then, run: "./'downloaded_file_name'". 
 
 <br/>
 

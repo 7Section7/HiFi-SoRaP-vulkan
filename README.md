@@ -71,9 +71,9 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
     * Run: "sudo apt-get install libgl-dev".
 	
+<br/>
 </details>
 
-<br/>
 <details>
 <summary>Installation on Mac</summary>
 
@@ -172,6 +172,7 @@ Note: careful with decimal values (depending on your compiler you may need to ch
 You need to load the spacecraft model (OBJ file) which is based on CAD model: it contains the list of vertices, faces 
 and normals (optional). Also, you need a MTL file where is described the reflectivy properties of the surface of
 the spacecraft. In addition, you can set its weight. In the resources/model directory there are examples of this files.
+<br/>
 </details>
 
 <details>
@@ -200,9 +201,9 @@ You need to choose a method (the model you want to use to approximate the SRP fo
 * **RayTrace (GPU)**: Similar to the CPU version, in this case the computation is done in the GPU. The user can set the secondary and diffuse rays.
     (Nx = Ny = 512 by default).
 
+<br/>
 </details>
 
-<br/>
 <details>
 <summary>3. Choose an Action to perform</summary>
 
@@ -247,5 +248,6 @@ You need to choose what action you want to do:
 * **Compare Graphics**: this option allows the user to compare the result of two graphics that were previously generated. It is important to have this
 tool of comparison because it lets the user to compute the difference between two already computed graphics. Also, it shows the mean
 square error (MSE) and the maximum difference between the points on the charts.
+<br/>
 </details>
 

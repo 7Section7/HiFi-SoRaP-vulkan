@@ -18,7 +18,7 @@ It also includes the possibility  of  visualizing  the  spacecraft  model  and  
 understanding of them.
 
 It was created by me (Leandro Zardaín Rodríguez, leandrozardain@gmail.com) under the guidance of the professors Anna Puig (annapuig@ub.edu) & Ariadna Farrés (ariadna.farres@gmail.com) for my Master degree thesis on 2019. We have made an article about this where you can get more information about this project:
-[<b>Farres, Ariadna & Puig, Anna & Zardaín, Leandro. (2020). High-fidelity Modeling and Visualizing of Solar Radiation Pressure: A Framework for High-fidelity Analysis. </b>](https://www.researchgate.net/publication/349295985_High-fidelity_Modeling_and_Visualizing_of_Solar_Radiation_Pressure_A_Framework_for_High-fidelity_Analysis)
+<a href="https://www.researchgate.net/publication/349295985_High-fidelity_Modeling_and_Visualizing_of_Solar_Radiation_Pressure_A_Framework_for_High-fidelity_Analysis"><b>Farres, Ariadna & Puig, Anna & Zardaín, Leandro. (2020). High-fidelity Modeling and Visualizing of Solar Radiation Pressure: A Framework for High-fidelity Analysis. </b> </a>
 
 <b>Project software architecture</b>
 

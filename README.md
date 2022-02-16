@@ -73,6 +73,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 	
 </details>
 
+<br/>
 <details>
 <summary>Installation on Mac</summary>
 
@@ -112,6 +113,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
     * Install last version of Xcode and XQuartz from the Mac AppStore.
 
+<br/>
 </details>
 
 <details>
@@ -156,6 +158,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 
 </details>
 
+<br/>
 ## <b>User guide: step by step</b> ##
 
 Note: careful with decimal values (depending on your compiler you may need to change the ',' for '.' and viceversa in the files you want to load).
@@ -199,6 +202,7 @@ You need to choose a method (the model you want to use to approximate the SRP fo
 
 </details>
 
+<br/>
 <details>
 <summary>3. Choose an Action to perform</summary>
 

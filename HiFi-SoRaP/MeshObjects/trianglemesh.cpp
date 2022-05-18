@@ -189,7 +189,6 @@ void TriangleMesh::prepareDataToGPU(){
 	vec4 **normalsPunter=new vec4*[faces.size()*3];
 	std::unordered_map<int,vec4> normalsPromig;
 
-
 	uint Index=0;
 
 	for(unsigned int i=0; i<faces.size(); i++){
@@ -197,10 +196,6 @@ void TriangleMesh::prepareDataToGPU(){
 		int face = faces[i].nn;
 
 		for(unsigned int j=0; j<3; j++){
-
-			if(triangleVertices[j]==3){
-				int text = -1;
-			}
 
 			replicatedVertices[Index] = vec4(vertices[triangleVertices[j]].x(),vertices[triangleVertices[j]].y(),vertices[triangleVertices[j]].z(),1);
 
@@ -224,7 +219,6 @@ void TriangleMesh::prepareDataToGPU(){
 	for(uint i=0; i< Index; i++){
 		replicatedNormals[i]=*normalsPunter[i];
 	}
-
 }
 
 void TriangleMesh::computeBoundingBox()

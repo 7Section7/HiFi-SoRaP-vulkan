@@ -158,7 +158,7 @@ void MainWindow::loadUserParameters(){
 	int reflectiveType =Reflective;
 	if(model == AdvancedGPUModel){
 		if(ui->comboBox->currentIndex()==4){
-			srp[model] = new RayTraceGPUTextures(false);
+			srp[model] = new RayTraceGPUTextures();
 		}
 
 		if(RayTraceGPU* ray=dynamic_cast<RayTraceGPU*>(srp[model])){

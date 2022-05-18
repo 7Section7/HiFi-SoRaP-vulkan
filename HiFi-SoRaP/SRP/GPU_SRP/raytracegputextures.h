@@ -30,7 +30,6 @@ protected:
 
 public:
 	RayTraceGPUTextures();
-	RayTraceGPUTextures(bool isSingleScattering);
 	virtual void sendTextures();
 };
 

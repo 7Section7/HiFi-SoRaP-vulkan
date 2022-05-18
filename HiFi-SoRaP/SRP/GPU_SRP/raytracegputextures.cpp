@@ -14,11 +14,6 @@ RayTraceGPUTextures::RayTraceGPUTextures()
 	fragmentShaderFileGPU = "://resources/shaders/raytrace_multiple_scattering_fshader.glsl";
 }
 
-RayTraceGPUTextures::RayTraceGPUTextures(bool isSingleScattering)
-{
-	fragmentShaderFileGPU = "://resources/shaders/raytrace_multiple_scattering_fshader.glsl";
-}
-
 void RayTraceGPUTextures::sendTextures()
 {
 	//804 faces -> 1024 or 32x32    -> 1 texture 2D 32x32 rgba with vertices indices and materials indices.

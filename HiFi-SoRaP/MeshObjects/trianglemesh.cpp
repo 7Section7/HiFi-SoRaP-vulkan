@@ -44,7 +44,7 @@ bool TriangleMesh::hitTriangle(vec3 point, vec3 L, int triangleIdx, vec3& hitPoi
 	vec4 L2 = vec4(L,0.f);
 
 	float lowerPart = dot(vNormal, L2);
-	if(fabs(lowerPart)<1.e-5f)
+	if(lowerPart > -1.e-5f) //Avoid results when the dot product is near 0 or positive
 		return false;
 
 	float tValue = - dot(vNormal,vPoint) / lowerPart;

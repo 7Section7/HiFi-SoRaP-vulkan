@@ -22,7 +22,6 @@ class AdvancedSRP: public SRP
 public:
 	QVector3D cm;
 	int nx,ny; //number of pixels in mesh
-	float xtot,ytot; //pixel array size
 	float safeDistance;
 
 	AdvancedSRP();

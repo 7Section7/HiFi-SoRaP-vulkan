@@ -20,7 +20,7 @@
 #include "DataVisualization/grid.h"
 #include <QProgressBar>
 
-#define ctt 4.57e-6
+#define ctt 4.563157e-6 //4.57e-6
 static double DEFAULT_DOUBLE_ARRAY[] = {0,0,0};
 
 /*

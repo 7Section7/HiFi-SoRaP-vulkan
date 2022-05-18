@@ -5,7 +5,7 @@
  * Project: HiFi-SoRaP
  * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
  * Created on: 30 Nov 2021
- * Version: 2.0.1
+ * Version: 2.2
  *
  ***********************************************************************/
 
@@ -47,7 +47,6 @@ uniform sampler1D texMaterials2;
 
 uniform int facesTextureSize;
 
-
 uniform int numNoiseValues;
 uniform sampler1D texNoise;
 
@@ -87,6 +86,7 @@ struct RayTraceStep{
 vec3 product(vec3 a, vec3 b){
 	return vec3(a.x*b.x,a.y*b.y,a.z*b.z);
 }
+
 Triangle getTriangle(int triangleIdx){
 
 	float texCoord = triangleIdx;
@@ -102,6 +102,7 @@ Triangle getTriangle(int triangleIdx){
 
 	return t;
 }
+
 //matIdx is supposed to be already between 0 and 1.
 Material getMaterial(float matIdx){
 	Material m;
@@ -150,18 +151,20 @@ vec3 computeNormal(int triangleIdx){
 	return N;
 }
 
-vec3 computeSRP(vec3 L, vec3 N, float ps, float pd, float Apix){
-	float costh = dot(N, L);
-
-	float FSRP0 = -Apix*( (1. - ps)*L.x + 2.*( ps*costh + pd/3. )*N.x );
-	float FSRP1 = -Apix*( (1. - ps)*L.y + 2.*( ps*costh + pd/3. )*N.y );
-	float FSRP2 = -Apix*( (1. - ps)*L.z + 2.*( ps*costh + pd/3. )*N.z );
+vec3 computeSRP(vec3 L, vec3 N, float ps, float pd){
+	float costh = abs(dot(N, L));
+	// PS and Apix are multiplied at the end in the 'draw' method on render.cpp
+	// We don't multiply initially by costh because in this approach, the area corresponds to
+	//the area of the pixel cell
+	float FSRP0 = ( (1. - ps)*L.x - 2.*( ps*costh + pd/3. )*N.x );
+	float FSRP1 = ( (1. - ps)*L.y - 2.*( ps*costh + pd/3. )*N.y );
+	float FSRP2 = ( (1. - ps)*L.z - 2.*( ps*costh + pd/3. )*N.z );
 
 	vec3 force = vec3(FSRP0,FSRP1, FSRP2);
 	return force;
 }
 
-vec3 computeForce(int triangleIdx,vec3 L, float Apix){
+vec3 computeForce(int triangleIdx,vec3 L){
 
 	Triangle t = getTriangle(triangleIdx);
 	Material m = getMaterial(t.mat);
@@ -170,7 +173,7 @@ vec3 computeForce(int triangleIdx,vec3 L, float Apix){
 	float ps = m.ps;
 	float pd = m.pd;
 
-	vec3 force=computeSRP(L,N,ps,pd,Apix);
+	vec3 force=computeSRP(L,N,ps,pd);
 	return force;
 }
 
@@ -222,7 +225,6 @@ bool hitTriangle(vec3 point, vec3 L, int triangleIdx, out vec3 hitPoint){
 			hitPoint = intPoint;
 			return true;
 		}
-
 	}
 
 	return false;
@@ -327,7 +329,7 @@ void copyHitInfo(in HitInfo hitInfo,out HitInfo outHitInfo){
 
 //Check if the ray intersects any triangle and get the closest one in order
 //to compute the force on the intersection.
-vec3 computeScatteredForce(inout HitInfo hitInfo, float Apix){
+vec3 computeScatteredForce(inout HitInfo hitInfo){
 	vec3 totalForce = vec3(0,0,0);
 	vec3 importance = hitInfo.currentImportance;
 	scatter(hitInfo);
@@ -336,7 +338,7 @@ vec3 computeScatteredForce(inout HitInfo hitInfo, float Apix){
 	int triangleIdx = hit(hitInfo.currentPoint,hitInfo.currentL,hitPoint);
 	if(triangleIdx!=-1){
 		hitInfo.currentImportance = product(hitInfo.currentImportance,importance);
-		vec3 localForce = computeForce(triangleIdx,hitInfo.currentL,Apix);
+		vec3 localForce = computeForce(triangleIdx,hitInfo.currentL);
 		totalForce+= product(localForce,hitInfo.currentImportance);
 
 		hitInfo.currentN = computeNormal(triangleIdx);
@@ -348,12 +350,10 @@ vec3 computeScatteredForce(inout HitInfo hitInfo, float Apix){
 		hitInfo.currentRefIdx = m.refIdx;
 
 		hitInfo.currentPoint = hitPoint;
-
 	}
 	else{
 		hitInfo.currentImportance=importance;
 	}
-
 
 	return totalForce;
 }
@@ -361,7 +361,7 @@ vec3 computeScatteredForce(inout HitInfo hitInfo, float Apix){
 //This computes the SRP force for the fragment.
 //In particular, it casts several additional rays when one of the primary
 //rays intersects with the mesh.
-vec3 computeFinalForce(vec3 point,vec3 L, vec3 N, float ps, float pd, float refIdx,int reflectiveness, float Apix){
+vec3 computeFinalForce(vec3 point,vec3 L, vec3 N, float ps, float pd, float refIdx,int reflectiveness){
 
 	vec3 totalForce;
 	bool foundNextHit = true;
@@ -389,7 +389,7 @@ vec3 computeFinalForce(vec3 point,vec3 L, vec3 N, float ps, float pd, float refI
 	currentRefIdx = m.refIdx;
 	currentReflectiveness = m.reflectiveness;
 
-	vec3 force = computeForce(triangleIdx,currentL,Apix);
+	vec3 force = computeForce(triangleIdx,currentL);
 	totalForce = product(force,importance);
 
 	if(numSecondaryRays == 0)
@@ -433,7 +433,7 @@ vec3 computeFinalForce(vec3 point,vec3 L, vec3 N, float ps, float pd, float refI
 
 			//Compute force on the intersection of the ray and add it to the accumulated force.
 			hitInfoAux.currentReflectiveness=r;
-			vec3 f = computeScatteredForce(hitInfoAux,Apix);
+			vec3 f = computeScatteredForce(hitInfoAux);
 			steps[currentStep].force += aux*f;
 
 			if(length(f)<1.e-5 || length(hitInfoAux.currentImportance)<1.e-5 || currentStep == numSecondaryRays-1){
@@ -481,17 +481,14 @@ void main (void) {
 	float pd=fragmentPD;
 	vec3 N = normalize(worldNormal.xyz);
 	vec3 L = normalize(lightDirection.xyz);
-	float Apix = 1.0f;//(4/50f) * (4/50f);
-	float Apix2 = 1.0f;
 
-	vec3 force = computeFinalForce(worldVertex.xyz,L,N,ps,pd,fragmentRefIdx,fragmentReflectiveness,Apix);
+	vec3 force = computeFinalForce(worldVertex.xyz,L,N,ps,pd,fragmentRefIdx,fragmentReflectiveness);
 
 	vec3 hitPoint;
 	vec3 currentPoint = worldVertex.xyz - 0.5f*L;
 	int triangleIdxAux = hit(currentPoint,L,hitPoint);
 	if(triangleIdxAux!=-1){
 		gNormal = 0.5f*(N+vec3(1.0f,1.0f,1.0f));
-
 	}
 
 	if(length(force)<0.0001) {
@@ -501,7 +498,7 @@ void main (void) {
 	}
 
 	vec3 normalizedForce = 0.125f*vec3(force.x+4,force.y+4,force.z+4);
-	gAlbedo = vec4(Apix2*normalizedForce,1.0f);
+	gAlbedo = vec4(normalizedForce,1.0f);
 
 	if(debugMode == 2){ //Show face normals
 		if(N.x <0)

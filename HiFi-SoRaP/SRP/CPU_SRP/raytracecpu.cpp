@@ -5,7 +5,7 @@
  * Project: HiFi-SoRaP
  * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
  * Created on: 30 Nov 2021
- * Version: 2.0.1
+ * Version: 2.2
  *
  ***********************************************************************/
 
@@ -79,17 +79,15 @@ bool refract(const QVector3D& v, const QVector3D& n, float ni_over_nt, QVector3D
 
 void RayTraceCPU::computeStepSRP(double XS[], QVector3D &force, double RS[], double V1[], double V2[])
 {
-	double FSRP[3], costh, pixel[3], Pint[3];
-	int ihit, rhit, nhit;
-	double depmin;
+	double FSRP[3], pixel[3];
 	double xtot, ytot, xpix, ypix, d;
 	double Apix;
-	int NT,r,ix,iy;
+	int NT,ix,iy;
 
 	std::vector<int> auxhit;
 	std::vector<double>depthit;
 
-	double PS = ctt/msat; ///msat;
+	double PS = ctt/msat;
 
 	d=safeDistance;
 	nx=this->nx;
@@ -97,12 +95,6 @@ void RayTraceCPU::computeStepSRP(double XS[], QVector3D &force, double RS[], dou
 	cm[0]=this->cm.x();
 	cm[1]=this->cm.y();
 	cm[2]=this->cm.z();
-	xtot=this->xtot;
-	ytot=this->ytot;
-
-	/*	Pixel Size */
-	xpix = xtot/nx; ypix = ytot/ny;
-	Apix = xpix*ypix;
 
 	TriangleMesh *mesh = satellite->getMesh();
 	NT = mesh->faces.size();
@@ -110,7 +102,7 @@ void RayTraceCPU::computeStepSRP(double XS[], QVector3D &force, double RS[], dou
 	Eigen::Vector3f diff = mesh->max_-mesh->min_;
 	float diagonalDiff = diff.norm();
 	float errorMargin = 0.1f;
-	float distanceWindow = diagonalDiff+errorMargin;;
+	float distanceWindow = diagonalDiff+errorMargin;
 
 	xtot = distanceWindow;
 	ytot = distanceWindow;
@@ -123,8 +115,6 @@ void RayTraceCPU::computeStepSRP(double XS[], QVector3D &force, double RS[], dou
 	auxhit.resize(NT);
 	depthit.resize(NT);
 	FSRP[0] = 0.; FSRP[1] = 0.; FSRP[2] = 0.;
-
-	int aux=0;
 
 	double v1_aux[3];
 	v1_aux[0]=V1[0]; v1_aux[1]=V1[1]; v1_aux[2]=V1[2];
@@ -147,11 +137,9 @@ void RayTraceCPU::computeStepSRP(double XS[], QVector3D &force, double RS[], dou
 			FSRP[0]+= pixelForce.x();
 			FSRP[1]+= pixelForce.y();
 			FSRP[2]+= pixelForce.z();
-			aux++;
-
 		}
-   }
-	force =PS* QVector3D(FSRP[0], FSRP[1], FSRP[2]);
+	}
+	force = PS * QVector3D(FSRP[0], FSRP[1], FSRP[2]);
 }
 
 QVector3D RayTraceCPU::computePixelForce(double XS[], double Apix, double pixel[])
@@ -169,7 +157,6 @@ QVector3D RayTraceCPU::computePixelForce(double XS[], double Apix, double pixel[
 	importance[0]=1;        importance[1]=1;        importance[2]=1;
 
 	totalForce = rayTrace(Apix,point,dir,importance,numSecondaryRays);
-	//totalForce = computeFinalForce(Apix,point,dir,importance,numSecondaryRays+1);
 
 	return totalForce;
 }
@@ -210,7 +197,6 @@ QVector3D RayTraceCPU::rayTrace(double Apix,double point[], double dir[], double
 			psImportance[0]*=importance[0]; psImportance[1]*=importance[1]; psImportance[2]*=importance[2];
 
 			forcePS = rayTrace(Apix,psPointInt,psDir,psImportance,numSecondaryRays-1);
-
 		}
 
 		//PD contribution
@@ -270,11 +256,17 @@ QVector3D RayTraceCPU::computeForce(int rhit, double XS[], double Apix)
 {
 	TriangleMesh *mesh = satellite->getMesh();
 	double ps, pd;
-	double costh = XS[0]*mesh->faceNormals[mesh->faces[rhit].nn].x() + XS[1]*mesh->faceNormals[mesh->faces[rhit].nn].y() + XS[2]*mesh->faceNormals[mesh->faces[rhit].nn].z();
-	ps = satellite->getMaterial(mesh->faces[rhit].rf).ps; 	pd = satellite->getMaterial(mesh->faces[rhit].rf).pd;
-	double forceX= -Apix*( (1. - ps)*XS[0] + 2.*( ps*costh + pd/3. )*mesh->faceNormals[mesh->faces[rhit].nn].x() );
-	double forceY= -Apix*( (1. - ps)*XS[1] + 2.*( ps*costh + pd/3. )*mesh->faceNormals[mesh->faces[rhit].nn].y() );
-	double forceZ= -Apix*( (1. - ps)*XS[2] + 2.*( ps*costh + pd/3. )*mesh->faceNormals[mesh->faces[rhit].nn].z() );
+	auto N = mesh->faceNormals[mesh->faces[rhit].nn];
+	double costh = XS[0]*N.x() + XS[1]*N.y() + XS[2]*N.z();
+
+	ps = satellite->getMaterial(mesh->faces[rhit].rf).ps;
+	pd = satellite->getMaterial(mesh->faces[rhit].rf).pd;
+
+	// We don't multiply initially by fabs(costh) because in this approach, the area corresponds to
+	//the area of the cell
+	double forceX= Apix*((1. - ps)*XS[0] - 2.*(ps*fabs(costh) + pd/3.)*N.x());
+	double forceY= Apix*((1. - ps)*XS[1] - 2.*(ps*fabs(costh) + pd/3.)*N.y());
+	double forceZ= Apix*((1. - ps)*XS[2] - 2.*(ps*fabs(costh) + pd/3.)*N.z());
 
 	return QVector3D(forceX,forceY,forceZ);
 }

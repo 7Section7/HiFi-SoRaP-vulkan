@@ -5,7 +5,7 @@
  * Project: HiFi-SoRaP
  * Created by: Leandro Zardaín Rodríguez (leandrozardain@gmail.com)
  * Created on: 30 Nov 2021
- * Version: 2.0.1
+ * Version: 2.2
  *
  ***********************************************************************/
 
@@ -33,19 +33,16 @@ void main (void) {
 	float pd=fragmentPD;
 	vec3 N = normalize(worldNormal.xyz);
 	vec3 L = normalize(lightDirection.xyz);
-	float costh = dot(N, L);
-	if(costh>0){
-		N=-N;
-		costh=-costh;
-	}
+	float costh = abs(dot(N, L));
 
 	//Compute SRP force on this point.
 	float Apix = 1.0f;
 	float Apix2 = 1.0f;
-	float FSRP0 = -Apix*( (1. - ps)*L.x + 2.*( ps*costh + pd/3. )*N.x );
-	float FSRP1 = -Apix*( (1. - ps)*L.y + 2.*( ps*costh + pd/3. )*N.y );
-	float FSRP2 = -Apix*( (1. - ps)*L.z + 2.*( ps*costh + pd/3. )*N.z );
-
+	// We don't multiply initially by costh because in this approach, the area
+	//corresponds to the area of the pixel cell
+	float FSRP0 = Apix*( (1. - ps)*L.x - 2.*( ps*costh + pd/3. )*N.x );
+	float FSRP1 = Apix*( (1. - ps)*L.y - 2.*( ps*costh + pd/3. )*N.y );
+	float FSRP2 = Apix*( (1. - ps)*L.z - 2.*( ps*costh + pd/3. )*N.z );
 
 	vec3 normalizedForce = 0.125f*vec3(FSRP0+4,FSRP1+4,FSRP2+4);
 	gAlbedo = vec4(Apix2*normalizedForce,1.0f);

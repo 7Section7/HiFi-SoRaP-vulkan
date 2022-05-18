@@ -19,7 +19,7 @@ void NPlate::computeStepSRP(double xs[], QVector3D &force, double RS[], double V
 	double PS = ctt/msat;
 
 	fsrp_nplate(np, xs, fs);
-	force = PS*QVector3D(fs[0],fs[1],fs[2]); //PS*
+	force = PS*QVector3D(fs[0],fs[1],fs[2]);
 }
 
 void NPlate::fsrp_nplate(int N, double xs[], double fs[])
@@ -27,15 +27,15 @@ void NPlate::fsrp_nplate(int N, double xs[], double fs[])
    SRP force for the N-plate model
 
   INPUT:
-		N 			- integer with number of plates
-	  n[][]  	-  N x 3 table with normal vector to each plate
-	  ps[]   	-  N array with coefficients for secular reflection
-	  pd[]   	-  N array with coefficients for difusive reflection
-	  A[]    	-  N array with Area of each plate
-	  xs[]  	-  3 array with sun-satellite direction
+	N       - integer with number of plates
+	n[][]   -  N x 3 table with normal vector to each plate
+	ps[]   	-  N array with coefficients for secular reflection
+	pd[]   	-  N array with coefficients for difusive reflection
+	A[]    	-  N array with Area of each plate
+	xs[]  	-  3 array with sun-satellite direction
 
    OUTPUT:
-	  fs[]  - resultat srp force
+	fs[]    - resultat srp force
 */
 {
 	int i, ip;
@@ -47,10 +47,10 @@ void NPlate::fsrp_nplate(int N, double xs[], double fs[])
 		cosTH = n[ip][0]*xs[0] + n[ip][1]*xs[1] + n[ip][2]*xs[2];
 
 		/* ilumination condition */
-		if(cosTH < 0)
+		if(cosTH < 0) // -1.0e-6) Avoid cases where values are closer to 0
 		{
 			for(i = 0; i < 3; i++)
-			fs[i] += A[ip]*( (1.-ps[ip])*xs[i] + 2.*(ps[ip]*cosTH + pd[ip]/3.)*n[ip][i] )*cosTH;
+				fs[i] += A[ip]*fabs(cosTH)*((1.-ps[ip])*xs[i] - 2.*(ps[ip]*fabs(cosTH) + pd[ip]/3.)*n[ip][i]);
 		}
 	}
 	return ;

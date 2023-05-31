@@ -39,17 +39,17 @@ class GLWindow: public QWidget
 	SRP* model;
 
 public:
-	 GLWindow(QWidget *parent = 0);
-	 virtual ~GLWindow();
+	GLWindow(QWidget *parent = 0);
+	virtual ~GLWindow();
 	void setSatellite(Object* satellite);
 	void drawSatellite();
-
 
 	SRP *getModel() const;
 	void setModel(SRP *value);
 
 private:
-	void generateAxisInformation(QHBoxLayout *axisLayoutContainer,QHBoxLayout *axisLayout,QLabel *labelAxisName, QString text, QFont font1,AxisWidgets axis);
+	void generateAxisInformation(QHBoxLayout *axisLayoutContainer,QHBoxLayout *axisLayout,QLabel *labelAxisName,
+			QString text, QFont font1,AxisWidgets axis);
 
 private slots:
 	void lockAxis();

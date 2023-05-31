@@ -32,7 +32,11 @@ void main (void) {
 	float pd=fragmentPD;
 	vec3 N = normalize(worldNormal.xyz);
 	vec3 L = normalize(lightDirection.xyz);
-	float costh = abs(dot(N, L));
+
+	float costh = dot(N, L);
+	if(costh>0){
+	    N=-N;
+	}
 
 	//Compute SRP force on this point.
 	float Apix = 1.0f;

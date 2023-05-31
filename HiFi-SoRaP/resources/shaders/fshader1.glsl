@@ -58,7 +58,7 @@ void main (void) {
 	if(length(worldNormal.xyz)<0.1f) //line objects
 		newDiffuse=diffuse;
 
-	vec3 Idiff = diffuse * vec3(max(dot(N, L),0.0)); // -dot(N, L)
+	vec3 Idiff = diffuse * vec3(max(dot(N, L),0.0));
 
 	vec3 Ispec = vec3(1.0, 1.0, 1.0) * pow(max(dot(R,E), 0.0), 2.2);
 	Ispec = clamp(Ispec, 0.0, 1.0);

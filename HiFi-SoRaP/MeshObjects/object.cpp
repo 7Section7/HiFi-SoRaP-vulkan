@@ -19,16 +19,6 @@ Object::Object()
 
 void Object::initializeBuffers()
 {
-	vec4 * vertices = new vec4[3];
-	vertices[0]=vec4(1,0,0,1);
-	vertices[1]=vec4(.5,1,0,1);
-	vertices[2]=vec4(0,0,0,1);
-
-	vec4 * normals = new vec4[3];
-	normals[0]=vec4(0,0,1,1);
-	normals[1]=vec4(0,0,1,1);
-	normals[2]=vec4(0,0,1,1);
-
 	uint size = mesh->replicatedVertices.size();
 
 	glGenVertexArrays( 1, &vao );
@@ -38,13 +28,18 @@ void Object::initializeBuffers()
 
 	glBindBuffer( GL_ARRAY_BUFFER, buffer );
 
-	glBufferData( GL_ARRAY_BUFFER, 2*sizeof(vec4)*size + 3*sizeof(float)*size + sizeof(int)*size, NULL, GL_STATIC_DRAW );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof(vec4)*size, mesh->replicatedVertices.data() ); //mesh->replicatedVertices.data()
-	glBufferSubData( GL_ARRAY_BUFFER, sizeof(vec4)*size, sizeof(vec4)*size, mesh->replicatedNormals.data() ); //mesh->replicatedVertices.data()
-	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vec4)*size, sizeof(float)*size, replicatedMaterialsPD.data() ); //mesh->replicatedVertices.data()
-	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vec4)*size+sizeof(float)*size, sizeof(float)*size, replicatedMaterialsPS.data() ); //mesh->replicatedVertices.data()
-	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vec4)*size+2*sizeof(float)*size, sizeof(float)*size, replicatedMaterialsRefIdx.data() ); //mesh->replicatedVertices.data()
-	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vec4)*size+3*sizeof(float)*size, sizeof(int)*size, replicatedMaterialsReflectiveness.data() ); //mesh->replicatedVertices.data()
+	using declared_type = precision::value_type;
+	glBufferData( GL_ARRAY_BUFFER, 2*sizeof(vector4)*size + 3*sizeof(declared_type)*size + sizeof(int)*size, NULL,
+				  GL_STATIC_DRAW );
+	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof(vector4)*size, mesh->replicatedVertices.data() );
+	glBufferSubData( GL_ARRAY_BUFFER, sizeof(vector4)*size, sizeof(vector4)*size, mesh->replicatedNormals.data() );
+	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vector4)*size, sizeof(declared_type)*size, replicatedMaterialsPD.data() );
+	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vector4)*size+sizeof(declared_type)*size,
+					 sizeof(declared_type)*size, replicatedMaterialsPS.data() );
+	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vector4)*size+2*sizeof(declared_type)*size,
+					 sizeof(declared_type)*size, replicatedMaterialsRefIdx.data() );
+	glBufferSubData( GL_ARRAY_BUFFER, 2*sizeof(vector4)*size+3*sizeof(declared_type)*size,
+					 sizeof(int)*size, replicatedMaterialsReflectiveness.data() );
 
 	// set up vertex arrays
 	glBindVertexArray( vao );
@@ -53,28 +48,28 @@ void Object::initializeBuffers()
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0,  0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0,  (void*)(sizeof(vec4)*size));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0,  (void*)(sizeof(vector4)*size));
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0,  (void*)(2*sizeof(vec4)*size));
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0,  (void*)(2*sizeof(vector4)*size));
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0,  (void*)(2*sizeof(vec4)*size+sizeof(float)*size));
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0,  (void*)(2*sizeof(vector4)*size+sizeof(declared_type)*size));
 	glEnableVertexAttribArray(3);
 
-	glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 0,  (void*)(2*sizeof(vec4)*size+2*sizeof(float)*size));
+	glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 0,  (void*)(2*sizeof(vector4)*size+2*sizeof(declared_type)*size));
 	glEnableVertexAttribArray(4);
 
-	glVertexAttribIPointer(5, 1, GL_INT, 0,  (void*)(2*sizeof(vec4)*size+3*sizeof(float)*size));
+	glVertexAttribIPointer(5, 1, GL_INT, 0,  (void*)(2*sizeof(vector4)*size+3*sizeof(declared_type)*size));
 	glEnableVertexAttribArray(5);
 
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 }
 
-void Object::draw(std::unique_ptr<QGLShaderProgram> &program_){
-
-	if(mesh){
-
+void Object::draw(std::unique_ptr<QGLShaderProgram> &program_)
+{
+	if(mesh)
+	{
 		GLuint diffuseLocation=program_->uniformLocation("diffuse");
 
 		glUniform3f(diffuseLocation,diffuseColor.x(),diffuseColor.y(),diffuseColor.z());
@@ -95,28 +90,27 @@ void Object::setMesh(TriangleMesh *mesh)
 
 Box3D Object::computeBoundingBox()
 {
-	vec3    pmin, pmax;
-	uint     i;
+	vector3    pmin, pmax;
 	Box3D capsa;
 
-	pmin.x = mesh->vertices[0].x();
-	pmin.y = mesh->vertices[0].y();
-	pmin.z = mesh->vertices[0].z();
+	pmin.x = mesh->vertices[0].x;
+	pmin.y = mesh->vertices[0].y;
+	pmin.z = mesh->vertices[0].z;
 	pmax = pmin;
-	for(i=1; i<mesh->vertices.size(); i++) {
-		if(mesh->vertices[i].x() <pmin[0])
-			pmin[0] = mesh->vertices[i].x();
-		if(mesh->vertices[i].y() <pmin[1])
-			pmin[1] = mesh->vertices[i].y();
-		if(mesh->vertices[i].z() <pmin[2])
-			pmin[2] = mesh->vertices[i].z();
+	for(uint i=1; i<mesh->vertices.size(); i++) {
+		if(mesh->vertices[i].x <pmin[0])
+			pmin[0] = mesh->vertices[i].x;
+		if(mesh->vertices[i].y <pmin[1])
+			pmin[1] = mesh->vertices[i].y;
+		if(mesh->vertices[i].z <pmin[2])
+			pmin[2] = mesh->vertices[i].z;
 
-		if(mesh->vertices[i].x() >pmax[0])
-			pmax[0] = mesh->vertices[i].x();
-		if(mesh->vertices[i].y() >pmax[1])
-			pmax[1] = mesh->vertices[i].y();
-		if(mesh->vertices[i].z() >pmax[2])
-			pmax[2] = mesh->vertices[i].z();
+		if(mesh->vertices[i].x >pmax[0])
+			pmax[0] = mesh->vertices[i].x;
+		if(mesh->vertices[i].y >pmax[1])
+			pmax[1] = mesh->vertices[i].y;
+		if(mesh->vertices[i].z >pmax[2])
+			pmax[2] = mesh->vertices[i].z;
 	}
 	capsa.pmin = pmin;
 	capsa.a = pmax[0]-pmin[0];
@@ -137,11 +131,11 @@ int Object::loadOBJ(char *nameobj, char *namemtl)
 	QFile file(fileName);
 	if(file.exists() && file.open(QFile::ReadOnly | QFile::Text))
 	{
-		QVector<QVector3D> v, vn;
-		QVector<QVector2D> vt;
+		QVector<vector3> v, vn;
+		QVector<vector2> vt;
 		uint numVertices = 0, numFaces = 0, numNormals = 0, numMaterials = 0;
 		uint currentMaterialIndex = 0;
-		std::map<uint,QVector3D> faceNormals;
+		std::map<uint,vector3> faceNormals;
 
 		while(!file.atEnd())
 		{
@@ -181,14 +175,14 @@ int Object::loadOBJ(char *nameobj, char *namemtl)
 				// if it’s a vertex position (v)
 				else if(lineParts.at(0).compare("v", Qt::CaseInsensitive) == 0)
 				{
-					mesh->vertices.push_back(QVector3D(lineParts.at(1).toFloat(),lineParts.at(2).toFloat(),
-							lineParts.at(3).toFloat()));
+					mesh->vertices.push_back(vector3(lineParts.at(1).toDouble(),lineParts.at(2).toDouble(),
+							lineParts.at(3).toDouble()));
 				}
 				// if it’s a normal (vn)
 				else if(lineParts.at(0).compare("vn", Qt::CaseInsensitive) == 0)
 				{
-					mesh->faceNormals.push_back(QVector3D(lineParts.at(1).toFloat(),lineParts.at(2).toFloat(),
-							lineParts.at(3).toFloat()));
+					mesh->faceNormals.push_back(vector3(lineParts.at(1).toDouble(),lineParts.at(2).toDouble(),
+							lineParts.at(3).toDouble()));
 				}
 				// if it’s face data (f)
 				// there’s an assumption here that faces are all triangles
@@ -221,18 +215,18 @@ int Object::loadOBJ(char *nameobj, char *namemtl)
 					t.nn = nn1;
 
 					/* Compute and STORE the face Area */
-					QVector3D v1, v2;
+					vector3 v1, v2;
 					for(uint i = 0; i < 3; i++){
 						v1[i] = mesh->vertices[t.v2][i] - mesh->vertices[t.v1][i];
 						v2[i] = mesh->vertices[t.v3][i] - mesh->vertices[t.v1][i];
 					}
-					QVector3D n;
+					vector3 n;
 					n[0] =  v1[1]*v2[2] - v2[1]*v1[2];
 					n[1] = -v1[0]*v2[2] + v2[0]*v1[2];
 					n[2] =  v1[0]*v2[1] - v2[0]*v1[1];
 					t.A = sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])/2.;
 
-					faceNormals[nn1] = n.normalized();
+					faceNormals[nn1] = Common::normalize(n);
 
 					/*	STORE the material index */
 					t.rf = currentMaterialIndex;
@@ -340,30 +334,18 @@ int Object::loadOBJ(char *nameobj, char *namemtl)
 
 	/* Write Materials and Properties on screen. */
 	for(uint i = 0; i < materials.size(); ++i){
-		printf("%d  %s  ps = %lf pd = %lf \n", i, materials[i].namemat.toStdString().data(),
-			   materials[i].ps, materials[i].pd);
+		printf("%d  %s  ps = %Lf pd = %Lf \n", i, materials[i].namemat.toStdString().data(),
+			   (long double) materials[i].ps, (long double) materials[i].pd);
 	}
 
 	mesh->computeBoundingBox();
 
 	Eigen::Vector3f center = (mesh->max_+mesh->min_)/2.0f;
-	QVector3D qCenter = QVector3D(center[0],center[1],center[2]);
+	vector3 qCenter = vector3(center[0],center[1],center[2]);
 	for(uint i=0; i<mesh->vertices.size(); i++) mesh->vertices[i]-=qCenter;
 
 	mesh->computeBoundingBox();
 
-	std::vector<float> extremeValues ={ mesh->max_[0],mesh->max_[1],mesh->max_[2], mesh->min_[0],mesh->min_[1],mesh->min_[2]};
-	float scale = *max_element(extremeValues.begin(),extremeValues.end());
-	scale = 1.0f/scale;
-
-	Eigen::Affine3f kScaling(Eigen::Scaling(Eigen::Vector3f(scale,scale,scale)));
-	for(uint i=0; i<mesh->vertices.size(); i++){
-		Eigen::Vector3f v = kScaling*Eigen::Vector3f(mesh->vertices[i].x(),mesh->vertices[i].y(),mesh->vertices[i].z());
-		mesh->vertices[i]=QVector3D(v[0],v[1],v[2]);
-	}
-	mesh->computeBoundingBox();
-
-	//computeVertexNormals();
 	mesh->prepareDataToGPU();
 	prepareMaterialsToGPU();
 
@@ -387,7 +369,7 @@ void Object::setReflectivenessInMaterials(Reflectiveness r)
 	}
 }
 
-void Object::setRefractiveIndexInMaterials(float refIdx)
+void Object::setRefractiveIndexInMaterials(const precision::value_type& refIdx)
 {
 	for(uint i=0; i<materials.size();i++){
 		materials[i].refIdx=refIdx;
@@ -408,8 +390,8 @@ void Object::prepareMaterialsToGPU(){
 
 	for(uint i=0;i<mesh->faces.size();i++){
 		for(uint j=0; j<3; j++){
-			replicatedMaterialsPD.push_back(materials[mesh->faces[i].rf].pd);//materials[mesh->faces[i].rf].pd
-			replicatedMaterialsPS.push_back(materials[mesh->faces[i].rf].ps);//materials[mesh->faces[i].rf].ps
+			replicatedMaterialsPD.push_back(materials[mesh->faces[i].rf].pd);
+			replicatedMaterialsPS.push_back(materials[mesh->faces[i].rf].ps);
 			replicatedMaterialsReflectiveness.push_back((materials[mesh->faces[i].rf].r));
 			replicatedMaterialsRefIdx.push_back(materials[mesh->faces[i].rf].refIdx);
 		}

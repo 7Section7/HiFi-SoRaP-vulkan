@@ -545,11 +545,15 @@
 // With MinGW-W64, including intrinsic headers before intrin.h will produce some errors. The problem is
 // that windows.h (and maybe other headers) will silently include intrin.h, which of course causes problems.
 // To fix, we just explicitly include intrin.h here.
-#if defined(__MINGW32__) && (GLM_ARCH != GLM_ARCH_PURE)
+#if defined(__MINGW32__)
+#if (GLM_ARCH != GLM_ARCH_PURE)
 #   include <intrin.h>
 #endif
+#endif
 
+#pragma GCC diagnostic ignored "-Wexpansion-to-defined"
 //#if(GLM_ARCH != GLM_ARCH_PURE)
+#if defined(__MINGW32__)
 #if(GLM_ARCH & GLM_ARCH_AVX2)
 #	include <immintrin.h>
 #endif//GLM_ARCH
@@ -566,6 +570,8 @@
 #	include <emmintrin.h>
 #endif//GLM_ARCH
 //#endif//(GLM_ARCH != GLM_ARCH_PURE)
+#endif
+#pragma GCC diagnostic warning "-Wexpansion-to-defined"
 
 #if(defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_ARCH_DISPLAYED))
 #	define GLM_MESSAGE_ARCH_DISPLAYED

@@ -1,14 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-//  --- Angel.h ---
-//
 //   The main header file for all examples from Angel 6th Edition
 //   Renamed to Common.h
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#ifndef COMMON_H
+#define COMMON_H
 
 //----------------------------------------------------------------------------
 //
@@ -50,6 +48,16 @@
 #endif
 #endif
 
+// Define a macro to modify warnings
+#define STRINGIFY(a) #a
+#define MODIFY_WARNINGS( parameter ) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wexpansion-to-defined")) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wunused-parameter")) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wunused-variable")) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wignored-attributes")) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wdeprecated-copy")) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wdeprecated-declarations")) \
+	_Pragma( STRINGIFY(GCC diagnostic parameter "-Wint-in-bool-context"))
 
 // Define a helpful macro for handling offsets into buffer objects
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
@@ -69,7 +77,7 @@ namespace Common {
 const GLfloat  DivideByZeroTolerance = GLfloat(1.0e-07);
 
 //  Degrees-to-radians constant
-const GLfloat  DegreesToRadians = M_PI / 180.0;
+const long double DegreesToRadians = M_PI / 180.0L;
 
 
 }  // namespace Common
@@ -84,14 +92,14 @@ const GLfloat  DegreesToRadians = M_PI / 180.0;
 using namespace Common;
 
 typedef struct {
-	  vec3 pmin;
-	  GLfloat a, h, p;
+	  vector3 pmin;
+	  vector3::value_type a, h, p;
 } Box3D;
 
 typedef struct {
-	  vec2 pmin;
-	  float a, h;
+	  vector2 pmin;
+	  vector2::value_type a, h;
 } Box2D;
 
 
-#endif // __ANGEL_H__
+#endif //

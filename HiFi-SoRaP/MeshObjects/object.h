@@ -50,7 +50,8 @@ public:
 	TriangleMesh* getMesh();
 	Material& getMaterial(int i);
 	void setReflectivenessInMaterials(Reflectiveness r);
-	void setRefractiveIndexInMaterials(float refIdx);
+	// In case we want to use the same refractive index for all the materials.
+	void setRefractiveIndexInMaterials(const precision::value_type& refIdx);
 
 	void sendObjectToGPU(std::unique_ptr<QGLShaderProgram> &program);
 

@@ -17,6 +17,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = HiFi-SoRaP
 TEMPLATE = app
 
+#QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-parameter
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -56,7 +58,15 @@ INCLUDEPATH += Lib/glm/Core
 
 #LIBS += -lGLEW
 
+#CONFIG(QMAKE_CXXFLAGS_WARN_ON)
+
+#QMAKE_CXXFLAGS += -I "Lib/eigen3/Eigen" -I "GLVisualization"
+#QMAKE_CXXFLAGS += -Wp
+#QMAKE_CXXFLAGS += -Wexpansion-to-defined -Wpedantic -Wextra
+#CFLAGS += -Wexpansion-to-defined -Wpedantic -Wextra
+
 SOURCES +=  \
+	SRP/CPU_SRP/cannonball.cpp \
         main.cpp \
         mainwindow.cpp \
     MeshObjects/material.cpp \
@@ -75,7 +85,6 @@ SOURCES +=  \
     GLVisualization/glwindow.cpp \
     GLVisualization/glwidget.cpp \
     SRP/GPU_SRP/advancedgpu.cpp \
-    SRP/CPU_SRP/canball.cpp \
     SRP/CPU_SRP/nplate.cpp \
     SRP/CPU_SRP/raytracecpu.cpp \
     Lib/glm/core/func_common.inl \
@@ -189,6 +198,7 @@ SOURCES +=  \
 
 
 HEADERS += \
+	SRP/CPU_SRP/cannonball.h \
         mainwindow.h \
     MeshObjects/triangle.h \
     MeshObjects/material.h \
@@ -209,7 +219,6 @@ HEADERS += \
     GLVisualization/light.h \
     GLVisualization/glwidget.h \
     SRP/GPU_SRP/advancedgpu.h \
-    SRP/CPU_SRP/canball.h \
     SRP/CPU_SRP/nplate.h \
     SRP/CPU_SRP/raytracecpu.h \
     Lib/glm/core/_detail.hpp \
@@ -334,6 +343,17 @@ HEADERS += \
     Lib/glm/virtrev/xstream.hpp \
     Lib/glm/ext.hpp \
     Lib/glm/glm.hpp \
+    Comparison/comparisonwindow.h \
+    Comparison/result.h \
+    Comparison/categoryresult.h \
+    SRP/GPU_SRP/raytracegputextures.h \
+    SRP/GPU_SRP/raytracegpu.h \
+    MeshObjects/quad.h \
+    SRP/GPU_SRP/render.h
+
+#CONFIG(warn_off){
+
+HEADERS += \
     Lib/eigen3/Eigen/src/Cholesky/LDLT.h \
     Lib/eigen3/Eigen/src/Cholesky/LLT.h \
     Lib/eigen3/Eigen/src/Cholesky/LLT_MKL.h \
@@ -756,14 +776,8 @@ HEADERS += \
     Lib/eigen3/unsupported/Eigen/Polynomials \
     Lib/eigen3/unsupported/Eigen/Skyline \
     Lib/eigen3/unsupported/Eigen/SparseExtra \
-    Lib/eigen3/unsupported/Eigen/Splines \
-    Comparison/comparisonwindow.h \
-    Comparison/result.h \
-    Comparison/categoryresult.h \
-    SRP/GPU_SRP/raytracegputextures.h \
-    SRP/GPU_SRP/raytracegpu.h \
-    MeshObjects/quad.h \
-    SRP/GPU_SRP/render.h
+    Lib/eigen3/unsupported/Eigen/Splines
+#}
 
 FORMS += \
         mainwindow.ui

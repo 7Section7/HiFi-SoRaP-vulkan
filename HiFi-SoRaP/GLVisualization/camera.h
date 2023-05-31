@@ -2,7 +2,12 @@
 #define CAMERAH
 
 #include "Lib/common.h"
-#include <Lib/eigen3/Eigen/Geometry>
+
+MODIFY_WARNINGS( ignored )
+	#include <Lib/eigen3/Eigen/Geometry>
+MODIFY_WARNINGS( warning )
+
+#undef GL_GLEXT_VERSION
 #include <QGLShaderProgram>
 
 #include <memory>

@@ -4,13 +4,18 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __ANGEL_MAT_H__
-#define __ANGEL_MAT_H__
+#ifndef MAT_H
+#define MAT_H
 
 #include <stdio.h>
 #include "./vec.h"
 
-const float DegreesToRadians = 0.01745329251;
+// Local constant only to be used here.
+namespace {
+
+const float DegreesToRadians = (float) 0.01745329251L;
+
+}
 
 // Classe que conté utilitats de matrius i operacions entre matrius i vectors
 namespace Common {
@@ -24,7 +29,7 @@ namespace Common {
 
 class mat2 {
 
-	vec2  _m[2];
+	vec2F  _m[2];
 
    public:
 	//
@@ -34,11 +39,11 @@ class mat2 {
 	mat2( const GLfloat d = GLfloat(1.0) )  // Create a diagional matrix
 	{ _m[0].x = d;  _m[1].y = d;   }
 
-	mat2( const vec2& a, const vec2& b )
+	mat2( const vec2F& a, const vec2F& b )
 	{ _m[0] = a;  _m[1] = b;  }
 
 	mat2( GLfloat m00, GLfloat m10, GLfloat m01, GLfloat m11 )
-	{ _m[0] = vec2( m00, m01 ); _m[1] = vec2( m10, m11 ); }
+	{ _m[0] = vec2F( m00, m01 ); _m[1] = vec2F( m10, m11 ); }
 
 	mat2( const mat2& m ) {
 	if ( *this != m ) {
@@ -48,11 +53,18 @@ class mat2 {
 	}
 
 	//
+	//  --- Copy Operator ---
+	//
+
+	mat2 operator = ( const mat2& m ) const
+	{ return mat2{m}; }
+
+	//
 	//  --- Indexing Operator ---
 	//
 
-	vec2& operator [] ( int i ) { return _m[i]; }
-	const vec2& operator [] ( int i ) const { return _m[i]; }
+	vec2F& operator [] ( int i ) { return _m[i]; }
+	const vec2F& operator [] ( int i ) const { return _m[i]; }
 
 	//
 	//  --- (non-modifying) Arithmatic Operators ---
@@ -127,7 +139,8 @@ class mat2 {
 		}
 	}
 
-	return *this = a;
+	*this = a;
+	return *this;
 	}
 
 	mat2& operator /= ( const GLfloat s ) {
@@ -147,8 +160,8 @@ class mat2 {
 	//  --- Matrix / Vector operators ---
 	//
 
-	vec2 operator * ( const vec2& v ) const {  // m * v
-	return vec2( _m[0][0]*v.x + _m[0][1]*v.y,
+	vec2F operator * ( const vec2F& v ) const {  // m * v
+	return vec2F( _m[0][0]*v.x + _m[0][1]*v.y,
 			 _m[1][0]*v.x + _m[1][1]*v.y );
 	}
 
@@ -196,7 +209,7 @@ mat2 transpose( const mat2& A ) {
 
 class mat3 {
 
-	vec3  _m[3];
+	vec3F  _m[3];
 
    public:
 	//
@@ -206,16 +219,16 @@ class mat3 {
 	mat3( const GLfloat d = GLfloat(1.0) )  // Create a diagional matrix
 	{ _m[0].x = d;  _m[1].y = d;  _m[2].z = d;   }
 
-	mat3( const vec3& a, const vec3& b, const vec3& c )
+	mat3( const vec3F& a, const vec3F& b, const vec3F& c )
 	{ _m[0] = a;  _m[1] = b;  _m[2] = c;  }
 
 	mat3( GLfloat m00, GLfloat m10, GLfloat m20,
 	  GLfloat m01, GLfloat m11, GLfloat m21,
 	  GLfloat m02, GLfloat m12, GLfloat m22 )
 	{
-		_m[0] = vec3( m00, m01, m02 );
-		_m[1] = vec3( m10, m11, m12 );
-		_m[2] = vec3( m20, m21, m22 );
+		_m[0] = vec3F( m00, m01, m02 );
+		_m[1] = vec3F( m10, m11, m12 );
+		_m[2] = vec3F( m20, m21, m22 );
 	}
 
 	mat3( const mat3& m )
@@ -228,11 +241,18 @@ class mat3 {
 	}
 
 	//
+	//  --- Copy Operator ---
+	//
+
+	mat3 operator = ( const mat3& m ) const
+	{ return mat3{m}; }
+
+	//
 	//  --- Indexing Operator ---
 	//
 
-	vec3& operator [] ( int i ) { return _m[i]; }
-	const vec3& operator [] ( int i ) const { return _m[i]; }
+	vec3F& operator [] ( int i ) { return _m[i]; }
+	const vec3F& operator [] ( int i ) const { return _m[i]; }
 
 	//
 	//  --- (non-modifying) Arithmatic Operators ---
@@ -307,7 +327,8 @@ class mat3 {
 		}
 	}
 
-	return *this = a;
+	*this = a;
+	return *this;
 	}
 
 	mat3& operator /= ( const GLfloat s ) {
@@ -327,8 +348,8 @@ class mat3 {
 	//  --- Matrix / Vector operators ---
 	//
 
-	vec3 operator * ( const vec3& v ) const {  // m * v
-	return vec3( _m[0][0]*v.x + _m[0][1]*v.y + _m[0][2]*v.z,
+	vec3F operator * ( const vec3F& v ) const {  // m * v
+	return vec3F( _m[0][0]*v.x + _m[0][1]*v.y + _m[0][2]*v.z,
 			 _m[1][0]*v.x + _m[1][1]*v.y + _m[1][2]*v.z,
 			 _m[2][0]*v.x + _m[2][1]*v.y + _m[2][2]*v.z );
 	}
@@ -383,7 +404,7 @@ mat3 transpose( const mat3& A ) {
 
 class mat4 {
 
-	vec4  _m[4];
+	vec4F  _m[4];
 
    public:
 	//
@@ -393,7 +414,7 @@ class mat4 {
 	mat4( const GLfloat d = GLfloat(1.0) )  // Create a diagional matrix
 	{ _m[0].x = d;  _m[1].y = d;  _m[2].z = d;  _m[3].w = d; }
 
-	mat4( const vec4& a, const vec4& b, const vec4& c, const vec4& d )
+	mat4( const vec4F& a, const vec4F& b, const vec4F& c, const vec4F& d )
 	{ _m[0] = a;  _m[1] = b;  _m[2] = c;  _m[3] = d; }
 
 	mat4( GLfloat m00, GLfloat m10, GLfloat m20, GLfloat m30,
@@ -401,10 +422,10 @@ class mat4 {
 	  GLfloat m02, GLfloat m12, GLfloat m22, GLfloat m32,
 	  GLfloat m03, GLfloat m13, GLfloat m23, GLfloat m33 )
 	{
-		_m[0] = vec4( m00, m01, m02, m03 );
-		_m[1] = vec4( m10, m11, m12, m13 );
-		_m[2] = vec4( m20, m21, m22, m23 );
-		_m[3] = vec4( m30, m31, m32, m33 );
+		_m[0] = vec4F( m00, m01, m02, m03 );
+		_m[1] = vec4F( m10, m11, m12, m13 );
+		_m[2] = vec4F( m20, m21, m22, m23 );
+		_m[3] = vec4F( m30, m31, m32, m33 );
 	}
 
 	mat4( const mat4& m )
@@ -418,11 +439,26 @@ class mat4 {
 	}
 
 	//
+	//  --- Copy Operator ---
+	//
+
+	mat4 operator = ( const mat4& m )
+	{
+		if ( *this != m ) {
+		_m[0] = m._m[0];
+		_m[1] = m._m[1];
+		_m[2] = m._m[2];
+		_m[3] = m._m[3];
+		}
+		return *this;
+	}
+
+	//
 	//  --- Indexing Operator ---
 	//
 
-	vec4& operator [] ( int i ) { return _m[i]; }
-	const vec4& operator [] ( int i ) const { return _m[i]; }
+	vec4F& operator [] ( int i ) { return _m[i]; }
+	const vec4F& operator [] ( int i ) const { return _m[i]; }
 
 	//
 	//  --- (non-modifying) Arithematic Operators ---
@@ -497,7 +533,8 @@ class mat4 {
 		}
 	}
 
-	return *this = a;
+	*this = a;
+	return *this;
 	}
 
 	mat4& operator /= ( const GLfloat s ) {
@@ -517,8 +554,8 @@ class mat4 {
 	//  --- Matrix / Vector operators ---
 	//
 
-	vec4 operator * ( const vec4& v ) const {  // m * v
-	return vec4( _m[0][0]*v.x + _m[0][1]*v.y + _m[0][2]*v.z + _m[0][3]*v.w,
+	vec4F operator * ( const vec4F& v ) const {  // m * v
+	return vec4F( _m[0][0]*v.x + _m[0][1]*v.y + _m[0][2]*v.z + _m[0][3]*v.w,
 			 _m[1][0]*v.x + _m[1][1]*v.y + _m[1][2]*v.z + _m[1][3]*v.w,
 			 _m[2][0]*v.x + _m[2][1]*v.y + _m[2][2]*v.z + _m[2][3]*v.w,
 			 _m[3][0]*v.x + _m[3][1]*v.y + _m[3][2]*v.z + _m[3][3]*v.w
@@ -582,11 +619,11 @@ mat4 transpose( const mat4& A ) {
 					<< str << std::endl; } while(0)
 
 inline
-vec4 mvmult( const mat4& a, const vec4& b )
+vec4F mvmult( const mat4& a, const vec4F& b )
 {
 	Error( "replace with vector matrix multiplcation operator" );
 
-	vec4 c;
+	vec4F c;
 	int i, j;
 	for(i=0; i<4; i++) {
 	c[i] =0.0;
@@ -661,13 +698,13 @@ mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 }
 
 inline
-mat4 Translate( const vec3& v )
+mat4 Translate( const vec3F& v )
 {
 	return Translate( v.x, v.y, v.z );
 }
 
 inline
-mat4 Translate( const vec4& v )
+mat4 Translate( const vec4F& v )
 {
 	return Translate( v.x, v.y, v.z );
 }
@@ -696,7 +733,7 @@ mat4 Scale( const GLfloat x, const GLfloat y, const GLfloat z )
 }
 
 inline
-mat4 Scale( const vec3& v )
+mat4 Scale( const vec3F& v )
 {
 	return Scale( v.x, v.y, v.z );
 }
@@ -773,12 +810,12 @@ mat4 Perspective( const GLfloat fovy, const GLfloat aspect,
 //
 
 inline
-mat4 LookAt( const vec4& eye, const vec4& at, const vec4& up )
+mat4 LookAt( const vec4F& eye, const vec4F& at, const vec4F& up )
 {
-	vec4 n = normalize(eye - at);
-	vec4 u = vec4(normalize(cross(up,n)), 0.0);
-	vec4 v = vec4(normalize(cross(n,u)), 0.0);
-	vec4 t = vec4(0.0, 0.0, 0.0, 1.0);
+	vec4F n = normalize(eye - at);
+	vec4F u = vec4F(normalize(cross(up,n)), 0.0);
+	vec4F v = vec4F(normalize(cross(n,u)), 0.0);
+	vec4F t = vec4F(0.0, 0.0, 0.0, 1.0);
 	mat4 c = mat4(u, v, n, t);
 	return c * Translate( -eye );
 }
@@ -786,14 +823,14 @@ mat4 LookAt( const vec4& eye, const vec4& at, const vec4& up )
 //----------------------------------------------------------------------------
 
 inline
-vec4 minus(const vec4& a, const vec4&  b )
+vec4F minus(const vec4F& a, const vec4F&  b )
 {
 	Error( "replace with vector subtraction" );
-	return vec4(a[0]-b[0], a[1]-b[1], a[2]-b[2], 0.0);
+	return vec4F(a[0]-b[0], a[1]-b[1], a[2]-b[2], 0.0);
 }
 
 inline
-void printv(const vec4& a )
+void printv(const vec4F& a )
 {
 	Error( "replace with vector insertion operator" );
 	printf("%f %f %f %f \n\n", a[0], a[1], a[2], a[3]);
@@ -818,6 +855,6 @@ mat4 identity()
 }
 
 
-}  // namespace Angel
+}  // namespace
 
-#endif // __ANGEL_MAT_H__
+#endif //

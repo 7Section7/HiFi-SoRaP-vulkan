@@ -12,21 +12,23 @@ NPlate::NPlate()
 {
 }
 
-void NPlate::computeStepSRP(double xs[], QVector3D &force, double RS[], double V1[], double V2[])
+void NPlate::computeStepSRP(const vector3& XS, vector3 &force, const vector3& V1, const vector3& V2)
 {
-	double fs[3];
-	double PS = ctt/msat;
+	Q_UNUSED(V1);
+	Q_UNUSED(V2);
 
-	fsrp_nplate(np, xs, fs);
-	force = PS*QVector3D(fs[0],fs[1],fs[2]);
+	precision::value_type PS = PRESSURE;
+
+	fsrp_nplate(XS, force);
+	force = PS/msat*force;
 }
 
-void NPlate::fsrp_nplate(int N, double xs[], double fs[])
+void NPlate::fsrp_nplate(const vector3& XS, vector3 &force)
 /*
    SRP force for the N-plate model
 
   INPUT:
-	N       - integer with number of plates
+	np       - integer with number of plates
 	n[][]   -  N x 3 table with normal vector to each plate
 	ps[]   	-  N array with coefficients for secular reflection
 	pd[]   	-  N array with coefficients for difusive reflection
@@ -37,22 +39,19 @@ void NPlate::fsrp_nplate(int N, double xs[], double fs[])
 	fs[]    - resultat srp force
 */
 {
-	int i, ip;
-	double cosTH;
+	int ip;
+	precision::value_type cosTH;
 
-	fs[0] = 0., fs[1] = 0., fs[2] = 0.;
-	for(ip = 0; ip < N; ip++)
+	force = vector3();
+	for(ip = 0; ip < np; ip++)
 	{
-		cosTH = n[ip][0]*xs[0] + n[ip][1]*xs[1] + n[ip][2]*xs[2];
+		cosTH = Common::dot(n[ip],XS);
 
 		/* ilumination condition */
-		if(cosTH < 0) // -1.0e-6) Avoid cases where values are closer to 0
-		{
-			for(i = 0; i < 3; i++)
-				fs[i] += A[ip]*fabs(cosTH)*((1.-ps[ip])*xs[i] - 2.*(ps[ip]*fabs(cosTH) + pd[ip]/3.)*n[ip][i]);
-		}
+		if(cosTH < 0)
+			force += A[ip]*fabs(cosTH)*((1.L-ps[ip])*XS - 2.L*(ps[ip]*fabs(cosTH) + pd[ip]/3.L)*n[ip]);
 	}
-	return ;
+	return;
 }
 
 bool NPlate::isSatelliteInfoLoaded()
@@ -75,26 +74,29 @@ void NPlate::loadSatelliteInfo()
 	fi = fopen(fileInput, "r");
 	if(fi == NULL)
 	{
-		printf("problems opening input spacecraft file (check file %s) \n", fileInput);
-		return;
+		throw std::invalid_argument(std::string("Problems opening input spacecraft file (check file ")+ fileInput +" ) \n");
 	}
 
 	qq = fscanf(fi, "%d", &np);
-	if(qq != 1){ printf(" incompatible input format (1)\n"); exit(1); }
+	if(qq != 1)
+	{
+		throw std::invalid_argument("Problems loading number of plates.");
+	}
 
-	for(i = 0; i < np; i++){
-
+	for(i = 0; i < np; i++)
+	{
 		double aux_A, aux_ps, aux_pd, aux_n0, aux_n1, aux_n2;
 		// IMPORTANT: Use ',' (not '.') to describe decimals
 		int qq2 = fscanf(fi, "%lf %lf %lf %lf %lf %lf", &aux_A, &aux_ps, &aux_pd, &aux_n0, &aux_n1, &aux_n2);
 
 		A.push_back(aux_A);
 		ps.push_back(aux_ps);  pd.push_back(aux_pd);
-		n.push_back(QVector3D(aux_n0,aux_n1,aux_n2));
+		n.push_back(vector3(aux_n0,aux_n1,aux_n2));
 
-		if(qq2 != 6){
-			printf(" incompatible input format (2)\n");
-			exit(1);
+		if(qq2 != 6)
+		{
+			throw std::invalid_argument("Depending on your OS, you may need to use ',' instead of '.' to describe "
+										"decimals (or viceversa).");
 		}
 	}
 	fclose(fi);

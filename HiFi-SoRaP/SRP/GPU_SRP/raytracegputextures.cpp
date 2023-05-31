@@ -8,6 +8,14 @@
  *
  ***********************************************************************/
 
+namespace
+{
+	unsigned int getNextPowerOfTwo(unsigned int value);
+
+	static float color[] = { 0.25f, 0.5f, 0.75f, 1.0f };
+}
+
+
 RayTraceGPUTextures::RayTraceGPUTextures()
 {
 	fragmentShaderFileGPU = "://resources/shaders/raytrace_multiple_scattering_fshader.glsl";
@@ -15,11 +23,6 @@ RayTraceGPUTextures::RayTraceGPUTextures()
 
 void RayTraceGPUTextures::sendTextures()
 {
-	//804 faces -> 1024 or 32x32    -> 1 texture 2D 32x32 rgba with vertices indices and materials indices.
-	//408 vertices ->512            -> 1 texture 1D 512 rgb with vertices info
-	//6 materials ->8               -> 1 texture 1D 8 rgb with ps, pd and refIdx.
-								//  -> 1 texture 1D 8 r with reflectiveness.
-
 	TriangleMesh *mesh = satellite->getMesh();
 
 	texFacesSize = getNextPowerOfTwo(mesh->faces.size());
@@ -60,27 +63,23 @@ void RayTraceGPUTextures::sendFaces(){
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float color[] = { 0.25f, 0.5f, 0.75f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, color);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	float *pixels = new float[texFacesSize*4];
-	for(int i=0; i<mesh->faces.size();i++){
-		pixels[4*i]   = ((float)mesh->faces[i].v1) / texVerticesSize;
-		pixels[4*i+1] = ((float)mesh->faces[i].v2) / texVerticesSize;
-		pixels[4*i+2] = ((float)mesh->faces[i].v3) / texVerticesSize;
-		pixels[4*i+3] = ((float)mesh->faces[i].rf) / texMaterialsSize;
+	facesTexture.reserve(texFacesSize*4);
+	for(uint i=0; i<mesh->faces.size();i++){
+		facesTexture[4*i]   = ((float)mesh->faces[i].v1) / texVerticesSize;
+		facesTexture[4*i+1] = ((float)mesh->faces[i].v2) / texVerticesSize;
+		facesTexture[4*i+2] = ((float)mesh->faces[i].v3) / texVerticesSize;
+		facesTexture[4*i+3] = ((float)mesh->faces[i].rf) / texMaterialsSize;
 	}
-	for(int i=mesh->faces.size()*4; i<texFacesSize*4; i++)
-		pixels[i] =0;
+	for(uint i=mesh->faces.size()*4; i<texFacesSize*4; i++)
+		facesTexture[i] =0;
 
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, 32, 32, 0, GL_RGBA, GL_FLOAT, pixels);
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, texFacesSize, 0, GL_RGBA, GL_FLOAT, pixels);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, texFacesSize, 0, GL_RGBA, GL_FLOAT, facesTexture.data());
 
 	glUniform1i(programGPU->uniformLocation( "texTriangles"), 0);
-
-	delete [] pixels;
 }
 
 void RayTraceGPUTextures::sendVertices(){
@@ -91,24 +90,33 @@ void RayTraceGPUTextures::sendVertices(){
 	glBindTexture(GL_TEXTURE_1D, texVertices);
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	float color[] = { 0.25f, 0.5f, 0.75f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, color);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	float *pixels = new float[texVerticesSize*3];
-	for(int i=0; i<mesh->vertices.size();i++){
-		pixels[3*i  ] = 0.5f * (mesh->vertices[i].x()+1);
-		pixels[3*i+1] = 0.5f * (mesh->vertices[i].y()+1);
-		pixels[3*i+2] = 0.5f * (mesh->vertices[i].z()+1);
-	}
-	for(int i=mesh->vertices.size()*3; i<texVerticesSize*3; i++) pixels[i] =0;
+	const auto extremeValues = std::vector<float>{mesh->max_.x(),mesh->max_.y(),mesh->max_.z(),
+			mesh->min_.x(),mesh->min_.y(),mesh->min_.z()};
+	const auto minPos = std::min_element(extremeValues.begin(),extremeValues.end());
+	const auto maxPos = std::max_element(extremeValues.begin(),extremeValues.end());
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16, texVerticesSize, 0, GL_RGB, GL_FLOAT, pixels);
+	GLuint minVertexComponentLocation = programGPU->uniformLocation("minVertexComponent");
+	glUniform1f(minVertexComponentLocation,*minPos);
+
+	GLuint maxVertexComponentLocation = programGPU->uniformLocation("maxVertexComponent");
+	glUniform1f(maxVertexComponentLocation,*maxPos);
+
+	verticesTexture.reserve(texVerticesSize*3);
+	for(uint i=0; i<mesh->vertices.size();i++)
+	{
+		verticesTexture[3*i  ] = (mesh->vertices[i].x - *minPos)/(*maxPos - *minPos);
+		verticesTexture[3*i+1] = (mesh->vertices[i].y - *minPos)/(*maxPos - *minPos);
+		verticesTexture[3*i+2] = (mesh->vertices[i].z - *minPos)/(*maxPos - *minPos);
+	}
+	for(uint i=mesh->vertices.size()*3; i<texVerticesSize*3; i++) verticesTexture[i] =0;
+
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16, texVerticesSize, 0, GL_RGB, GL_FLOAT, verticesTexture.data());
 
 	glUniform1i(programGPU->uniformLocation( "texVertices"), 1);
-
-	delete [] pixels;
 }
 
 void RayTraceGPUTextures::sendMaterials(){
@@ -118,40 +126,36 @@ void RayTraceGPUTextures::sendMaterials(){
 	glBindTexture(GL_TEXTURE_1D, texMaterials1);
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	float color[] = { 0.25f, 0.5f, 0.75f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, color);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	float *pixels = new float[texMaterialsSize*3];
-	int numMaterials = satellite->getNumMaterials();
+	reflectivitiesTexture.reserve(texMaterialsSize*3);
+	uint numMaterials = satellite->getNumMaterials();
 
-	for(int i=0; i<numMaterials;i++){
+	for(uint i=0; i<numMaterials;i++){
 		Material m = satellite->getMaterial(i);
-		pixels[3*i  ] = m.ps;
-		pixels[3*i+1] = m.pd;
-		pixels[3*i+2] = 1.0f / m.refIdx;
+		reflectivitiesTexture[3*i  ] = m.ps;
+		reflectivitiesTexture[3*i+1] = m.pd;
+		reflectivitiesTexture[3*i+2] = 1.0f / m.refIdx;
 	}
-	for(int i=numMaterials*3; i<texMaterialsSize*3; i++) pixels[i] =0;
+	for(uint i=numMaterials*3; i<texMaterialsSize*3; i++) reflectivitiesTexture[i] =0;
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16, texMaterialsSize, 0, GL_RGB, GL_FLOAT, pixels);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16, texMaterialsSize, 0, GL_RGB, GL_FLOAT, reflectivitiesTexture.data());
 
 	glUniform1i(programGPU->uniformLocation( "texMaterials1"), 2);
-
-	delete [] pixels;
 
 	glGenTextures(1, &texMaterials2);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_1D, texMaterials2);
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	//float color[] = { 0.25f, 0.5f, 0.75f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, color);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	float *pixels2 = new float[texMaterialsSize];
-	for(int i=0; i<numMaterials;i++){
+	materialTypesTexture.reserve(texMaterialsSize);
+	for(uint i=0; i<numMaterials;i++){
 		Material m = satellite->getMaterial(i);
 		float f=0;
 
@@ -159,15 +163,13 @@ void RayTraceGPUTextures::sendMaterials(){
 		else if(m.r == Transparent) f=0.5f;
 		else if(m.r == Lambertian) f=1;
 
-		pixels2[3*i] = f;
+		materialTypesTexture[3*i] = f;
 	}
-	for(int i=numMaterials; i<texMaterialsSize; i++) pixels2[i] =0;
+	for(uint i=numMaterials; i<texMaterialsSize; i++) materialTypesTexture[i] = 0;
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_R16, texMaterialsSize, 0, GL_R, GL_FLOAT, pixels2);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R16, texMaterialsSize, 0, GL_R, GL_FLOAT, materialTypesTexture.data());
 
 	glUniform1i(programGPU->uniformLocation( "texMaterials2"), 3);
-
-	delete [] pixels2;
 }
 
 void RayTraceGPUTextures::sendNormals(){
@@ -178,24 +180,21 @@ void RayTraceGPUTextures::sendNormals(){
 	glBindTexture(GL_TEXTURE_1D, texNormals);
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	float color[] = { 0.25f, 0.5f, 0.75f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_1D, GL_TEXTURE_BORDER_COLOR, color);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	float *pixels = new float[texNormalsSize*3];
-	for(int i=0; i<mesh->faceNormals.size();i++){
-		pixels[3*i  ] = 0.5f * (mesh->faceNormals[i].x()+1);
-		pixels[3*i+1] = 0.5f * (mesh->faceNormals[i].y()+1);
-		pixels[3*i+2] = 0.5f * (mesh->faceNormals[i].z()+1);
+	normalsTexture.reserve(texNormalsSize*3);
+	for(uint i=0; i<mesh->faceNormals.size();i++){
+		normalsTexture[3*i  ] = 0.5f * (mesh->faceNormals[i].x+1);
+		normalsTexture[3*i+1] = 0.5f * (mesh->faceNormals[i].y+1);
+		normalsTexture[3*i+2] = 0.5f * (mesh->faceNormals[i].z+1);
 	}
-	for(int i=mesh->faceNormals.size()*3; i<texNormalsSize*3; i++) pixels[i] =0;
+	for(uint i=mesh->faceNormals.size()*3; i<texNormalsSize*3; i++) normalsTexture[i] =0;
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16, texNormalsSize, 0, GL_RGB, GL_FLOAT, pixels);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB16, texNormalsSize, 0, GL_RGB, GL_FLOAT, normalsTexture.data());
 
 	glUniform1i(programGPU->uniformLocation( "texNormals"), 4);
-
-	delete [] pixels;
 
 	glGenTextures(1, &texFaces2);
 	glActiveTexture(GL_TEXTURE5);
@@ -207,21 +206,21 @@ void RayTraceGPUTextures::sendNormals(){
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	float *pixels2 = new float[texFacesSize];
-	for(int i=0; i<mesh->faces.size();i++){
-		pixels2[i] = ((float)mesh->faces[i].nn) / texNormalsSize;
+	faceNormalsTexture.reserve(texFacesSize);
+	for(uint i=0; i<mesh->faces.size();i++){
+		faceNormalsTexture[i] = ((float)mesh->faces[i].nn) / texNormalsSize;
 	}
-	for(int i=mesh->faces.size(); i<texFacesSize; i++) pixels2[i] =0;
+	for(uint i=mesh->faces.size(); i<texFacesSize; i++) faceNormalsTexture[i] =0;
 
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, 32, 32, 0, GL_RGBA, GL_FLOAT, pixels);
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_R16, texFacesSize, 0, GL_R, GL_FLOAT, pixels2);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R16, texFacesSize, 0, GL_R, GL_FLOAT, faceNormalsTexture.data());
 
 	glUniform1i(programGPU->uniformLocation( "texTrianglesNormals"), 5);
-
-	delete [] pixels2;
 }
 
-unsigned int RayTraceGPUTextures::getNextPowerOfTwo(unsigned int value)
+namespace
+{
+
+unsigned int getNextPowerOfTwo(unsigned int value)
 {
 	unsigned int v = value; // compute the next highest power of 2 of 32-bit v
 
@@ -236,5 +235,6 @@ unsigned int RayTraceGPUTextures::getNextPowerOfTwo(unsigned int value)
 	v+= (v==0);
 
 	return v;
+}
 
 }

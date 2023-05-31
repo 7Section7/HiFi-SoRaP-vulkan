@@ -221,8 +221,6 @@ GLWindow::GLWindow(QWidget *parent):QWidget(parent)
 	unlockButton->setDisabled(true);
 	gridLayout2->addWidget(unlockButton,14,1);
 
-	QSpacerItem *spacer5 = new QSpacerItem(0,10,QSizePolicy::Fixed,QSizePolicy::Fixed);
-
 	minValue=labelMinValue;
 	maxValue =labelMaxValue;
 	glWidget->setLabels(labelMinValue,labelMaxValue);
@@ -347,14 +345,10 @@ void GLWindow::addForceSRP()
 		return;
 
 	long int xAngle, yAngle,zAngle;
-	float angleX,angleY,angleZ;
+
 	xAngle = axes[_X_].spinBox->value();
 	yAngle = axes[_Y_].spinBox->value();
 	zAngle = axes[_Z_].spinBox->value();
-
-	angleX = xAngle/180.0f*M_PI;
-	angleY = yAngle/180.0f*M_PI;
-	angleZ = zAngle/180.0f*M_PI;
 
 	xAngle+=180;
 	yAngle+=180;
@@ -366,9 +360,10 @@ void GLWindow::addForceSRP()
 
 	if (it == createdLineForces.end()) {
 
-		QVector3D lightDir = glWidget->getLightDir();
+		const auto& lightDir = glWidget->getLightDir();
 		Eigen::Matrix4f rotationMatrix = glWidget->getSatelliteRotation();
-		QVector3D force= model->computeSRP(lightDir,rotationMatrix);
+
+		const auto force = model->computeSRP(lightDir,rotationMatrix);
 
 		glWidget->addNewForceSRP(force);
 		createdLineForces.insert(id);

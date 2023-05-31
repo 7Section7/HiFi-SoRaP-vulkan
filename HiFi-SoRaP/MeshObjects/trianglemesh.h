@@ -9,18 +9,24 @@
  *
  ***********************************************************************/
 
+#include <MeshObjects/material.h>
+#include <MeshObjects/triangle.h>
+
+#include "Lib/common.h"
+#undef GL_GLEXT_VERSION // Lib/common and QGLShaderProgram both defines this macro.
+//We do this to avoid redefinition warning.
+#include <QGLShaderProgram>
+
+MODIFY_WARNINGS( ignored )
+	#include <Lib/eigen3/Eigen/Geometry>
+MODIFY_WARNINGS( warning )
+
+#include <unordered_map>
 #include <vector>
 #include <QVector3D>
 #include <math.h>
 #include <stdio.h>
-#include <Lib/eigen3/Eigen/Geometry>
-#include <unordered_map>
 
-#include <MeshObjects/material.h>
-#include <MeshObjects/triangle.h>
-#include "Lib/common.h"
-
-#include <QGLShaderProgram>
 #include <memory>
 
 #define MTLMAX 20
@@ -34,18 +40,18 @@
 class TriangleMesh
 {
 public:
-	std::vector<QVector3D> faceNormals;
-	std::vector<QVector3D> vertices;
+	std::vector<vector3> faceNormals;
+	std::vector<vector3> vertices;
 	std::vector<Triangle> faces;
 
-	std::vector<vec4> replicatedVertices, replicatedNormals;
+	//For now, we pass the info of the object to the GPU as floats.
+	std::vector<vector4> replicatedVertices, replicatedNormals;
 	std::vector<int> indexedFaces;
 
 	Eigen::Vector3f min_, max_;
 
 	TriangleMesh();
-	bool hitTriangle(vec3 point, vec3 L, int triangleIdx, vec3& hitPoint);
-	int hitTriangle(double pix[], double ray[], Triangle to,double Pint[]);
+	bool hitTriangle(const vector3& point, const vector3& L, const int triangleIdx, vector3& hitPoint);
 
 	void computeVertexNormals();
 	void prepareDataToGPU();
@@ -53,9 +59,6 @@ public:
 	void computeBoundingBox();
 
 	void sendMeshToGPU(std::unique_ptr<QGLShaderProgram> &program);
-private:
-	int solveCramer(double A[][3], double b[], double x[]);
-	double det3(double A[][3]);
 };
 
 #endif // TRIANGLEMESH_H

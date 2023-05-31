@@ -1,4 +1,5 @@
 #include "basicsrp.h"
+#include <QElapsedTimer>
 
 /***********************************************************************
  +
@@ -16,24 +17,14 @@ void BasicSRP::computeSRP(Grid *results)
 {
 	int  i, j;
 	int  NEL, NAZ, AZstep, ELstep;
-	double xs[3];
-	double el, az, elrad, azrad, ffx, ffy, ffz;
-	QVector3D force;
+	double el, az, elrad, azrad;
+	vector3 XS, force;
 
 	AZstep = step_AZ;
 	ELstep = step_EL;
 
-	if( ((360 % AZstep)!=0) || ((180 % ELstep)!=0) )
-	{
-		printf("Step Sizes determined for Azimuth and Elevation not good\n");
-		return ;//-1;
-	}
-
 	NEL = 180/ELstep+1;
 	NAZ = 360/AZstep+1;
-
-	QTime myTimer;
-	myTimer.start();
 
 	for(j = 0; j < NAZ; j++)
 	{
@@ -45,43 +36,40 @@ void BasicSRP::computeSRP(Grid *results)
 			elrad = el*M_PI/180.;
 
 			/* direction of the sunray shotted (xs = -rs) */
-			xs[0] = -cos(elrad)*cos(azrad); xs[1] = -cos(elrad)*sin(azrad); xs[2] = -sin(elrad);
+			XS = vector3(-cos(elrad)*cos(azrad), -cos(elrad)*sin(azrad), -sin(elrad));
 
-			computeStepSRP(xs,force);
-			ffx=force.x();  ffy=force.y();  ffz=force.z();
+			computeStepSRP(XS,force);
 
-			(*results)(j,i)=Output(az, el, ffx, ffy, ffz);
-
+			(*results)(j,i)=Output(az, el, force.x, force.y, force.z);
 		}
 	}
-	int nMilliseconds = myTimer.elapsed();
 }
 
-QVector3D BasicSRP::computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ)
+vector3 BasicSRP::computeSRP(const vector3& XS, float angleX, float angleY, float angleZ)
 {
-	QVector3D force;
-	Eigen::Affine3f rotationX(Eigen::AngleAxisf(-angleX,Eigen::Vector3f(1,0,0)));
-	Eigen::Affine3f rotationY(Eigen::AngleAxisf(-angleY,Eigen::Vector3f(0,1,0)));
-	Eigen::Affine3f rotationZ(Eigen::AngleAxisf(-angleZ,Eigen::Vector3f(0,0,1)));
+	vector3 force;
+	const Eigen::Affine3f rotationX(Eigen::AngleAxisf(-angleX,Eigen::Vector3f(1,0,0)));
+	const Eigen::Affine3f rotationY(Eigen::AngleAxisf(-angleY,Eigen::Vector3f(0,1,0)));
+	const Eigen::Affine3f rotationZ(Eigen::AngleAxisf(-angleZ,Eigen::Vector3f(0,0,1)));
 
-	Eigen::Matrix4f model = rotationX.matrix()*rotationY.matrix()*rotationZ.matrix();
-	Eigen::Vector4f output = model * Eigen::Vector4f(lightDir.x(),lightDir.y(),lightDir.z(),0);
+	const auto model = rotationX.matrix()*rotationY.matrix()*rotationZ.matrix();
+	const auto output = model * Eigen::Vector4f(XS.x,XS.y,XS.z,0);
 
-	double xs[] = {output[0],output[1],output[2]};
-	computeStepSRP(xs,force);
+	const auto rotatedXS = vector3{output[0],output[1],output[2]};
+	computeStepSRP(rotatedXS, force);
 
 	return force;
 }
 
-QVector3D BasicSRP::computeSRP(QVector3D lightDir, Eigen::Matrix4f &satelliteRotation)
+vector3 BasicSRP::computeSRP(const vector3& XS, Eigen::Matrix4f& satelliteRotation)
 {
-	QVector3D force;
+	vector3 force;
 
-	Eigen::Matrix4f model = satelliteRotation.inverse();
-	Eigen::Vector4f output = model * Eigen::Vector4f(lightDir.x(),lightDir.y(),lightDir.z(),0);
+	const auto model = satelliteRotation.inverse();
+	const auto output = model * Eigen::Vector4f(XS.x,XS.y,XS.z,0);
 
-	double xs[] = {output[0],output[1],output[2]};
-	computeStepSRP(xs,force);
+	const auto rotatedXS = vector3{output[0],output[1],output[2]};
+	computeStepSRP(rotatedXS, force);
 
 	return force;
 }

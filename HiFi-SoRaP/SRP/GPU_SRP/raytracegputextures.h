@@ -18,18 +18,22 @@
 class RayTraceGPUTextures: public Render, public RayTraceGPU
 {
 protected:
-	GLuint texFaces,texFaces2, texVertices,texNormals, texMaterials1, texMaterials2;
-	unsigned int texFacesSize, texVerticesSize, texNormalsSize, texMaterialsSize;
-
 	virtual void sendFaces();
 	void sendVertices();
 	void sendNormals();
 	void sendMaterials();
-	unsigned int getNextPowerOfTwo(unsigned int value);
 
 public:
 	RayTraceGPUTextures();
 	virtual void sendTextures();
+
+private:
+	GLuint texFaces,texFaces2, texVertices,texNormals, texMaterials1, texMaterials2;
+	unsigned int texFacesSize, texVerticesSize, texNormalsSize, texMaterialsSize;
+
+	std::vector<float> facesTexture, verticesTexture;
+	std::vector<float> reflectivitiesTexture, materialTypesTexture;
+	std::vector<float> normalsTexture, faceNormalsTexture;
 };
 
 #endif // RAYTRACEGPUTEXTURES_H

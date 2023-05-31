@@ -41,9 +41,10 @@ void RayTraceGPU::setNoiseTexture(int textureId,std::unique_ptr<QGLShaderProgram
 
 	int index=0;
 	float *pixels = new float[256*3];
-	for(int i=0; i<w && index<256;i++){
-		for(int j=1; j<h && index<256; j+=2){
-			//index = (i*h/2+(j-1)/2);
+	for(int i=0; i<w && index<256;i++)
+	{
+		for(int j=1; j<h && index<256; j+=2)
+		{
 			QColor pixel = QColor(image.pixel(i,j));
 			float r,g,b;
 			r= pixel.redF(); g = pixel.greenF(); b = pixel.blueF();
@@ -103,8 +104,8 @@ void RayTraceGPU::setNumSecondaryRays( std::unique_ptr<QGLShaderProgram> &progra
 	program->bind();
 	GLuint idNumSecondaryRays = program->uniformLocation("numSecondaryRays");
 	glUniform1i(idNumSecondaryRays,numSecondaryRays);
-
 }
+
 int RayTraceGPU::getNumSecondaryRays() const
 {
 	return numSecondaryRays;

@@ -9,6 +9,7 @@
  *
  ***********************************************************************/
 
+#include "Lib/common.h"
 #include <QString>
 
 enum Reflectiveness{Reflective, Transparent, Lambertian};
@@ -20,9 +21,8 @@ class Material
 {
 public:
 	QString namemat;
-	double ps, pd;
+	precision::value_type ps, pd, refIdx;
 	Reflectiveness r;
-	float refIdx;
 
 	Material();
 	Material( QString aMaterialName );

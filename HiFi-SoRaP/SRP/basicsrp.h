@@ -20,9 +20,10 @@ class BasicSRP: public SRP
 public:
 	BasicSRP();
 	void computeSRP(Grid *results);
-	QVector3D computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ);
-	QVector3D computeSRP(QVector3D lightDir,Eigen::Matrix4f& satelliteRotation);
-	virtual void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY)=0;
+	vector3 computeSRP(const vector3& XS, float angleX, float angleY, float angleZ);
+	vector3 computeSRP(const vector3& XS, Eigen::Matrix4f& satelliteRotation);
+	virtual void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
+			const vector3& V2 = DEFAULT_VEC3) = 0;
 };
 
 #endif // BASICSRP_H

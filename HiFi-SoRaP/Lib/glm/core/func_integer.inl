@@ -26,12 +26,14 @@
 /// @author Christophe Riccio
 ///////////////////////////////////////////////////////////////////////////////////
 
+#if defined(__MINGW32__)
 #if(GLM_ARCH != GLM_ARCH_PURE)
 #if(GLM_COMPILER & GLM_COMPILER_VC)
 #	include <intrin.h>
 #	pragma intrinsic(_BitScanReverse)
 #endif//(GLM_COMPILER & GLM_COMPILER_VC)
 #endif//(GLM_ARCH != GLM_ARCH_PURE)
+#endif
 
 namespace glm
 {
@@ -523,7 +525,10 @@ namespace glm
 	}
 
 	// findMSB
+
+#if defined(__MINGW32__)
 #if((GLM_ARCH != GLM_ARCH_PURE) && (GLM_COMPILER & GLM_COMPILER_VC))
+#define ELSE_SITUATION
 
 	template <typename genIUType>
 	GLM_FUNC_QUALIFIER int findMSB
@@ -562,7 +567,9 @@ namespace glm
 		return 31 - __builtin_clzl(Value);
 	}
 */
-#else
+#endif
+#endif
+#ifndef ELSE_SITUATION
 
 /* SSE implementation idea
 

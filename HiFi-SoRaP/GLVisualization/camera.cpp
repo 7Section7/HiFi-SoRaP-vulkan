@@ -4,7 +4,14 @@
 
 #define GLM_FORCE_RADIANS
 
+//QT_WARNING_PUSH
+//QT_WARNING_DISABLE_GCC("-Wexpansion-to-defined")
+
+//MODIFY_WARNINGS( ignored )
 #include "Lib/glm/gtc/matrix_transform.hpp"
+//MODIFY_WARNINGS( warning )
+
+//QT_WARNING_POP
 
 #include <algorithm>
 #include <cmath>
@@ -230,6 +237,12 @@ void Camera::setCameraStep(double step) {
 
 void Camera::toGPU(std::unique_ptr<QGLShaderProgram> &program)
 {
+	if(abs(zNear - zFar) < 0.2){
+		zNear = 0.0001;
+		zFar = 800;
+		fieldOfView = 60;
+	}
+
 	setViewport();
 
 	Eigen::Matrix4f projection = setProjection();

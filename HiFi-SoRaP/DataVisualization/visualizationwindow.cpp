@@ -8,8 +8,10 @@
  *
  ***********************************************************************/
 
-VisualizationWindow::VisualizationWindow(QWidget *parent):QWidget(parent)
+VisualizationWindow::VisualizationWindow(QWidget *parent)
 {
+	Q_UNUSED(parent);
+
 	for(int i=0; i< MAX_SUFACES; i++){
 		surfaces[i].container = QWidget::createWindowContainer(&surfaces[i].surface);
 

@@ -31,7 +31,7 @@ public:
 
 	QVector2D getSizes();
 
-	void saveData(int AZstep, int ELstep,std::string output);
+	void saveData(const int AZstep, const int ELstep, const std::string output);
 
 	void save(FILE* fo);
 

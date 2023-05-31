@@ -24,8 +24,8 @@ void LineObject::initializeBuffers()
 
 	glBindBuffer( GL_ARRAY_BUFFER, buffer );
 
-	glBufferData( GL_ARRAY_BUFFER, sizeof(vec4)*size , NULL, GL_STATIC_DRAW );
-	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof(vec4)*size, mesh->replicatedVertices.data() );
+	glBufferData( GL_ARRAY_BUFFER, sizeof(vec4F)*size , NULL, GL_STATIC_DRAW );
+	glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof(vec4F)*size, mesh->replicatedVertices.data() );
 
 	// set up vertex arrays
 	glBindVertexArray( vao );

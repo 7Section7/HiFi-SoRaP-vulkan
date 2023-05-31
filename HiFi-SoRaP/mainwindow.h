@@ -19,7 +19,7 @@
 #include <QProgressBar>
 
 //#include "SRP/srp.h"
-#include "SRP/CPU_SRP/canball.h"
+#include "SRP/CPU_SRP/cannonball.h"
 #include "SRP/CPU_SRP/nplate.h"
 #include "SRP/CPU_SRP/raytracecpu.h"
 
@@ -66,8 +66,6 @@ private slots:
 
 	void on_pushButton_clicked();
 
-	void on_comboBox_highlighted(const QString &arg1);
-
 	void on_comboBox_currentIndexChanged(const QString &arg1);
 
 	void showCPUMethodInformation(const QString &arg1);
@@ -92,7 +90,7 @@ private:
 	SRPModel model;
 
 	std::vector<GLWindow*> glVisualizations;
-	std::vector<VisualizationWindow *> dataVisualizations;
+	std::vector<VisualizationWindow*> dataVisualizations;
 	std::vector<ComparisonWindow*> comparisonVisualizations;
 
 	QString getNameFromModel(SRPModel model);

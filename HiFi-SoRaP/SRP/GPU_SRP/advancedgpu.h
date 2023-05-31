@@ -36,7 +36,7 @@ public:
 		QEventLoop * loop;
 		Light * light;
 		bool isComputed=false;
-		QVector3D force;
+		vector3 force;
 	};
 
 protected:
@@ -56,7 +56,7 @@ protected:
 	Object *satellite;
 	Light *light;
 
-	QVector3D computedForce;
+	vector3 computedForce;
 
 	std::vector<QEventLoop *>loops;
 	std::vector<QTimer *>timers;
@@ -74,8 +74,8 @@ public:
 
 	static Eigen::Matrix4f getLightView(dataVisualization::Camera &camera, Light &light, Object* satellite);
 
-	QVector3D getComputedForce() const;
-	void setComputedForce(const QVector3D &value);
+	const vector3& getComputedForce() const;
+	void setComputedForce(const vector3& value);
 
 	// Object interface
 public:
@@ -90,7 +90,8 @@ public:
 
 	// SRP interface
 public:
-	void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
+	void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
+			const vector3& V2 = DEFAULT_VEC3);
 
 	Light *getLight() const;
 	void setLight(Light *value);

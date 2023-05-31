@@ -182,7 +182,7 @@ border: 1px solid;
       <string> Kg</string>
      </property>
      <property name="maximum">
-      <double>999.990000000000009</double>
+      <double>1000.000000000000000</double>
      </property>
      <property name="value">
       <double>1.000000000000000</double>

@@ -43,11 +43,11 @@ class GLWidget : public QGLWidget
 
 	struct LineForceSRP{
 		LineObject* line;
-		QVector3D force;
+		vector3 force;
 	};
 
 	float minForce, maxForce;
-	int previousNumForces;
+	uint previousNumForces;
 	AdvancedGPU *advancedGPU;
 
 	Object *satellite, *Sun, *cube;
@@ -103,13 +103,15 @@ class GLWidget : public QGLWidget
 	 */
 	void initializeGL();
 	void initShaders(const char* vShaderFile, const char* fShaderFile, std::unique_ptr<QGLShaderProgram>& program);
-	void initializeShaders(std::string kVertexShaderFile, std::string kFragmentShaderFile, std::unique_ptr<QGLShaderProgram>& program);
+	void initializeShaders(std::string kVertexShaderFile, std::string kFragmentShaderFile,
+			std::unique_ptr<QGLShaderProgram>& program);
 
 	void paintGL();
 
-	LineObject* createLineObject(QVector3D initDir,QVector3D endDir);
-	LineObject* createBigLineObject(QVector3D initDir,QVector3D endDir,QVector3D axis1, QVector3D axis2);
-	void updateBigLineObject(LineObject* line,QVector3D initDir,QVector3D endDir,QVector3D axis1, QVector3D axis2);
+	LineObject* createLineObject(const vector3& initPos, const vector3& endPos);
+	LineObject* createBigLineObject(const vector3& initPos, const vector3& endPos, const vector3& axis1, const vector3& axis2);
+	void updateBigLineObject(TriangleMesh* line, const vector3& initPos, const vector3& endPos, const vector3& axis1,
+			const vector3& axis2);
 
 protected:
 	/**
@@ -130,16 +132,17 @@ public:
 	GLWidget(QWidget *parent);
 	GLWidget(const QGLFormat &glf, QWidget *parent=0);
 	~GLWidget();
+
 	void initializeBuffers();
 	void setSatellite(Object *obj);
 
-	void addNewForceSRP(QVector3D dir);
+	void addNewForceSRP(const vector3& dir);
 	void clearLineForces();
 
 	void rotateSatellite(float angleX,float angleY,float angleZ);
 
-	QVector3D getLightDir() const;
-	void setLightDir(const QVector3D &value);
+	const vector3& getLightDir() const;
+	void setLightDir(const vector3& value);
 	AdvancedGPU *getRayTraceGPU() const;
 	void setRayTraceGPU(AdvancedGPU *value);
 

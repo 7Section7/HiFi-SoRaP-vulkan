@@ -1,4 +1,4 @@
-#include "canball.h"
+#include "cannonball.h"
 
 /***********************************************************************
  +
@@ -8,12 +8,15 @@
  *
  ***********************************************************************/
 
-Canball::Canball()
+CannonBall::CannonBall()
 {
 }
 
-void Canball::computeStepSRP(double xs[], QVector3D &force, double RS[], double V1[], double V2[])
+void CannonBall::computeStepSRP(const vector3& XS, vector3 &force, const vector3& V1, const vector3& V2)
 {
-	double PS = (ctt)*cr*area/msat;
-	force = -PS*QVector3D(xs[0],xs[1],xs[2]);
+	Q_UNUSED(V1);
+	Q_UNUSED(V2);
+
+	const precision::value_type PS = PRESSURE;
+	force = (PS)*cr*area/msat*XS;
 }

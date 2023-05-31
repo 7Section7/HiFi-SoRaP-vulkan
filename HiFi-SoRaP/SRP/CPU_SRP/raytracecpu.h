@@ -16,33 +16,34 @@
  */
 class RayTraceCPU: public AdvancedSRP
 {
-	int numSecondaryRays;
-	int numDiffuseRays;
-	int reflectionType;
+	uint numSecondaryRays;
+	uint numDiffuseRays;
+	uint reflectionType;
 	float seed;
-	QVector3D pixel;
+
+	enum HasHit : bool {NO_HIT=false, HIT=true};
 
 public:
 	RayTraceCPU();
-	void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
+	void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1, const vector3& V2);
 
-	int getNumSecondaryRays() const;
-	void setNumSecondaryRays(int value);
+	uint getNumSecondaryRays() const;
+	void setNumSecondaryRays(const uint value);
 
-	int getNumDiffuseRays() const;
-	void setNumDiffuseRays(int value);
+	uint getNumDiffuseRays() const;
+	void setNumDiffuseRays(const uint value);
 
-	int getReflectionType() const;
-	void setReflectionType(int value);
+	uint getReflectionType() const;
+	void setReflectionType(const uint value);
 
 private:
-	QVector3D randomInSphere(QVector3D hitPoint);
-	QVector3D randomInSphere();
-	QVector3D computePixelForce(double xs[], double Apix, double pixel[]);
+	HasHit computePixelForce(const vector3& XS, const vector3& pixelPosition, vector3& pixelForce);
+	HasHit rayTrace(const vector3& pixelPosition, const vector3& XS, const vector3& importance,
+			const int numSecondaryRays, vector3& pixelForce);
+	vector3 computeForce(const int triangleIdx, const vector3& XS);
 
-	QVector3D rayTrace( double Apix,double point[], double dir[], double importance[], int numSecondaryRays);
-	QVector3D computeForce(int rhit, double xs[],double Apix);
-	void scatter(double pointInt[],int rhit, double xs[], double importance[],Reflectiveness r );
+	void scatter(vector3& hitPoint, int triangleIdx, vector3& XS, vector3& importance, Reflectiveness r);
+	int hit(const vector3& pixelPosition, const vector3& XS, vector3& closestHitPoint);
 };
 
 #endif // RAYTRACECPU_H

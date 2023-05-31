@@ -20,8 +20,15 @@
  */
 class Render : public AdvancedGPU
 {
+	unsigned int rboStencil;
+	//GLfloat *localForces;
+	//GLubyte *hits;
+	std::vector<GLfloat> localForces;
+	std::vector<GLubyte> hits;
+
 public:
 	Render();
+
 	virtual void initializeBuffers();
 	void draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite);
 };

@@ -11,6 +11,8 @@
 
 #include "Lib/common.h"
 #include <qvector3d.h>
+
+#undef GL_GLEXT_VERSION
 #include <QGLShaderProgram>
 #include <memory>
 
@@ -19,19 +21,19 @@
  */
 class Light
 {
-	QVector3D lightDir;
-	QVector3D rightDir,upDir;
+	vector3 lightDir;
+	vector3 rightDir,upDir;
 public:
 	Light();
 
 	void toGPU(std::unique_ptr<QGLShaderProgram> &program);
 
-	QVector3D getLightDir() const;
-	void setLightDir(const QVector3D &value);
-	QVector3D getRightDir() const;
-	void setRightDir(const QVector3D &value);
-	QVector3D getUpDir() const;
-	void setUpDir(const QVector3D &value);
+	const vector3& getLightDir() const;
+	void setLightDir(const vector3& value);
+	const vector3& getRightDir() const;
+	void setRightDir(const vector3& value);
+	const vector3& getUpDir() const;
+	void setUpDir(const vector3& value);
 };
 
 #endif // LIGHT_H

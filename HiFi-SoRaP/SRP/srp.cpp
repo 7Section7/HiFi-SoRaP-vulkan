@@ -8,6 +8,11 @@
  *
  ***********************************************************************/
 
+SRP::SRP()
+{
+	stopExecution = false;
+}
+
 int SRP::getAzimuthStep() const
 {
 	return step_AZ;
@@ -58,14 +63,9 @@ void SRP::setSatellite(Object *value)
 	satellite = value;
 }
 
-SRP::SRP()
-{
-	stopExecution = false;
-}
-
 void SRP::saveResults(Grid *results){
-	QVector3D origin(0,0,0);
-	saveResultsToFile(-1,origin,results);
+	//QVector3D origin(0,0,0);
+	saveResultsToFile(-1,vector3{},results);
 }
 
 QProgressBar *SRP::getProgressBar() const
@@ -88,13 +88,19 @@ void SRP::setStopExecution(bool value)
 	stopExecution = value;
 }
 
-void SRP::saveResultsToFile(float xpix, QVector3D& cm, Grid* results){
+void SRP::saveResultsToFile(float xpix, const vector3& cm, Grid* results)
+{
 	int AZstep, ELstep;
 	FILE *fo;
 
-
 	char * fileName =(char *)output.c_str();
-	fo = fopen(fileName, "w");
+
+#ifdef _WIN32
+	fopen_s( &fo,fileName, "w+");
+#else
+	fo = fopen(fileName, "w+");
+#endif
+
 	if(fo == NULL)
 	{	printf("Problems opening output file %s\n", fileName);
 		return;
@@ -110,7 +116,7 @@ void SRP::saveResultsToFile(float xpix, QVector3D& cm, Grid* results){
 	fprintf(fo, "Pixel Size    : %lf \n",xpix);
 	fprintf(fo, "Spacecraft Size : NAN \n");
 	fprintf(fo, "Pressure           : 1\n");
-	fprintf(fo, "Center of Mass     :  (%lf, %lf, %lf)\n",cm.x(),cm.y(),cm.z());
+	fprintf(fo, "Center of Mass     :  (%lf, %lf, %lf)\n",cm.x,cm.y,cm.z);
 	fprintf(fo, "Current time       : xx xx xx xxxxx\n");
 
 	fprintf(fo, "\n");

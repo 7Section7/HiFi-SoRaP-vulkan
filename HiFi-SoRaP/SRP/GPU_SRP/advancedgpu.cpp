@@ -10,58 +10,31 @@
 
 #include <QCoreApplication>
 
-Light *AdvancedGPU::getLight() const
+AdvancedGPU::AdvancedGPU()
 {
-	return light;
+	renderNeeded=false;
+	index =0;
+
+	fragmentShaderFileGPU = "://resources/shaders/zbuffer_fshader.glsl";
+	fragmentShaderRenderGPU = "://resources/shaders/render_fshader.glsl";
 }
 
-void AdvancedGPU::setLight(Light *value)
+void AdvancedGPU::initializeGL(int width, int height, Object *obj)
 {
-	light = value;
+	this->width=width;
+	this->height=height;
+	satellite=obj;
+	this->camera = new dataVisualization::Camera();//camera;
 }
 
-int AdvancedGPU::getWidth() const
-{
-	return width;
-}
-
-void AdvancedGPU::setWidth(int value)
-{
-	width = value;
-}
-
-int AdvancedGPU::getHeight() const
-{
-	return height;
-}
-
-void AdvancedGPU::setHeight(int value)
-{
-	height = value;
-}
-
-dataVisualization::Camera *AdvancedGPU::getCamera() const
-{
-	return camera;
-}
-
-std::string AdvancedGPU::getFragmentShaderFileGPU() const
-{
-	return fragmentShaderFileGPU;
-}
-
-void AdvancedGPU::setFragmentShaderFileGPU(const std::string &value)
-{
-	fragmentShaderFileGPU = value;
-}
 
 void AdvancedGPU::debugDraw(std::unique_ptr<QGLShaderProgram> &program, Object * satellite)
 {
+	if(debugMode == NoDebug) return;
+
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	if(debugMode == NoDebug) return;
 
 #ifdef CULL_FRONT_FACES
 	glCullFace(GL_FRONT);
@@ -123,57 +96,20 @@ void AdvancedGPU::debugDraw(std::unique_ptr<QGLShaderProgram> &program, Object *
 	glUniform1i(debugModeLocation,NoDebug);
 }
 
-void AdvancedGPU::showForces()
-{
-	debugMode = ShowOutputForces;
-}
-
-void AdvancedGPU::showNormals()
-{
-	debugMode = ShowFaceNormals;
-}
-
-void AdvancedGPU::showNothing()
-{
-	debugMode = NoDebug;
-}
-
-std::string AdvancedGPU::getFragmentShaderRenderGPU() const
-{
-	return fragmentShaderRenderGPU;
-}
-
-AdvancedGPU::AdvancedGPU()
-{
-	renderNeeded=false;
-	index =0;
-
-	fragmentShaderFileGPU = "://resources/shaders/zbuffer_fshader.glsl";
-	fragmentShaderRenderGPU = "://resources/shaders/render_fshader.glsl";
-}
-
-void AdvancedGPU::initializeGL(int width, int height,Object *obj) //, dataVisualization::Camera *camera
-{
-	this->width=width;
-	this->height=height;
-	satellite=obj;
-	this->camera = new dataVisualization::Camera();//camera;
-}
-
-void AdvancedGPU::computeStepSRP(double xs[], QVector3D &force, double RS[], double V1[], double V2[])
+void AdvancedGPU::computeStepSRP(const vector3& XS, vector3& force, const vector3& V1, const vector3& V2)
 {
 	ForceSRP f;
 	QEventLoop *loop = new QEventLoop();
 	QTimer *timer = new QTimer();
 	Light *light = new Light();
-	light->setLightDir(QVector3D(xs[0],xs[1],xs[2]));
-	light->setRightDir(QVector3D(V1[0],V1[1],V1[2]));
-	light->setUpDir(   QVector3D(V2[0],V2[1],V2[2]));
+	light->setLightDir(XS);
+	light->setRightDir(V1);
+	light->setUpDir(V2);
 
 	f.loop=loop;
 	f.timer = timer;
 	f.isComputed=false;
-	f.force = QVector3D(0,0,0);
+	f.force = vector3(0,0,0);
 	f.light = light;
 
 	forces[index] = &f;
@@ -199,24 +135,88 @@ void AdvancedGPU::computeStepSRP(double xs[], QVector3D &force, double RS[], dou
 
 Eigen::Matrix4f AdvancedGPU::getLightView(dataVisualization::Camera &camera, Light &light, Object* satellite)
 {
-	QVector3D lightDir = light.getLightDir();
-	QVector3D upDir = light.getUpDir();
+	const auto& lightDir = light.getLightDir();
+	const auto& upDir = light.getUpDir();
 
 	TriangleMesh *mesh = satellite->getMesh();
 	Eigen::Vector3f center = (mesh->max_+mesh->min_)/2.0f;
 
-	Eigen::Vector3f eye(center.x() - lightDir.x(),center.y() - lightDir.y(),center.z() - lightDir.z());
-	Eigen::Vector3f up(upDir.x(),upDir.y(),upDir.z());
+	Eigen::Vector3f eye(center.x() - lightDir.x,center.y() - lightDir.y,center.z() - lightDir.z);
+	Eigen::Vector3f up(upDir.x,upDir.y,upDir.z);
 
 	return camera.lookAt(eye,center,up);
 }
 
-QVector3D AdvancedGPU::getComputedForce() const
+const vector3& AdvancedGPU::getComputedForce() const
 {
 	return computedForce;
 }
 
-void AdvancedGPU::setComputedForce(const QVector3D &value)
+void AdvancedGPU::setComputedForce(const vector3& value)
 {
 	computedForce = value;
+}
+void AdvancedGPU::showForces()
+{
+	debugMode = ShowOutputForces;
+}
+
+void AdvancedGPU::showNormals()
+{
+	debugMode = ShowFaceNormals;
+}
+
+void AdvancedGPU::showNothing()
+{
+	debugMode = NoDebug;
+}
+
+std::string AdvancedGPU::getFragmentShaderRenderGPU() const
+{
+	return fragmentShaderRenderGPU;
+}
+
+Light *AdvancedGPU::getLight() const
+{
+	return light;
+}
+
+void AdvancedGPU::setLight(Light *value)
+{
+	light = value;
+}
+
+int AdvancedGPU::getWidth() const
+{
+	return width;
+}
+
+void AdvancedGPU::setWidth(int value)
+{
+	width = value;
+}
+
+int AdvancedGPU::getHeight() const
+{
+	return height;
+}
+
+void AdvancedGPU::setHeight(int value)
+{
+	height = value;
+}
+
+dataVisualization::Camera *AdvancedGPU::getCamera() const
+{
+	return camera;
+}
+
+std::string AdvancedGPU::getFragmentShaderFileGPU() const
+{
+	return fragmentShaderFileGPU;
+}
+
+void AdvancedGPU::setFragmentShaderFileGPU(const std::string &value)
+{
+	fragmentShaderFileGPU = value;
 }

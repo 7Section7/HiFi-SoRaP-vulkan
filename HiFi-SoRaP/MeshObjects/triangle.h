@@ -9,6 +9,8 @@
  *
  ***********************************************************************/
 
+#include "Lib/common.h"
+
 /*
  * This class contains the information of a triangle .
  */
@@ -18,7 +20,7 @@ public:
 	int v1, v2, v3;
 	int rf;
 	int nn;
-	double A;
+	precision::value_type A;
 
 	Triangle();
 };

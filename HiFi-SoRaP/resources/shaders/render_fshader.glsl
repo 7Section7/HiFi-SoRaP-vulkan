@@ -30,8 +30,9 @@ uniform vec3 diffuse;
 
 
 //This shader is used for rendering textures.
-void main (void) {
-
+void main (void)
+{
+/*
 	float ps=fragmentPS;
 	float pd=fragmentPD;
 	vec3 N = normalize(worldNormal.xyz);
@@ -43,7 +44,7 @@ void main (void) {
 	}
 
 	fragColor =vec4(0.5f*vec3(worldVertex.x+1,worldVertex.y+1,worldVertex.z+1),1);
-
+*/
 	vec2 texCoords = 0.5f*(vec2(worldVertex.x+1,worldVertex.y+1));
 	vec3 result = texture(gAlbedo,texCoords).xyz;
 	vec3 normal = texture(gNormal,texCoords).xyz;

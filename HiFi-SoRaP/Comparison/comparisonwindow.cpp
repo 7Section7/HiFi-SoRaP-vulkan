@@ -8,6 +8,11 @@
  *
  ***********************************************************************/
 
+#include<iostream>
+#include<fstream>
+#include <sstream>
+#include<iomanip>
+
 void ComparisonWindow::setResults(CategoryResult *value, int maxSRPModels)
 {
 	results = value;
@@ -19,7 +24,7 @@ void ComparisonWindow::setResults(CategoryResult *value, int maxSRPModels)
 		std::vector<Result> particularResults = results[i].getResults();
 		std::unordered_map<size_t,int> repetitions;
 		std::hash<std::string> hash_fn;
-		for(int j=0; j< particularResults.size();j++){
+		for(uint j=0; j< particularResults.size();j++){
 
 			Result r = particularResults[j];
 			QString num;
@@ -86,7 +91,7 @@ void ComparisonWindow::computeDifference()
 		return;
 	}
 	Grid *diffGrid = new Grid((int)size1.x(),(int)size2.y());
-	double MSE =0;
+	long double MSE =0;
 	double maxError = -1;
 	for (int i=0; i< (int)size1.x(); i++){
 		for(int j=0; j <(int) size1.y(); j++){
@@ -95,7 +100,7 @@ void ComparisonWindow::computeDifference()
 			QVector3D forces1 = o1.getForces();
 			QVector3D forces2 = o2.getForces();
 			QVector3D f = forces1-forces2;
-			MSE+= fabs(f.length());
+			MSE+= f.length();
 			if(f.length()>maxError){
 				maxError=f.length();
 			}
@@ -104,12 +109,16 @@ void ComparisonWindow::computeDifference()
 			(*diffGrid)(i,j) = o;
 		}
 	}
-	QString text;
-	text.sprintf("%+0.3e", maxError);
-	errorComparison->setText(QString("The largest difference between both selected models is: ")+text);
-	QString text2;
-	text2.sprintf("%+0.3e", MSE / (size1.x() * size2.y()));
-	errorComparisonExtraInfo->setText("The MSE is: "+text2);
+
+	std::stringstream stream;
+	stream << std::scientific << std::setprecision(4) << maxError;
+	std::string maxErrorText = "The largest difference between both selected models is: "+stream.str();
+	errorComparison->setText(QString(maxErrorText.data()));
+
+	std::stringstream stream2;
+	stream2 << std::scientific << std::setprecision(4) << MSE / (size1.x() * size1.y());
+	std::string MSEText = "The MSE is: "+stream2.str();
+	errorComparisonExtraInfo->setText(MSEText.data());
 
 	QString nameModel1 = r.getName();
 	nameModel1+= idxAuxModel1.z()>1?QString(" ")+QString::number((int)idxAuxModel1.z()):QString("");
@@ -195,7 +204,7 @@ ComparisonWindow::~ComparisonWindow()
 	delete errorComparisonExtraInfo;
 	delete compareButton;
 
-	for(int i=0; i<visualizationWindows.size();i++){
+	for(uint i=0; i<visualizationWindows.size();i++){
 		if(visualizationWindows[i])
 			delete visualizationWindows[i];
 	}

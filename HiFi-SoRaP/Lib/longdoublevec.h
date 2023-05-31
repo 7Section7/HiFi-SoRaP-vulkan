@@ -1,18 +1,11 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 //  --- vec.h ---
-// Class created initially by Angel 6th Edition.
-// It has been generalized via template, so you can define the type for the
-// values of the vectors.
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef VEC_H
-#define VEC_H
-
-#ifdef _WIN32
-#include "windows.h"
-#endif
+#ifndef __ANGEL_VEC_H__
+#define __ANGEL_VEC_H__
 
 #include <GL/gl.h>
 #include <math.h>
@@ -26,39 +19,30 @@ namespace Common {
 //  vec2.h - 2D vector
 //
 
-template<typename T> struct vec2 {
+struct vec2 {
 
-	T  x;
-	T  y;
-
-	using value_type = T;
+	GLfloat  x;
+	GLfloat  y;
 
 	//
 	//  --- Constructors and Destructors ---
 	//
 
-	vec2( T s = T(0.0) ) :
+	vec2( GLfloat s = GLfloat(0.0) ) :
 	x(s), y(s) {}
 
-	vec2( T x, T y ) :
+	vec2( GLfloat x, GLfloat y ) :
 	x(x), y(y) {}
 
 	vec2( const vec2& v )
 	{ x = v.x;  y = v.y;  }
 
 	//
-	//  --- Copy Operator ---
-	//
-
-	vec2 operator = ( const vec2& v )
-	{ x=v.x; y=v.y; return *this; }
-
-	//
 	//  --- Indexing Operator ---
 	//
 
-	T& operator [] ( int i ) { return *(&x + i); }
-	//const T operator [] ( int i ) const { return *(&x + i); }
+	GLfloat& operator [] ( int i ) { return *(&x + i); }
+	//const GLfloat operator [] ( int i ) const { return *(&x + i); }
 
 	//
 	//  --- (non-modifying) Arithematic Operators ---
@@ -73,16 +57,16 @@ template<typename T> struct vec2 {
 	vec2 operator - ( const vec2& v ) const
 	{ return vec2( x - v.x, y - v.y ); }
 
-	vec2 operator * ( const T s ) const
+	vec2 operator * ( const GLfloat s ) const
 	{ return vec2( s*x, s*y ); }
 
 	vec2 operator * ( const vec2& v ) const
 	{ return vec2( x*v.x, y*v.y ); }
 
-	friend vec2 operator * ( const T s, const vec2& v )
+	friend vec2 operator * ( const GLfloat s, const vec2& v )
 	{ return v * s; }
 
-	vec2 operator / ( const T s ) const {
+	vec2 operator / ( const GLfloat s ) const {
 #ifdef DEBUG
 	if ( std::fabs(s) < DivideByZeroTolerance ) {
 		std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -91,7 +75,7 @@ template<typename T> struct vec2 {
 	}
 #endif // DEBUG
 
-	T r = T(1.0) / s;
+	GLfloat r = GLfloat(1.0) / s;
 	return *this * r;
 	}
 
@@ -105,13 +89,13 @@ template<typename T> struct vec2 {
 	vec2& operator -= ( const vec2& v )
 	{ x -= v.x;  y -= v.y;  return *this; }
 
-	vec2& operator *= ( const T s )
+	vec2& operator *= ( const GLfloat s )
 	{ x *= s;  y *= s;   return *this; }
 
 	vec2& operator *= ( const vec2& v )
 	{ x *= v.x;  y *= v.y; return *this; }
 
-	vec2& operator /= ( const T s ) {
+	vec2& operator /= ( const GLfloat s ) {
 #ifdef DEBUG
 	if ( std::fabs(s) < DivideByZeroTolerance ) {
 		std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -119,7 +103,7 @@ template<typename T> struct vec2 {
 	}
 #endif // DEBUG
 
-	T r = T(1.0) / s;
+	GLfloat r = GLfloat(1.0) / s;
 	*this *= r;
 
 	return *this;
@@ -140,11 +124,11 @@ template<typename T> struct vec2 {
 	//  --- Conversion Operators ---
 	//
 
-	operator const T* () const
-	{ return static_cast<const T*>( &x ); }
+	operator const GLfloat* () const
+	{ return static_cast<const GLfloat*>( &x ); }
 
-	operator T* ()
-	{ return static_cast<T*>( &x ); }
+	operator GLfloat* ()
+	{ return static_cast<GLfloat*>( &x ); }
 };
 
 //----------------------------------------------------------------------------
@@ -152,15 +136,18 @@ template<typename T> struct vec2 {
 //  Non-class vec2 Methods
 //
 
-template<typename T> T dot( const vec2<T>& u, const vec2<T>& v ) {
+inline
+GLfloat dot( const vec2& u, const vec2& v ) {
 	return u.x * v.x + u.y * v.y;
 }
 
-template<typename T> T length( const vec2<T>& v ) {
+inline
+GLfloat length( const vec2& v ) {
 	return sqrt( dot(v,v) );
 }
 
-template<typename T> vec2<T> normalize( const vec2<T>& v ) {
+inline
+vec2 normalize( const vec2& v ) {
 	return v / length(v);
 }
 
@@ -170,41 +157,32 @@ template<typename T> vec2<T> normalize( const vec2<T>& v ) {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename T> struct vec3 {
+struct vec3 {
 
-	T  x;
-	T  y;
-	T  z;
-
-	using value_type = T;
+	GLfloat  x;
+	GLfloat  y;
+	GLfloat  z;
 
 	//
 	//  --- Constructors and Destructors ---
 	//
 
-	vec3( T s = T(0.0) ) :
+	vec3( GLfloat s = GLfloat(0.0) ) :
 	x(s), y(s), z(s) {}
 
-	vec3( T x, T y, T z ) :
+	vec3( GLfloat x, GLfloat y, GLfloat z ) :
 	x(x), y(y), z(z) {}
 
 	vec3( const vec3& v ) { x = v.x;  y = v.y;  z = v.z; }
 
-	vec3( const vec2<T>& v, const T f ) { x = v.x;  y = v.y;  z = f; }
-
-	//
-	//  --- Copy Operator ---
-	//
-
-	vec3 operator = ( const vec3& v )
-	{ x=v.x; y=v.y; z=v.z; return *this; }
+	vec3( const vec2& v, const float f ) { x = v.x;  y = v.y;  z = f; }
 
 	//
 	//  --- Indexing Operator ---
 	//
 
-	T& operator [] ( int i ) { return *(&x + i); }
-	//const T operator [] ( int i ) const { return *(&x + i); }
+	GLfloat& operator [] ( int i ) { return *(&x + i); }
+	//const GLfloat operator [] ( int i ) const { return *(&x + i); }
 
 	//
 	//  --- (non-modifying) Arithematic Operators ---
@@ -219,16 +197,16 @@ template<typename T> struct vec3 {
 	vec3 operator - ( const vec3& v ) const
 	{ return vec3( x - v.x, y - v.y, z - v.z ); }
 
-	vec3 operator * ( const T s ) const
+	vec3 operator * ( const GLfloat s ) const
 	{ return vec3( s*x, s*y, s*z ); }
 
 	vec3 operator * ( const vec3& v ) const
 	{ return vec3( x*v.x, y*v.y, z*v.z ); }
 
-	friend vec3 operator * ( const T s, const vec3& v )
+	friend vec3 operator * ( const GLfloat s, const vec3& v )
 	{ return v * s; }
 
-	vec3 operator / ( const T s ) const {
+	vec3 operator / ( const GLfloat s ) const {
 #ifdef DEBUG
 	if ( std::fabs(s) < DivideByZeroTolerance ) {
 		std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -237,7 +215,7 @@ template<typename T> struct vec3 {
 	}
 #endif // DEBUG
 
-	T r = T(1.0) / s;
+	GLfloat r = GLfloat(1.0) / s;
 	return *this * r;
 	}
 
@@ -251,13 +229,13 @@ template<typename T> struct vec3 {
 	vec3& operator -= ( const vec3& v )
 	{ x -= v.x;  y -= v.y;  z -= v.z;  return *this; }
 
-	vec3& operator *= ( const T s )
+	vec3& operator *= ( const GLfloat s )
 	{ x *= s;  y *= s;  z *= s;  return *this; }
 
 	vec3& operator *= ( const vec3& v )
 	{ x *= v.x;  y *= v.y;  z *= v.z;  return *this; }
 
-	vec3& operator /= ( const T s ) {
+	vec3& operator /= ( const GLfloat s ) {
 #ifdef DEBUG
 	if ( std::fabs(s) < DivideByZeroTolerance ) {
 		std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -265,7 +243,7 @@ template<typename T> struct vec3 {
 	}
 #endif // DEBUG
 
-	T r = T(1.0) / s;
+	GLfloat r = GLfloat(1.0) / s;
 	*this *= r;
 
 	return *this;
@@ -286,11 +264,11 @@ template<typename T> struct vec3 {
 	//  --- Conversion Operators ---
 	//
 
-	operator const T* () const
-	{ return static_cast<const T*>( &x ); }
+	operator const GLfloat* () const
+	{ return static_cast<const GLfloat*>( &x ); }
 
-	operator T* ()
-	{ return static_cast<T*>( &x ); }
+	operator GLfloat* ()
+	{ return static_cast<GLfloat*>( &x ); }
 };
 
 //----------------------------------------------------------------------------
@@ -298,31 +276,36 @@ template<typename T> struct vec3 {
 //  Non-class vec3 Methods
 //
 
-template<typename T> T dot( const vec3<T>& u, const vec3<T>& v ) {
+inline
+GLfloat dot( const vec3& u, const vec3& v ) {
 	return u.x*v.x + u.y*v.y + u.z*v.z ;
 }
 
-template<typename T> T length( const vec3<T>& v ) {
+inline
+GLfloat length( const vec3& v ) {
 	return sqrt( dot(v,v) );
 }
 
-template<typename T> vec3<T> normalize( const vec3<T>& v ) {
+inline
+vec3 normalize( const vec3& v ) {
 	return v / length(v);
 }
 
-template<typename T> vec3<T> normalize3d(const vec3<T> &v) {
-   T length_of_v = sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
-   return vec3<T>(v.x / length_of_v, v.y / length_of_v, v.z / length_of_v);
+inline
+vec3 normalize3d(const vec3 &v) {
+   float length_of_v = sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+   return vec3(v.x / length_of_v, v.y / length_of_v, v.z / length_of_v);
 }
 
-template<typename T> vec3<T> cross(const vec3<T>& a, const vec3<T>& b )
+inline
+vec3 cross(const vec3& a, const vec3& b )
 {
-	return vec3<T>( a.y * b.z - a.z * b.y,
+	return vec3( a.y * b.z - a.z * b.y,
 		 a.z * b.x - a.x * b.z,
 		 a.x * b.y - a.y * b.x );
 }
-
-template<typename T> T distance( const vec3<T>& u, const vec3<T>& v ) {
+inline
+GLfloat distance( const vec3& u, const vec3& v ) {
 	return sqrt((u.x-v.x)*(u.x-v.x) + (u.y-v.y)*(u.y-v.y) + (u.z-v.z)*(u.z-v.z)) ;
 }
 
@@ -333,46 +316,37 @@ template<typename T> T distance( const vec3<T>& u, const vec3<T>& v ) {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename T> struct vec4 {
+struct vec4 {
 
-	T  x;
-	T  y;
-	T  z;
-	T  w;
-
-	using value_type = T;
+	GLfloat  x;
+	GLfloat  y;
+	GLfloat  z;
+	GLfloat  w;
 
 	//
 	//  --- Constructors and Destructors ---
 	//
 
-	vec4( T s = T(0.0) ) :
+	vec4( GLfloat s = GLfloat(0.0) ) :
 	x(s), y(s), z(s), w(s) {}
 
-	vec4( T x, T y, T z, T w ) :
+	vec4( GLfloat x, GLfloat y, GLfloat z, GLfloat w ) :
 	x(x), y(y), z(z), w(w) {}
 
-	vec4( const vec4& v ) { x = v.x; y = v.y; z = v.z; w = v.w; }
+	vec4( const vec4& v ) { x = v.x;  y = v.y;  z = v.z;  w = v.w; }
 
-	vec4( const vec3<T>& v, const T w = 1.0 ) : w(w)
+	vec4( const vec3& v, const float w = 1.0 ) : w(w)
 	{ x = v.x;  y = v.y;  z = v.z; }
 
-	vec4( const vec2<T>& v, const T z, const T w ) : z(z), w(w)
+	vec4( const vec2& v, const float z, const float w ) : z(z), w(w)
 	{ x = v.x;  y = v.y; }
-
-	//
-	//  --- Copy Operator ---
-	//
-
-	vec4 operator = ( const vec4& v )
-	{ x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
 
 	//
 	//  --- Indexing Operator ---
 	//
 
-	T& operator [] ( int i ) { return *(&x + i); }
-	//const T operator [] ( int i ) const { return *(&x + i); }
+	GLfloat& operator [] ( int i ) { return *(&x + i); }
+	//const GLfloat operator [] ( int i ) const { return *(&x + i); }
 
 	//
 	//  --- (non-modifying) Arithematic Operators ---
@@ -387,16 +361,16 @@ template<typename T> struct vec4 {
 	vec4 operator - ( const vec4& v ) const
 	{ return vec4( x - v.x, y - v.y, z - v.z, w - v.w ); }
 
-	vec4 operator * ( const T s ) const
+	vec4 operator * ( const GLfloat s ) const
 	{ return vec4( s*x, s*y, s*z, s*w ); }
 
 	vec4 operator * ( const vec4& v ) const
 	{ return vec4( x*v.x, y*v.y, z*v.z, w*v.z ); }
 
-	friend vec4 operator * ( const T s, const vec4& v )
+	friend vec4 operator * ( const GLfloat s, const vec4& v )
 	{ return v * s; }
 
-	vec4 operator / ( const T s ) const {
+	vec4 operator / ( const GLfloat s ) const {
 #ifdef DEBUG
 	if ( std::fabs(s) < DivideByZeroTolerance ) {
 		std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -405,7 +379,7 @@ template<typename T> struct vec4 {
 	}
 #endif // DEBUG
 
-	T r = T(1.0) / s;
+	GLfloat r = GLfloat(1.0) / s;
 	return *this * r;
 	}
 
@@ -419,13 +393,13 @@ template<typename T> struct vec4 {
 	vec4& operator -= ( const vec4& v )
 	{ x -= v.x;  y -= v.y;  z -= v.z;  w -= v.w;  return *this; }
 
-	vec4& operator *= ( const T s )
+	vec4& operator *= ( const GLfloat s )
 	{ x *= s;  y *= s;  z *= s;  w *= s;  return *this; }
 
 	vec4& operator *= ( const vec4& v )
 	{ x *= v.x, y *= v.y, z *= v.z, w *= v.w;  return *this; }
 
-	vec4& operator /= ( const T s ) {
+	vec4& operator /= ( const GLfloat s ) {
 #ifdef DEBUG
 	if ( std::fabs(s) < DivideByZeroTolerance ) {
 		std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
@@ -433,7 +407,7 @@ template<typename T> struct vec4 {
 	}
 #endif // DEBUG
 
-	T r = T(1.0) / s;
+	GLfloat r = GLfloat(1.0) / s;
 	*this *= r;
 
 	return *this;
@@ -455,11 +429,11 @@ template<typename T> struct vec4 {
 	//  --- Conversion Operators ---
 	//
 
-	operator const T* () const
-	{ return static_cast<const T*>( &x ); }
+	operator const GLfloat* () const
+	{ return static_cast<const GLfloat*>( &x ); }
 
-	operator T* ()
-	{ return static_cast<T*>( &x ); }
+	operator GLfloat* ()
+	{ return static_cast<GLfloat*>( &x ); }
 };
 
 //----------------------------------------------------------------------------
@@ -467,49 +441,31 @@ template<typename T> struct vec4 {
 //  Non-class vec4 Methods
 //
 
-template<typename T> T dot( const vec4<T>& u, const vec4<T>& v ) {
+inline
+GLfloat dot( const vec4& u, const vec4& v ) {
 	return u.x*v.x + u.y*v.y + u.z*v.z + u.w*v.w;
 }
 
-template<typename T> T length( const vec4<T>& v ) {
+inline
+GLfloat length( const vec4& v ) {
 	return sqrt( dot(v,v) );
 }
 
-template<typename T> vec4<T> normalize( const vec4<T>& v ) {
+inline
+vec4 normalize( const vec4& v ) {
 	return v / length(v);
 }
 
-template<typename T> vec3<T> cross(const vec4<T>& a, const vec4<T>& b )
+inline
+vec3 cross(const vec4& a, const vec4& b )
 {
-	return vec3<T>( a.y * b.z - a.z * b.y,
+	return vec3( a.y * b.z - a.z * b.y,
 		 a.z * b.x - a.x * b.z,
 		 a.x * b.y - a.y * b.x );
 }
 
 //----------------------------------------------------------------------------
 
-// Declare common type vectors
+}  // namespace Angel
 
-
-// Define the type for vector2, vector3 & vector4 that will be used
-// in every part of the computation of the SRP force.
-namespace precision
-{
-
-using value_type =  float;
-
-}
-
-using vec2F = vec2<GLfloat>;
-using vec3F = vec3<GLfloat>;
-using vec4F = vec4<GLfloat>;
-
-// Vectors we will use for the computation of the SRP force. It depends on
-// the precision you have set.
-using vector2 = vec2<precision::value_type>;
-using vector3 = vec3<precision::value_type>;
-using vector4 = vec4<precision::value_type>;
-
-}  // namespace
-
-#endif // __VEC_H__
+#endif // __ANGEL_VEC_H__

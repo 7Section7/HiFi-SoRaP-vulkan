@@ -19,8 +19,9 @@
 #include "DataVisualization/grid.h"
 #include <QProgressBar>
 
-#define ctt 4.563157e-6 //4.57e-6
-static double DEFAULT_DOUBLE_ARRAY[] = {0,0,0};
+#define PRESSURE 4.563157e-6L //4.57e-6
+#define DEFAULT_VEC3 vector3{}
+
 
 /*
  * This class is an abstract class that contains the basic information that a SRP method should have.
@@ -32,17 +33,19 @@ protected:
 	bool stopExecution;
 	int step_AZ, step_EL;
 	std::string output;
-	float msat;
+	precision::value_type msat;
 
 	Object *satellite;
-	void saveResultsToFile(float xpix, QVector3D& cm,Grid *results);
+	void saveResultsToFile(float xpix, const vector3& cm, Grid *results);
 
 public:
 	SRP();
 	virtual void computeSRP(Grid *results) = 0;
-	virtual QVector3D computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ) = 0;
-	virtual QVector3D computeSRP(QVector3D lightDir,Eigen::Matrix4f& satelliteRotation) = 0;
-	virtual void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY) = 0;
+	virtual vector3 computeSRP(const vector3& XS, float angleX, float angleY, float angleZ) = 0;
+	virtual vector3 computeSRP(const vector3& XS, Eigen::Matrix4f& satelliteRotation) = 0;
+	virtual void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
+			const vector3& V2 = DEFAULT_VEC3) = 0;
+
 	virtual void saveResults(Grid *results);
 
 	int getAzimuthStep() const;

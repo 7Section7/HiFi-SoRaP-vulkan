@@ -1,4 +1,5 @@
 #include "grid.h"
+#include "SRP/srp.h"
 
 /***********************************************************************
  +
@@ -37,7 +38,7 @@ QVector2D Grid::getSizes()
 	return QVector2D(sizeX,sizeZ);
 }
 
-void Grid::saveData(int AZstep, int ELstep, std::string output)
+void Grid::saveData(const int AZstep, const int ELstep, const std::string output)
 {
 	FILE *fo;
 
@@ -48,15 +49,14 @@ void Grid::saveData(int AZstep, int ELstep, std::string output)
 		return;
 	}
 
-	int xpix =-1;
 	QVector3D cm(0,0,0);
 	fprintf(fo, "Version: Cannonball\n");
-	//fprintf(fo, "System: %s \n", output);
+	fprintf(fo, "System: %s \n", output.data());
 	fprintf(fo, "Analysis Type      : Area\n");
 	fprintf(fo, "Reflections        : 1\n");
-	fprintf(fo, "Pixel Size    : %lf \n",xpix);
+	fprintf(fo, "Pixel Size    : 1 \n");
 	fprintf(fo, "Spacecraft Size : 1 \n");
-	fprintf(fo, "Pressure           : 1\n");
+	fprintf(fo, "Pressure           : %Lf\n", PRESSURE);
 	fprintf(fo, "Center of Mass     :  (%lf, %lf, %lf)\n",cm.x(),cm.y(),cm.z());
 	fprintf(fo, "Current time       : 00 00 00 00000\n");
 

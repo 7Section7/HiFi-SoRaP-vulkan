@@ -19,16 +19,18 @@
 class AdvancedSRP: public SRP
 {
 public:
-	QVector3D cm;
-	int nx,ny; //number of pixels in mesh
-	float safeDistance;
+	vector3 cm;
+	int nx,ny;
+	precision::value_type safeDistance;
+	long int counter;
 
 	AdvancedSRP();
 	void computeSRP(Grid *results);
-	QVector3D computeSRP(QVector3D lightDir,float angleX, float angleY, float angleZ);
-	QVector3D computeSRP(QVector3D lightDir,Eigen::Matrix4f& satelliteRotation);
-	virtual void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY) = 0;
-	int hit(double pixel[], double XS[], double pointInt[]);
+	vector3 computeSRP(const vector3& XS, float angleX, float angleY, float angleZ);
+	vector3 computeSRP(const vector3& XS, Eigen::Matrix4f& satelliteRotation);
+	virtual void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
+			const vector3& V2 = DEFAULT_VEC3) = 0;
+
 	void saveResults(Grid *results);
 };
 

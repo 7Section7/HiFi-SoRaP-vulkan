@@ -9,13 +9,14 @@
  ***********************************************************************/
 
 #include "ui_mainwindow.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	srp[CanballModel] = new Canball();
+	srp[CannonBallModel] = new CannonBall();
 	srp[NPlateModel] = new NPlate();
 	srp[RayTraceCPUModel] = new RayTraceCPU();
 	srp[AdvancedGPUModel] = new Render();
@@ -109,7 +110,30 @@ void MainWindow::bttn_loadSatelliteInfo_clicked()
 }
 
 //Load the parameters that the used has set for the selected method.
-void MainWindow::loadUserParameters(){
+void MainWindow::loadUserParameters()
+{
+	if(model == AdvancedGPUModel)
+	{
+		srp[model] = new RayTraceGPUTextures();
+	}
+
+	const auto az = ui->sb_az->value();
+	const auto el = ui->sb_el->value();
+
+	srp[model]->setAzimuthStep(az);
+	srp[model]->setElevationStep(el);
+
+	if( ((360 % az)!=0) || ((180 % el)!=0) )
+	{
+		errorCode=-1;
+		QMessageBox msgBox;
+		msgBox.setText("Step Sizes determined for Azimuth and Elevation are not good.\n"
+					   "Choose a factor of 360 and 180, respectively.");
+		msgBox.exec();
+		return;
+	}
+
+	srp[model]->setMsat(ui->dsb_msat->value());
 
 	char * nameObj, *nameMtl;
 	std::string obj = this->nameObj.toStdString();
@@ -155,12 +179,10 @@ void MainWindow::loadUserParameters(){
 	//Load the initial properties of the selected method.
 
 	int reflectiveType =Reflective;
-	if(model == AdvancedGPUModel){
-		if(ui->comboBox->currentIndex()==4){
-			srp[model] = new RayTraceGPUTextures();
-		}
-
-		if(RayTraceGPU* ray=dynamic_cast<RayTraceGPU*>(srp[model])){
+	if(model == AdvancedGPUModel)
+	{
+		if(RayTraceGPU* ray=dynamic_cast<RayTraceGPU*>(srp[model]))
+		{
 			int numRays = numSecondaryRays->value();
 			ray->setNumSecondaryRays(numRays);
 
@@ -168,27 +190,17 @@ void MainWindow::loadUserParameters(){
 			ray->setDiffuseRays(numDiffuse);
 			ray->setReflectionType(reflectiveType);
 		}
-
-		srp[model]->setSatellite(satellite);
 	}
-	float az = ui->sb_az->value();
-	float el = ui->sb_el->value();
 
-	srp[model]->setAzimuthStep(az);
-	srp[model]->setElevationStep(el);
-
-	srp[model]->setMsat(ui->dsb_msat->value());
-
-	if(model == CanballModel){
-		Canball* c = dynamic_cast<Canball*>(srp[CanballModel]);
-		c->ps =0.05;
+	if(model == CannonBallModel){
+		CannonBall* c = dynamic_cast<CannonBall*>(srp[CannonBallModel]);
 		c->cr = cr->value();
 		c->area = area->value();
 
 	}
 	else if(model == RayTraceCPUModel){
 		RayTraceCPU * srpModel = dynamic_cast<RayTraceCPU*>(srp[model]);
-		srpModel->cm = QVector3D();
+		srpModel->cm = vector3{};
 		srpModel->nx =nx->value();
 		srpModel->ny =ny->value();
 
@@ -204,11 +216,23 @@ void MainWindow::loadUserParameters(){
 	else if(model == NPlateModel){
 		NPlate * srpModel = dynamic_cast<NPlate*>(srp[model]);
 		if(!srpModel->satelliteInfoFile.isEmpty())
-			srpModel->loadSatelliteInfo();
+		{
+			try{
+				srpModel->loadSatelliteInfo();
+			} catch (const std::invalid_argument& e){
+				errorCode=-1;
+				QMessageBox msgBox;
+				msgBox.setText(QString("There was a problem loading the information of the satellite (*.in file).\n")
+							   + QString(e.what()));
+				msgBox.exec();
+				return;
+			}
+
+		}
 		else if(srpModel->satelliteInfoFile.isEmpty()){
 			errorCode=-1;
 			QMessageBox msgBox;
-			msgBox.setText("Load the information of the satellite (*.in) file.");
+			msgBox.setText("Load the information of the satellite (*.in file).");
 			msgBox.exec();
 			return;
 		}
@@ -243,7 +267,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 
 	QWidget *window;
 
-	if(gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model]))
+	if((gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model])))
 	{
 		if(ui->cb_advance->currentIndex()==1){
 			gpuMethod->showNothing();
@@ -257,18 +281,24 @@ void MainWindow::on_bttn_generateOutput_clicked()
 		window = new QWidget;
 		vLayout = new QVBoxLayout;
 	}
-	if(gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model])){
+	if((gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model]))){
 		QGLFormat glfModern=QGLFormat::defaultFormat();
-		glfModern.setVersion(3,3);
+		glfModern.setVersion(4,4);
 		glfModern.setProfile(QGLFormat::CoreProfile);
 		glfModern.setSampleBuffers(true);
 		glfModern.setSwapInterval(0);
 		glfModern.setDefaultFormat(glfModern);
 
+		int Nx = nx->value();
+		int Ny = ny->value();
+
+		gpuMethod->nx = Nx;
+		gpuMethod->ny = Ny;
+
 		glWidget= new GLWidget(glfModern);
-		glWidget->setGeometry(QRect(0, 0, 512, 512));
-		glWidget->setMaximumSize(512, 512);
-		glWidget->setMinimumSize(512, 512);
+		glWidget->setGeometry(QRect(0, 0, Nx, Ny));
+		glWidget->setMaximumSize(Nx,Ny);
+		glWidget->setMinimumSize(Nx,Ny);
 
 		vLayout->addWidget(glWidget);
 	}
@@ -292,18 +322,17 @@ void MainWindow::on_bttn_generateOutput_clicked()
 
 		window->setLayout(vLayout);
 
-		if(gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model])){
+		if((gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model]))){
 			glWidget->setRayTraceGPU(gpuMethod);
 			glWidget->setSatellite(gpuMethod->getSatellite());
 
 			glWidget->setShowSatellite(false);
 		}
-			//glWidget->show();
+
 		window->show();
 	}
 
-	if(gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model])){
-
+	if((gpuMethod=dynamic_cast<AdvancedGPU*>(srp[model]))){
 		glWidget->initializeBuffers();
 
 		glWidget->updateGL();
@@ -326,7 +355,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 	}
 	QString particularNameResult = nameResult +offset;
 
-	VisualizationWindow* visualization = new VisualizationWindow();
+	VisualizationWindow *visualization = new VisualizationWindow();
 	visualization->setELstep(el);
 	visualization->setAZstep(az);
 
@@ -362,7 +391,7 @@ QString MainWindow::getNameFromModel(SRPModel model)
 {
 	QString name;
 
-	if(model == CanballModel)
+	if(model == CannonBallModel)
 		name = QStringLiteral("Cannon-Ball");
 	else if(model == NPlateModel)
 		name = QStringLiteral("NPlate");
@@ -414,10 +443,6 @@ void MainWindow::clearLayout(QLayout* layout, bool deleteWidgets)
 			clearLayout(childLayout, deleteWidgets);
 		delete item;
 	}
-}
-
-void MainWindow::on_comboBox_highlighted(const QString &arg1)
-{
 }
 
 void MainWindow::on_comboBox_currentIndexChanged(const QString &arg1)
@@ -477,7 +502,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		numPerformance=6;
 		textInfo = QString("This method implements a basic approximation of the computation of SRP forces. In particular, the satellite's shape is approximated by a sphere.");
 
-		model = SRPModel::CanballModel;
+		model = SRPModel::CannonBallModel;
 
 		QLabel * labelCr = new QLabel;
 		labelCr->setFont(font1);
@@ -540,10 +565,11 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		area->setMinimum(0);
 		area->setMaximum(99.99f);
 		area->setSingleStep(0.01f);
-		area->setMaximumWidth(80);
+		area->setMaximumWidth(230);
 		area->setObjectName(QStringLiteral("dsbArea"));
 		area->setSuffix(" m²");
 		area->setMinimumHeight(30);
+		area->setDecimals(5);
 		extraInfoGrid->addWidget(area,2,3);
 
 		gridLayout2->addLayout(extraInfoGrid,4,0,6,2);
@@ -592,7 +618,20 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		textInfo = QString("This method cast several rays from a grid (size: Nx x Ny). Then, for each ray that intersects with a face of the satellite the SRP force is computed and (iteratively) another ray with reflected and diffuse directions are casted.");
 
 		model = SRPModel::RayTraceCPUModel;
+	}
+	else if(arg1.compare(QString("RayTrace (GPU) - Multiple Scattering"))==0){
+		numFiability=6;
+		numPerformance=3;
 
+		textInfo = QString("This method takes the satellite's faces to the GPU and then, for each pixel, it is casted a ray that if it intersects with a face of the satellite, the SRP force will be computed. Additionally, each time a ray intersects a face, other rays with reflected and diffuse directions will be casted as well.");
+
+		ui->pushButton->show();
+		model = SRPModel::AdvancedGPUModel;
+	}
+
+	if(arg1.compare(QString("RayTrace (CPU) - Multiple Scattering"))==0 ||
+	   arg1.compare(QString("RayTrace (GPU) - Multiple Scattering"))==0)
+	{
 		QLabel * labelNx = new QLabel;
 		labelNx->setFont(font1);
 		labelNx->setObjectName(QStringLiteral("labelNx"));
@@ -619,7 +658,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		nx = new QSpinBox;
 		nx->setValue(50);
 		nx->setMinimum(1);
-		nx->setMaximum(999);
+		nx->setMaximum(10000);
 		nx->setSingleStep(1);
 		nx->setObjectName(QStringLiteral("sbNx"));
 		nx->setMaximumWidth(70);
@@ -634,8 +673,8 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		labelNumRays->setObjectName(QStringLiteral("labelNumRays"));
 		labelNumRays->setGeometry(QRect(0, 0, 31, 17));
 		labelNumRays->setText(QString("Secondary Rays"));
-		labelNumRays->setContentsMargins(20,30,00,0);
-		labelNumRays->setMaximumWidth(120);
+		labelNumRays->setContentsMargins(20,50,00,0);
+		labelNumRays->setMaximumWidth(100);
 		extraInfoGrid->addWidget(labelNumRays,0,5);
 
 		QLabel *labelIcon3 = new QLabel();
@@ -649,11 +688,11 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		labelIcon3->setToolTip(QApplication::translate("MainWindow", "This is the maxim number of secondary rays that will be casted (iteratively) when one of the initial rays intersect with a face of the satellite.", nullptr));
 		extraInfoGrid->addWidget(labelIcon3,0,6);
 
-		QSpacerItem *item3 = new QSpacerItem(0,30);
+		QSpacerItem *item3 = new QSpacerItem(10,0);
 		extraInfoGrid->addItem(item3,0,7);
 
 		numSecondaryRays = new QSpinBox;
-		numSecondaryRays->setValue(2);
+		numSecondaryRays->setValue(0);
 		numSecondaryRays->setMinimum(0);
 		numSecondaryRays->setMaximum(20);
 		numSecondaryRays->setSingleStep(1);
@@ -688,7 +727,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		ny = new QSpinBox;
 		ny->setValue(50);
 		ny->setMinimum(1);
-		ny->setMaximum(999);
+		ny->setMaximum(10000);
 		ny->setSingleStep(1);
 		ny->setMaximumWidth(70);
 		ny->setObjectName(QStringLiteral("sbNy"));
@@ -704,7 +743,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		labelNumDiffuseRays->setGeometry(QRect(0, 0, 31, 17));
 		labelNumDiffuseRays->setText(QString("Diffuse Rays"));
 		labelNumDiffuseRays->setContentsMargins(20,30,00,0);
-		labelNumDiffuseRays->setMaximumWidth(120);
+		labelNumDiffuseRays->setMaximumWidth(100);
 		extraInfoGrid->addWidget(labelNumDiffuseRays,2,5);
 
 		QLabel *labelIcon7 = new QLabel();
@@ -722,7 +761,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		extraInfoGrid->addItem(item8,2,7);
 
 		numDiffuseRays = new QSpinBox;
-		numDiffuseRays->setValue(2);
+		numDiffuseRays->setValue(0);
 		numDiffuseRays->setMinimum(0);
 		numDiffuseRays->setMaximum(20);
 		numDiffuseRays->setSingleStep(1);
@@ -730,85 +769,6 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		numDiffuseRays->setMaximumWidth(50);
 		numDiffuseRays->setMinimumHeight(30);
 		extraInfoGrid->addWidget(numDiffuseRays,2,8);
-
-		gridLayout2->addLayout(extraInfoGrid,4,0,6,4);
-	}
-	else if(arg1.compare(QString("RayTrace (GPU) - Multiple Scattering"))==0){
-		numFiability=6;
-		numPerformance=3;
-
-		textInfo = QString("This method takes the satellite's faces to the GPU and then, for each pixel, it is casted a ray that if it intersects with a face of the satellite, the SRP force will be computed. Additionally, each time a ray intersects a face, other rays with reflected and diffuse directions will be casted as well.");
-
-		ui->pushButton->show();
-		model = SRPModel::AdvancedGPUModel;
-
-		QLabel * labelNumRays = new QLabel;
-		labelNumRays->setFont(font1);
-		labelNumRays->setObjectName(QStringLiteral("labelNumRays"));
-		labelNumRays->setGeometry(QRect(0, 0, 31, 17));
-		labelNumRays->setText(QString("Secondary Rays"));
-		labelNumRays->setContentsMargins(20,50,00,0);
-		labelNumRays->setMaximumWidth(100);
-		extraInfoGrid->addWidget(labelNumRays,0,0);
-
-		QLabel *labelIcon3 = new QLabel();
-		//label_61->setObjectName(QStringLiteral("label_61"));
-		labelIcon3->setGeometry(QRect(0, 0, 20, 20));
-		labelIcon3->setSizePolicy(sizePolicy3);
-		labelIcon3->setFont(font1);
-		labelIcon3->setMaximumWidth(20);
-		labelIcon3->setMaximumHeight(20);
-		labelIcon3->setPixmap(QPixmap(QString::fromUtf8(":/resources/images/infoIcon3.png")));
-		labelIcon3->setScaledContents(true);
-		labelIcon3->setToolTip(QApplication::translate("MainWindow", "This is the maxim number of secondary rays that will be casted (iteratively) when one of the initial rays intersect with a face of the satellite.", nullptr));
-		extraInfoGrid->addWidget(labelIcon3,0,1);
-
-		QSpacerItem *item3 = new QSpacerItem(10,0);
-		extraInfoGrid->addItem(item3,0,2);
-
-		numSecondaryRays = new QSpinBox;
-		numSecondaryRays->setValue(2);
-		numSecondaryRays->setMinimum(0);
-		numSecondaryRays->setMaximum(20);
-		numSecondaryRays->setSingleStep(1);
-		numSecondaryRays->setObjectName(QStringLiteral("numSecondaryRays"));
-		numSecondaryRays->setMaximumWidth(50);
-		numSecondaryRays->setMinimumHeight(30);
-		extraInfoGrid->addWidget(numSecondaryRays,0,3);
-
-		QLabel * labelNumDiffuseRays = new QLabel;
-		labelNumDiffuseRays->setFont(font1);
-		labelNumDiffuseRays->setObjectName(QStringLiteral("labelDiffuseRays"));
-		labelNumDiffuseRays->setGeometry(QRect(0, 0, 31, 17));
-		labelNumDiffuseRays->setText(QString("Diffuse Rays"));
-		labelNumDiffuseRays->setContentsMargins(20,30,00,0);
-		labelNumDiffuseRays->setMaximumWidth(100);
-		extraInfoGrid->addWidget(labelNumDiffuseRays,1,0);
-
-		QLabel *labelIcon7 = new QLabel();
-		//label_61->setObjectName(QStringLiteral("label_61"));
-		labelIcon7->setGeometry(QRect(0, 0, 20, 20));
-		labelIcon7->setSizePolicy(sizePolicy3);
-		labelIcon7->setFont(font1);
-		labelIcon7->setMaximumWidth(20);
-		labelIcon7->setMaximumHeight(20);
-		labelIcon7->setPixmap(QPixmap(QString::fromUtf8(":/resources/images/infoIcon3.png")));
-		labelIcon7->setScaledContents(true);
-		labelIcon7->setToolTip(QApplication::translate("MainWindow", "This is the number of diffuse rays that will be casted for each ray that has intersected with a face of the satellite.", nullptr));
-		extraInfoGrid->addWidget(labelIcon7,1,1);
-
-		QSpacerItem *item8 = new QSpacerItem(10,00);
-		extraInfoGrid->addItem(item8,1,2);
-
-		numDiffuseRays = new QSpinBox;
-		numDiffuseRays->setValue(2);
-		numDiffuseRays->setMinimum(0);
-		numDiffuseRays->setMaximum(20);
-		numDiffuseRays->setSingleStep(1);
-		numDiffuseRays->setObjectName(QStringLiteral("numDiffuseRays"));
-		numDiffuseRays->setMaximumWidth(50);
-		numDiffuseRays->setMinimumHeight(30);
-		extraInfoGrid->addWidget(numDiffuseRays,1,3);
 
 		gridLayout2->addLayout(extraInfoGrid,4,0,6,2);
 	}
@@ -871,8 +831,6 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 	performance->setContentsMargins(0,30,0,0);
 	performance->setStyleSheet("border:none;margin-left:0px;");
 	gridLayout->addWidget(performance,2,0,2,1);
-
-	QHBoxLayout *hLayout2 = new QHBoxLayout();
 
 	for(int i=0; i< numPerformance; i++){
 		QLabel *fiabilityIcon = new QLabel();
@@ -942,5 +900,6 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 
 void MainWindow::on_pushButton_2_clicked(bool checked)
 {
+	Q_UNUSED(checked)
 	on_actionCompare_computed_results_triggered();
 }

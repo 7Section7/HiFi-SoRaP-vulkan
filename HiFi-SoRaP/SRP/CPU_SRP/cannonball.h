@@ -14,14 +14,14 @@
 /*
  * This class implements the Cannonball method.
  */
-class Canball: public BasicSRP
+class CannonBall: public BasicSRP
 {
 public:
-	double ps;
-	float cr, area;
+	precision::value_type cr, area;
 
-	Canball();
-	void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
+	CannonBall();
+	void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
+			const vector3& V2 = DEFAULT_VEC3);
 };
 
 #endif // CANBALL_H

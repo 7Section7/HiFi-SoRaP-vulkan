@@ -16,15 +16,16 @@
  */
 class NPlate: public BasicSRP
 {
-	void fsrp_nplate(int N, double xs[], double fs[]);
+	void fsrp_nplate(const vector3& XS, vector3 &force);
 
-	std::vector<double> A,ps,pd;
-	std::vector<QVector3D> n;
+	std::vector<precision::value_type> A,ps,pd;
+	std::vector<vector3> n;
 	int np;
 public:
 	QString satelliteInfoFile;
 	NPlate();
-	void computeStepSRP(double xs[],QVector3D &force,double RS[3]=DEFAULT_DOUBLE_ARRAY, double V1[3]=DEFAULT_DOUBLE_ARRAY, double V2[3]=DEFAULT_DOUBLE_ARRAY);
+	void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
+			const vector3& V2 = DEFAULT_VEC3);
 
 	bool isSatelliteInfoLoaded();
 	void loadSatelliteInfo();

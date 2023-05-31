@@ -8,297 +8,301 @@
  *
  ***********************************************************************/
 
-int RayTraceCPU::getNumSecondaryRays() const
-{
-	return numSecondaryRays;
-}
+#include<QElapsedTimer>
+#include<iostream>
+#include<fstream>
+#include <iomanip>
 
-void RayTraceCPU::setNumSecondaryRays(int value)
-{
-	numSecondaryRays = value;
-}
+#include <cstdint> // for specific size integers
+//#include <fstream> // for file handling
+using namespace std;
 
-int RayTraceCPU::getNumDiffuseRays() const
+namespace
 {
-	return numDiffuseRays;
-}
 
-void RayTraceCPU::setNumDiffuseRays(int value)
-{
-	numDiffuseRays = value;
-}
+static precision::value_type APIX;
 
-int RayTraceCPU::getReflectionType() const
-{
-	return reflectionType;
-}
+//! Reflects the 'dir' vector along the 'normal' vector as if it was mirror-like.
+vector3 reflect(const vector3& dir,const vector3& normal);
 
-void RayTraceCPU::setReflectionType(int value)
-{
-	reflectionType = value;
-}
+//! Returns a random 3D vector of length 1.
+vector3 randomInSphere();
+
+/*
+//! Refracts the 'dir' vector along the 'normal' vector by considering the refractive index
+bool refract(const vector3& dir, const vector3& normal, const precision::value_type& refractiveIndex,
+		vector3& refracted);
+*/
+
+} //anonymous namespace
 
 RayTraceCPU::RayTraceCPU()
 {
 	reflectionType=Reflective;
 }
 
-QVector3D product(QVector3D a, QVector3D b){
-	return QVector3D(a.x()*b.x(),a.y()*b.y(),a.z()*b.z());
-}
-
-QVector3D reflect(QVector3D dir,QVector3D normal){
-	QVector3D r = dir-2.0f*QVector3D::dotProduct(dir,normal)*normal;
-	return r.normalized();
-}
-QVector3D RayTraceCPU::randomInSphere()  {
-	QVector3D p;
-	do {
-#ifdef _WIN32
-        p = 2.0f*QVector3D(qrand(),qrand(),qrand()) - QVector3D(1,1,1);
-#else
-        p = 2.0f*QVector3D(drand48(),drand48(),drand48()) - QVector3D(1,1,1);
-#endif
-
-	} while (p.length() >=  1.0f);
-	return p;
-}
-
-bool refract(const QVector3D& v, const QVector3D& n, float ni_over_nt, QVector3D& refracted) {
-		QVector3D uv = v.normalized();
-		float dt = QVector3D::dotProduct(uv, n);
-		float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1-dt*dt);
-		if (discriminant > 0) {
-			refracted = ni_over_nt*(uv - n*dt) - n*sqrt(discriminant);
-			return true;
-		}
-		else
-			return false;
-}
-
-void RayTraceCPU::computeStepSRP(double XS[], QVector3D &force, double RS[], double V1[], double V2[])
+void RayTraceCPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3& V1, const vector3& V2)
 {
-	double FSRP[3], pixel[3];
-	double xtot, ytot, xpix, ypix, d;
-	double Apix;
-	int NT,ix,iy;
+	precision::value_type xtot, ytot, xpix, ypix, d, Apix;
+	int ix,iy;
 
-	std::vector<int> auxhit;
-	std::vector<double>depthit;
+	const precision::value_type PS = PRESSURE;
 
-	double PS = ctt/msat;
-
-	d=safeDistance;
-	nx=this->nx;
-	ny=this->ny;
-	cm[0]=this->cm.x();
-	cm[1]=this->cm.y();
-	cm[2]=this->cm.z();
-
-	TriangleMesh *mesh = satellite->getMesh();
-	NT = mesh->faces.size();
-
+	auto *mesh = satellite->getMesh();
 	Eigen::Vector3f diff = mesh->max_-mesh->min_;
 	float diagonalDiff = diff.norm();
 	float errorMargin = 0.1f;
 	float distanceWindow = diagonalDiff+errorMargin;
 
 	xtot = distanceWindow;
-	ytot = distanceWindow;
+	ytot = xtot;
 	xpix = xtot/nx;
 	ypix = ytot/ny;
 	Apix = xpix * ypix;
+	APIX = Apix;
 
 	d=diagonalDiff;
 
-	auxhit.resize(NT);
-	depthit.resize(NT);
-	FSRP[0] = 0.; FSRP[1] = 0.; FSRP[2] = 0.;
+	force = vector3{0.L};
 
-	double v1_aux[3];
-	v1_aux[0]=V1[0]; v1_aux[1]=V1[1]; v1_aux[2]=V1[2];
-
-	double v2_aux[3];
-	v2_aux[0]=V2[0]; v2_aux[1]=V2[1]; v2_aux[2]=V2[2];
+	vector3 compensationTerm{0.L};
+	vector3 previousForce;
 
 	/* For each pixel in the array */
-	for(ix = 1; ix <= nx; ix++)
+	for(ix = 2; ix <= nx; ix++)
 	{
-		for(iy = 1; iy <= ny; iy++)
+		for(iy = 3; iy <= ny; iy++)
 		{
+			vector3 F{0.L,0.L,0.L};
 			/* pixel (ix,iy) in the grid */
-			pixel[0] = ((ix-0.5)*xpix - xtot/2.)*V1[0] + ((iy-0.5)*ypix - ytot/2.)*V2[0] + d*RS[0];
-			pixel[1] = ((ix-0.5)*xpix - xtot/2.)*V1[1] + ((iy-0.5)*ypix - ytot/2.)*V2[1] + d*RS[1];
-			pixel[2] = ((ix-0.5)*xpix - xtot/2.)*V1[2] + ((iy-0.5)*ypix - ytot/2.)*V2[2] + d*RS[2];
+			const auto pixelPosition = ((ix-0.5L)*xpix - xtot/2.L)*V1 + ((iy-0.5L)*ypix - ytot/2.L)*V2 + d*(-XS); //*RS
+			const auto hasHit = computePixelForce(XS,pixelPosition,F);
 
-			QVector3D pixelForce = computePixelForce(XS,Apix,pixel);
+			if(hasHit)
+			{
+				const auto fixedForce = F - compensationTerm;
+				const auto accumulatedFixedForce = force + fixedForce;
+				compensationTerm = (accumulatedFixedForce - force) - fixedForce;
+				force = accumulatedFixedForce;
 
-			FSRP[0]+= pixelForce.x();
-			FSRP[1]+= pixelForce.y();
-			FSRP[2]+= pixelForce.z();
+				previousForce = force;
+
+				// previously
+				//force += F;
+			}
 		}
 	}
-	force = PS * QVector3D(FSRP[0], FSRP[1], FSRP[2]);
+
+	// In this approach 'Apix' corresponds already to the projected area.
+	force *= PS*Apix/msat;
 }
 
-QVector3D RayTraceCPU::computePixelForce(double XS[], double Apix, double pixel[])
+RayTraceCPU::HasHit RayTraceCPU::computePixelForce(const vector3& XS, const vector3& pixelPosition, vector3& pixelForce)
 {
-	this->pixel = QVector3D(pixel[0],pixel[1],pixel[2]);
-
-	double dir[3];
-	dir[0] = XS[0];         dir[1] = XS[1];         dir[2] = XS[2];
-
-	double point[3];
-	point[0] = pixel[0];    point[1] = pixel[1];    point[2] = pixel[2];
-
-	QVector3D totalForce;
-	double importance[3];
-	importance[0]=1;        importance[1]=1;        importance[2]=1;
-
-	totalForce = rayTrace(Apix,point,dir,importance,numSecondaryRays);
-
-	return totalForce;
+	return rayTrace(pixelPosition,XS,vector3{1.L,1.L,1.L},numSecondaryRays, pixelForce);
 }
 
-QVector3D RayTraceCPU::rayTrace(double Apix,double point[], double dir[], double importance[],int numSecondaryRays){
-
-	QVector3D null(0,0,0);
-
-	if(numSecondaryRays < 0){
-		return null;
-	}
-	QVector3D imp(importance[0],importance[1],importance[2]);
-	if(imp.length()<1.e-5){
-		return null;
+RayTraceCPU::HasHit RayTraceCPU::rayTrace(const vector3& pixelPosition, const vector3& XS, const vector3& importance,
+		const int numSecondaryRays, vector3& pixelForce)
+{
+	if(numSecondaryRays < 0)
+	{
+		return NO_HIT;
 	}
 
-	double pointInt[3];
-	int rhit = hit(point,dir,pointInt);
+	if(Common::length(importance)<1.e-5L)
+	{
+		return NO_HIT;
+	}
 
-	if(rhit != -1){
-		QVector3D totalForce;
+	vector3 hitPoint;
+	const auto hitTriangleIdx = hit(pixelPosition,XS,hitPoint);
 
-		QVector3D localForce = computeForce(rhit,dir,Apix);
-		totalForce = product(localForce,imp);
+	if(hitTriangleIdx != -1)
+	{
+		auto totalForce = computeForce(hitTriangleIdx,XS)*importance;
 
-		if(numSecondaryRays == 0)
-			return totalForce;
+		if(numSecondaryRays == 0){
+			pixelForce = totalForce;
+			return HIT;
+		}
 
 		//PS contribution
-		QVector3D forcePS = QVector3D(0,0,0);
+		vector3 forcePS{0.L,0.L,0.L};
 		if(reflectionType!=Lambertian){
-			double psImportance[3],psDir[3], psPointInt[3];
-			psDir[0]=dir[0];    psDir[1]=dir[1];    psDir[2]=dir[2];
-			psPointInt[0]=pointInt[0];    psPointInt[1]=pointInt[1];    psPointInt[2]=pointInt[2];
+			vector3 psImportance, psDir, psHitPoint;
+			psDir = XS;
+			psHitPoint = hitPoint;
 
-			scatter(psPointInt,rhit,psDir,psImportance, Reflective);
+			scatter(psHitPoint,hitTriangleIdx,psDir,psImportance, Reflective);
+			psImportance*=importance;
 
-			psImportance[0]*=importance[0]; psImportance[1]*=importance[1]; psImportance[2]*=importance[2];
-
-			forcePS = rayTrace(Apix,psPointInt,psDir,psImportance,numSecondaryRays-1);
+			rayTrace(psHitPoint,psDir,psImportance,numSecondaryRays-1,forcePS);
 		}
 
 		//PD contribution
-		QVector3D forcePD = QVector3D(0,0,0);
+		vector3 forcePD{0.L,0.L,0.L};
+		uint kernelSize = numDiffuseRays;
+		for(uint i=0; i< kernelSize; i++){
+			vector3 pdImportance, pdDir, pdHitPoint;
+			pdDir = XS;
+			pdHitPoint = hitPoint;
 
-		int kernelSize = numDiffuseRays;
-		for(int i=0; i< kernelSize; i++){
-			double pdImportance[3],pdDir[3], pdPointInt[3];
-			pdDir[0]=dir[0];    pdDir[1]=dir[1];    pdDir[2]=dir[2];
-			pdPointInt[0]=pointInt[0];    pdPointInt[1]=pointInt[1];    pdPointInt[2]=pointInt[2];
+			scatter(pdHitPoint,hitTriangleIdx,pdDir,pdImportance, Lambertian);
+			pdImportance*=importance;
 
-			scatter(pdPointInt,rhit,pdDir,pdImportance, Lambertian);
-
-			pdImportance[0]*=importance[0]; pdImportance[1]*=importance[1]; pdImportance[2]*=importance[2];
-			forcePD += rayTrace(Apix,pdPointInt,pdDir,pdImportance,numSecondaryRays-1);
+			vector3 localForcePD{0.L,0.L,0.L};
+			rayTrace(pdHitPoint,pdDir,pdImportance,numSecondaryRays-1, localForcePD);
+			forcePD += localForcePD;
 		}
 		if(kernelSize>0)
-			forcePD = 1.0f/kernelSize *forcePD;
-		else
-			forcePD = QVector3D(0,0,0);
+			forcePD = 1.0L/kernelSize *forcePD;
 
 		totalForce += forcePS + forcePD;
-		return totalForce;
+		pixelForce = totalForce;
+		return HIT;
 	}
 	else{
-		return null;
+		return NO_HIT;
 	}
 }
 
-float PHI = 1.61803398874989484820459 * 0.1; // Golden Ratio
-float PI  = 3.14159265358979323846264 * 0.1; // PI
-float SQ2 = 1.41421356237309504880169 * 10000.0; // Square Root of Two
+vector3 RayTraceCPU::computeForce(const int triangleIdx, const vector3& XS)
+{
+	auto *mesh = satellite->getMesh();
+	precision::value_type ps, pd;
+	const auto& N = mesh->faceNormals[mesh->faces[triangleIdx].nn];
 
-float goldNoise( vec2 coordinate,float seed){
+	const auto costh = Common::dot(XS,N);
 
-	float value=tan(distance(vec3(coordinate*(seed+PHI),0), vec3(PHI, PI,0)))*SQ2;
-	return value - floor(value);
+	ps = satellite->getMaterial(mesh->faces[triangleIdx].rf).ps;
+	pd = satellite->getMaterial(mesh->faces[triangleIdx].rf).pd;
+
+	auto F = ((1.L - ps)*XS - 2.L*(ps*fabs(costh) + pd/3.L)*N);
+	return F;
 }
 
-float rand(vec2 n) {
-		float value=sin(dot(n, vec2(12.9898f, 4.1414f))) * 43758.5453f;
-		return value - floor(value);
+void RayTraceCPU::scatter(vector3& hitPoint, int triangleIdx, vector3& XS, vector3& importance, Reflectiveness r)
+{
+	TriangleMesh *mesh = satellite->getMesh();
+	Material m = satellite->getMaterial(mesh->faces[triangleIdx].rf);
+
+	const auto& N = mesh->faceNormals[mesh->faces[triangleIdx].nn];
+
+	if(r == Reflective)
+	{
+		const auto reflected = Common::normalize(reflect(XS, N));
+
+		hitPoint = hitPoint + 1.e-4L*reflected;
+		XS = reflected;
+		importance = m.ps*vector3{1.L,1.L,1.L};
+	}
+	else if(r == Lambertian)
+	{
+		const auto target = hitPoint+N+randomInSphere();
+		const auto reflected = Common::normalize(target-hitPoint);
+
+		hitPoint = hitPoint + 1.e-4L*reflected;
+		XS = reflected;
+		importance = m.pd*vector3{1.L,1.L,1.L};
+	}
 }
 
-QVector3D RayTraceCPU::randomInSphere(QVector3D hitPoint){
+int RayTraceCPU::hit(const vector3& pixelPosition, const vector3& XS, vector3& closestHitPoint)
+{
+	precision::value_type depmin, dephit;
+	uint triangleIdx;
+	int triangleIdxHit = -1; //If the ray doesn't hit any triangle, the returned triangle index is -1.
 
-	QVector3D p;
-	do{
-		QVector3D aux= QVector3D(goldNoise(vec2(aux.x(),aux.y()),seed), goldNoise(vec2(aux.y(),aux.z()),seed), goldNoise(vec2(aux.x(),aux.z()),seed));
-		p= 2.0f*aux - QVector3D(1.0f,1.0f,1.0f);
-		seed =  seed*seed - floor(seed*seed);
-	}while(p.length()>=1.0f);
+	auto *mesh = satellite->getMesh();
+	const auto numFaces = mesh->faces.size();
+
+	depmin = std::numeric_limits<precision::value_type>::infinity();
+
+	const auto L = Common::normalize(XS);
+	vector3 hitPoint;
+
+	for(triangleIdx = 0; triangleIdx < numFaces; triangleIdx++)
+	{
+		if( mesh->hitTriangle(pixelPosition, L, triangleIdx, hitPoint) )
+		{
+			dephit = Common::length(pixelPosition-hitPoint);
+
+			if(dephit<depmin)
+			{
+				depmin=dephit;
+				triangleIdxHit = triangleIdx;
+				closestHitPoint = hitPoint;
+			}
+		}
+	}
+	return triangleIdxHit;
+}
+
+uint RayTraceCPU::getNumSecondaryRays() const
+{
+	return numSecondaryRays;
+}
+
+void RayTraceCPU::setNumSecondaryRays(const uint value)
+{
+	numSecondaryRays = value;
+}
+
+uint RayTraceCPU::getNumDiffuseRays() const
+{
+	return numDiffuseRays;
+}
+
+void RayTraceCPU::setNumDiffuseRays(const uint value)
+{
+	numDiffuseRays = value;
+}
+
+uint RayTraceCPU::getReflectionType() const
+{
+	return reflectionType;
+}
+
+void RayTraceCPU::setReflectionType(const uint value)
+{
+	reflectionType = value;
+}
+
+namespace
+{
+
+vector3 reflect(const vector3& dir,const vector3& normal)
+{
+	return Common::normalize(dir-2.0L*Common::dot(dir,normal)*normal);
+}
+
+vector3 randomInSphere()
+{
+	vector3 p;
+	do {
+#ifdef _WIN32
+		p = 2.0L*vector3(qrand(),qrand(),qrand()) - vector3(1.L,1.L,1.L);
+#else
+		p = 2.0L*vector3(drand48(),drand48(),drand48()) - vector3(1.L,1.L,1.L);
+#endif
+
+	} while (Common::length(p) >=  1.0L);
 	return p;
 }
 
-QVector3D RayTraceCPU::computeForce(int rhit, double XS[], double Apix)
+/*bool refract(const vector3& dir, const vector3& normal, const precision::value_type& refractiveIndex,
+		vector3& refracted)
 {
-	TriangleMesh *mesh = satellite->getMesh();
-	double ps, pd;
-	auto N = mesh->faceNormals[mesh->faces[rhit].nn];
-	double costh = XS[0]*N.x() + XS[1]*N.y() + XS[2]*N.z();
-
-	ps = satellite->getMaterial(mesh->faces[rhit].rf).ps;
-	pd = satellite->getMaterial(mesh->faces[rhit].rf).pd;
-
-	// We don't multiply initially by fabs(costh) because in this approach, the area corresponds to
-	//the area of the cell
-	double forceX= Apix*((1. - ps)*XS[0] - 2.*(ps*fabs(costh) + pd/3.)*N.x());
-	double forceY= Apix*((1. - ps)*XS[1] - 2.*(ps*fabs(costh) + pd/3.)*N.y());
-	double forceZ= Apix*((1. - ps)*XS[2] - 2.*(ps*fabs(costh) + pd/3.)*N.z());
-
-	return QVector3D(forceX,forceY,forceZ);
-}
-
-void RayTraceCPU::scatter(double pointInt[],int rhit, double xs[], double importance[], Reflectiveness r)
-{
-	TriangleMesh *mesh = satellite->getMesh();
-	Material m = satellite->getMaterial(mesh->faces[rhit].rf);
-
-	QVector3D dir(xs[0],xs[1],xs[2]);
-	QVector3D point(pointInt[0],pointInt[1],pointInt[2]);
-	QVector3D normal = mesh->faceNormals[mesh->faces[rhit].nn];
-
-	if(r == Reflective){
-		QVector3D reflected = reflect(dir, normal);
-		reflected.normalize();
-
-		point = point + 1.e-4f*reflected;
-
-		pointInt[0] = point.x(); pointInt[1] = point.y(); pointInt[2] = point.z();
-		xs[0] = reflected.x(); xs[1] = reflected.y(); xs[2] = reflected.z();
-		importance[0] = m.ps; importance[1] = m.ps; importance[2] = m.ps;
+	const auto uv = Common::normalize(dir);
+	const auto dt = Common::dot(uv, normal);
+	const auto discriminant = 1.0L - refractiveIndex*refractiveIndex*(1-dt*dt);
+	if (discriminant > 0) {
+		refracted = refractiveIndex*(uv - normal*dt) - normal*sqrt(discriminant);
+		return true;
 	}
-	else if( r == Lambertian){
-		QVector3D target = point+normal+randomInSphere();
-		QVector3D reflected = target-point;
-		reflected.normalize();
+	else
+		return false;
+}*/
 
-		point = point + 1.e-4f*reflected;
-
-		pointInt[0] = point.x(); pointInt[1] = point.y(); pointInt[2] = point.z();
-		xs[0] = reflected.x(); xs[1] = reflected.y(); xs[2] = reflected.z();
-		importance[0] = m.pd; importance[1] = m.pd; importance[2] = m.pd;
-
-	}
-}
+} //anonymous namespace

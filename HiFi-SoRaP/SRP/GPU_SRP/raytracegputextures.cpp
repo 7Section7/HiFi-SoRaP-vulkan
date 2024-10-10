@@ -18,7 +18,9 @@ namespace
 
 RayTraceGPUTextures::RayTraceGPUTextures()
 {
-	fragmentShaderFileGPU = "://resources/shaders/raytrace_multiple_scattering_fshader.glsl";
+	//fragmentShaderFileGPU = "://resources/shaders/raytrace_multiple_scattering_fshader.glsl";
+	fragmentShaderFileGPU = "://resources/shaders/raytrace_improved_fshader.glsl";
+	//fragmentShaderFileGPU   = "://resources/shaders/raytrace_rand_xorshift_fshader.glsl";
 }
 
 void RayTraceGPUTextures::sendTextures()

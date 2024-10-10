@@ -78,7 +78,7 @@ void Grid::saveData(const int AZstep, const int ELstep, const std::string output
 	fprintf(fo, ": END\n");
 	fprintf(fo, "\n");
 
-	fprintf(fo, "Record count       : %d\n", (AZstep>0?360/AZstep:0+1)*(ELstep>0?180/ELstep:0+1) );
+	fprintf(fo, "Record count       : %d\n", ((AZstep>0?360/AZstep:0)+1)*((ELstep>0?180/ELstep:0)+1) );
 	fprintf(fo, "\n");
 
 	fprintf(fo, " AzimuthElevatio  Force(X)  Force(Y)  Force(Z) \n");

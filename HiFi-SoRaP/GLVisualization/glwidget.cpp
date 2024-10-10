@@ -182,7 +182,7 @@ void GLWidget::initializeGL() {
 			setNumSecondaryRays();
 
 			RayTraceGPU *rayT = dynamic_cast<RayTraceGPU*>(advancedGPU);
-			rayT->setNoiseTexture(10,advancedGPU->programGPU);
+			rayT->setNoiseTexture(10,advancedGPU->programGPU, AdvancedSRP::getFixedUniformNoiseTexture());
 			rayT->setDiffuseRays(advancedGPU->programGPU);
 			rayT->setReflectionType(advancedGPU->programGPU);
 		}
@@ -556,7 +556,7 @@ void GLWidget::paintGL() {
 			advancedGPU->getCamera()->toGPU(program);
 			if(dynamic_cast<RayTraceGPUTextures*>(advancedGPU)){
 				advancedGPU->draw(advancedGPU->programGPU,cube);
-				advancedGPU->debugDraw(advancedGPU->programGPU,cube); //quad
+				advancedGPU->debugDraw(advancedGPU->programGPU,quad); //quad
 			}
 			else{
 				advancedGPU->draw(advancedGPU->programGPU,advancedGPU->getSatellite());

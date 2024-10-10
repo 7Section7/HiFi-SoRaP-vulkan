@@ -251,6 +251,22 @@ void MainWindow::on_bttn_generateOutput_clicked()
 		return;
 	}
 
+	//DELETE
+	/*
+	numSecondaryRays->setValue(1);
+	numDiffuseRays->setRange(0,100);*/
+	/*
+for(int j=0; j<=5; j++)
+{
+
+
+for(int i =1; i<=5; i++)
+{numDiffuseRays->setRange(0,100);
+	numDiffuseRays->setValue(pow(2,j));
+*/
+
+	//FI DELETE
+
 	loadUserParameters();
 
 	if(errorCode<0)
@@ -260,6 +276,8 @@ void MainWindow::on_bttn_generateOutput_clicked()
 	float el = ui->sb_el->value();
 	int NEL = 180/el+1;
 	int NAZ = 360/az+1;
+
+
 	Grid *results = new Grid(NAZ,NEL);
 
 	AdvancedGPU* gpuMethod;
@@ -361,6 +379,22 @@ void MainWindow::on_bttn_generateOutput_clicked()
 
 	visualization->plotResults(results, particularNameResult);
 	dataVisualizations.push_back(visualization);
+
+	//DELETE:
+	/*
+	//QString path = QCoreApplication::applicationDirPath();
+	std::string outputName = "/home/leandro/Documentos/Doctorado/Integrador/build_hifi_sorap_tests_sim_RNG/results/";
+	const auto numRays = std::to_string(numSecondaryRays->value());
+	const auto numDiffuse = std::to_string(numDiffuseRays->value());
+	outputName += "apendice1_cpu_256x256_RNG_polarCoordinates/gpu_psp6_newMtl_256x256_30x30_";
+	outputName += numRays+"x"+numDiffuse+"_"+std::to_string(i);
+	outputName +=".txt";
+	results->saveData(NAZ,NEL,outputName);
+}
+}
+*/
+//FI DELETE
+
 }
 
 //Load a window to visualize the satellite with particular SRP forces.

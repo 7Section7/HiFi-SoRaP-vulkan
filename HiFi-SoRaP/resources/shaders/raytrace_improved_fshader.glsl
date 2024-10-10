@@ -12,11 +12,24 @@
 #define Transparent 1
 #define Lambertian 2
 
+#define MAX_SECONDARY_RAYS_DEEP_LEVEL 10
+
+// Random number constants:
+#define A 16807
+#define M 2147483647
+#define Q 127773
+#define R 2836
+
+#define M_PI 3.14159265358979323846
+
+
 layout (location = 0)out vec4 gAlbedo;
 layout (location = 1) out vec3 gNormal;
 
 smooth in vec4 worldNormal;
 smooth in vec4 worldVertex;
+
+uniform int timeSeed;
 
 uniform vec3 lightDirection;
 uniform vec3 V1;
@@ -88,6 +101,7 @@ struct RayTraceStep
     HitInfo hitInfo;
 
     vec3 force;
+    vec3 forcePS, forcePD, localForcePD;
     int currentStep;
     int currentComputation;
 };
@@ -278,15 +292,16 @@ float rand(vec2 n)
     return fract(sin(dot(n, vec2(12.9898f, 4.1414f))) * 43758.5453f);
 }
 
-float seed =0;
+float seed;
 
-vec3 getRandomVector()
+/*vec3 getRandomVector()
 {
-    seed = mod(seed,numNoiseValues);
+    //float noisesValues = float(numNoiseValues);
     float coord = seed/numNoiseValues;
 
     vec3 rand = texture(texNoise,coord).xyz;
-    seed++;
+    //seed++;
+    seed = mod(seed+1,numNoiseValues);
 
     return rand;
 }
@@ -295,6 +310,35 @@ vec3 randomInSphere()
 {
     vec3 p;
     do{ p= 2.0f* getRandomVector() - vec3(1.0f,1.0f,1.0f);} while(length(p)>=1.0f);
+    return p;
+}*/
+
+float getRandomValue()
+{
+	int newSeed = int( A*mod(seed,Q) - R*(seed/Q) );
+	if(newSeed < 0) newSeed += M;
+
+	seed = newSeed;
+
+	float randomValue = newSeed/float(M);
+
+	return randomValue;
+}
+
+vec3 randomInSphere()
+{
+    vec3 p;
+
+    //OPTION 2: Polar Coordinates Improved
+    float theta = 2 * M_PI * getRandomValue();
+    // wrong: double phi = M_PI * uniform01(generator);
+    float phi = acos(1 - 2 * getRandomValue());
+    float x = sin(phi) * cos(theta);
+    float y = sin(phi) * sin(theta);
+    float z = cos(phi);
+
+    p = vec3(x,y,z);
+
     return p;
 }
 
@@ -355,9 +399,10 @@ vec3 computeScatteredForce(inout HitInfo hitInfo)
     int triangleIdx = hit(hitInfo.currentPoint,hitInfo.currentL,hitPoint);
     if(triangleIdx!=-1)
     {
-	hitInfo.currentImportance = product(hitInfo.currentImportance,importance);
-	vec3 localForce = computeForce(triangleIdx,hitInfo.currentL);
-	totalForce+= product(localForce,hitInfo.currentImportance);
+	//hitInfo.currentImportance = product(hitInfo.currentImportance,importance);
+	//vec3 localForce = computeForce(triangleIdx,hitInfo.currentL);
+	//totalForce+= product(localForce,hitInfo.currentImportance);
+	totalForce = computeForce(triangleIdx,hitInfo.currentL);
 
 	hitInfo.currentN = computeNormal(triangleIdx);
 
@@ -416,14 +461,18 @@ vec3 computeFinalForce(vec3 point,vec3 L, out int triangleIdx)
 
     //For optimization, we decided to create a stack 'steps'
     //in order to save the accumulated forces of each iteration.
-    RayTraceStep steps[20];
+    //numSecondaryRays MUST BE <= MAX_SECONDARY_RAYS_DEEP_LEVEL
+    RayTraceStep steps[MAX_SECONDARY_RAYS_DEEP_LEVEL];
 
     for(int i=0; i< numSecondaryRays; i++)
     {
 	steps[i].currentStep=i;
 	steps[i].currentComputation=0;
-	steps[i].force =vec3(0,0,0);
+	steps[i].force = vec3(0,0,0);
 	steps[i].hitInfo.currentReflectiveness=0;
+	steps[i].forcePS = vec3(0,0,0);
+	steps[i].forcePD = vec3(0,0,0);
+	steps[i].localForcePD = vec3(0,0,0);
     }
     steps[0].hitInfo.currentImportance=importance;
     steps[0].hitInfo.currentL=L;
@@ -447,43 +496,61 @@ vec3 computeFinalForce(vec3 point,vec3 L, out int triangleIdx)
 
 	    //Depending on the current step of computation we are in,
 	    //we compute a secondary ray based on specular or diffuse reflection.
-	    int r; float aux;
-	    if(steps[currentStep].currentComputation<1){r=0; aux=1;}
-	    else{r=2; aux=1.0f/diffuseRays;}
+	    int r;
+	    if(steps[currentStep].currentComputation<1) { r=0; }
+	    else { r=2; }
 
 	    //Compute force on the intersection of the ray and add it to the accumulated force.
 	    hitInfoAux.currentReflectiveness=r;
 	    vec3 f = computeScatteredForce(hitInfoAux);
-	    steps[currentStep].force += aux*f;
 
-	    if( length(f)<FLOAT_EPSILON || length(hitInfoAux.currentImportance)<FLOAT_EPSILON ||
-		    currentStep == numSecondaryRays-1 )
+	    if(steps[currentStep].currentComputation<1)
+	    { steps[currentStep].forcePS = f; }
+	    else
+	    { steps[currentStep].localForcePD = f;	}
+
+	    if( length(f)<FLOAT_EPSILON || currentStep == numSecondaryRays-1 )
 	    {
-		//This secondary ray didn't apport anything, so we move forward on the next secondary ray computation.
-		//(next iteration).
+		//There was no hit for this secondary ray or we reach the maximum deep raytracing level,
+		//so we move forward on the next secondary ray computation. (next iteration).
+		if(steps[currentStep].currentComputation >= 1)
+		{ steps[currentStep].forcePD += steps[currentStep].localForcePD; }
+
 		steps[currentStep].currentComputation++;
 	    }
 	    else
 	    {
-		//Or, the secondary ray hit a triangle, then we need to compute new secondary rays from this intersected point.
+		//Or, the secondary ray hit a triangle, then we need to compute new secondary rays from this
+		//intersected point.
 		copyHitInfo(hitInfoAux,steps[currentStep+1].hitInfo);
 		steps[currentStep+1].currentComputation=0;
 		steps[currentStep+1].force=vec3(0,0,0);
+		steps[currentStep+1].forcePS=vec3(0,0,0);
+		steps[currentStep+1].forcePD=vec3(0,0,0);
+		steps[currentStep+1].localForcePD=vec3(0,0,0);
+		steps[currentStep+1].hitInfo.currentReflectiveness=0;
 
 		currentStep++;
 	    }
 	}
-
 	else//Move backward.
 	{
 	    //Once all the secondary rays were computed, we move backward in the stack.
+	    float ps = steps[currentStep].hitInfo.currentPS;
+	    float pd = steps[currentStep].hitInfo.currentPD;
+	    steps[currentStep].force = ps*steps[currentStep].forcePS;
+	    if(diffuseRays > 0) steps[currentStep].force += (pd/diffuseRays)*steps[currentStep].forcePD;
+
 	    if(currentStep==0)  stop=true;
 	    else
 	    {
-		float aux2=1;
-		if(steps[currentStep].hitInfo.currentReflectiveness==2)
-		    aux2=1.0f/diffuseRays;
-		steps[currentStep-1].force += aux2*steps[currentStep].force;
+		if(steps[currentStep-1].currentComputation<1)
+		{ steps[currentStep-1].forcePS += steps[currentStep].force; }
+		else
+		{
+		    steps[currentStep-1].localForcePD += steps[currentStep].force;
+		    steps[currentStep-1].forcePD += steps[currentStep-1].localForcePD;
+		}
 
 		currentStep--;
 		steps[currentStep].currentComputation++;
@@ -510,6 +577,15 @@ void main(void)
 
     vec3 pixelPosition = ((ix-0.5f)*xpix - xtot/2.f)*V1 +
 	    ((iy-0.5f)*ypix - ytot/2.f)*V2 + boundingBoxDistance*(-L);
+
+    int idxSeed = ((ix-1)*Nx + iy)*1000;
+    idxSeed = int( mod( float(idxSeed), float(M/100)) );
+    seed = timeSeed + idxSeed;
+    //seed = mod(ix * Nx + iy, float(numNoiseValues));
+    //seed = 0;
+
+    //gAlbedo = vec4(seed/M, timeSeed/M, idxSeed/M, 1.0f);
+    //return;
 
     if(debugMode == 0 || debugMode == 1) //Show nothing or Show Forces in the glwidget while the forces are computed
     {

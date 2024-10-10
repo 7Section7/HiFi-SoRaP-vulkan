@@ -791,6 +791,8 @@ RESOURCES += \
 
 DISTFILES += \
     resources/shaders/fshader1.glsl \
+    resources/shaders/raytrace_improved_fshader.glsl \
+    resources/shaders/raytrace_rand_xorshift_fshader.glsl \
     resources/shaders/vshader1.glsl \
     resources/images/chartIcon.png \
     resources/images/satelliteIcon.png \

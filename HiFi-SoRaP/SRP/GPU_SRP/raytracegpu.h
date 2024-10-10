@@ -30,7 +30,7 @@ public:
 	int getNumSecondaryRays() const;
 	void setNumSecondaryRays(int value);
 
-	void setNoiseTexture(int textureId,std::unique_ptr<QGLShaderProgram> &program);
+	void setNoiseTexture(int textureId,std::unique_ptr<QGLShaderProgram> &program,const float* noiseTexture);
 
 	void setDiffuseRays(std::unique_ptr<QGLShaderProgram> &program);
 	int getDiffuseRays() const;

@@ -31,5 +31,7 @@
         <file>resources/models/cube0_nplat_dot.in</file>
         <file>resources/models/BoxPlate/nplate_boxplate_comma.in</file>
         <file>resources/models/BoxPlate/nplate_boxplate_dot.in</file>
+        <file>resources/shaders/raytrace_improved_fshader.glsl</file>
+        <file>resources/shaders/raytrace_rand_xorshift_fshader.glsl</file>
     </qresource>
 </RCC>

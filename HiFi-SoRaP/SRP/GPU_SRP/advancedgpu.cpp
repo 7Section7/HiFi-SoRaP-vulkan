@@ -48,6 +48,19 @@ void AdvancedGPU::debugDraw(std::unique_ptr<QGLShaderProgram> &program, Object *
 	glUniform1i(debugModeLocation,debugMode);
 
 	camera->toGPU(program);
+	/*
+	auto camera2 = new dataVisualization::Camera();
+	TriangleMesh *mesh = this->satellite->getMesh();
+	Eigen::Vector3f diff = mesh->max_-mesh->min_;
+	float diagonalDiff = diff.norm();
+	float errorMargin = 0.1f;
+	float distance = diagonalDiff+errorMargin;
+	float xAxis = distance/2.0f;
+	float yAxis = distance/2.0f;
+	camera2->updateProjection(-xAxis,xAxis,-yAxis,yAxis,program);
+	Eigen::Matrix4f lightView = getLightView(*camera2,*light,this->satellite);
+	camera2->updateView(lightView,program,diagonalDiff);
+*/
 
 	glActiveTexture(GL_TEXTURE11);
 	glBindTexture(GL_TEXTURE_2D, gAlbedo);

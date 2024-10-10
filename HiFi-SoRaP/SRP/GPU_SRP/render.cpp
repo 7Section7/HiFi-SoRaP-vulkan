@@ -17,6 +17,94 @@
 //#include <fstream> // for file handling
 using namespace std;
 
+////////////////////// TO REMOVE
+#include <stdio.h>
+
+const int BYTES_PER_PIXEL = 3; /// red, green, & blue
+const int FILE_HEADER_SIZE = 14;
+const int INFO_HEADER_SIZE = 40;
+
+unsigned char* createBitmapFileHeader (int height, int stride)
+{
+	int fileSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + (stride * height);
+
+	static unsigned char fileHeader[] = {
+		0,0,     /// signature
+		0,0,0,0, /// image file size in bytes
+		0,0,0,0, /// reserved
+		0,0,0,0, /// start of pixel array
+	};
+
+	fileHeader[ 0] = (unsigned char)('B');
+	fileHeader[ 1] = (unsigned char)('M');
+	fileHeader[ 2] = (unsigned char)(fileSize      );
+	fileHeader[ 3] = (unsigned char)(fileSize >>  8);
+	fileHeader[ 4] = (unsigned char)(fileSize >> 16);
+	fileHeader[ 5] = (unsigned char)(fileSize >> 24);
+	fileHeader[10] = (unsigned char)(FILE_HEADER_SIZE + INFO_HEADER_SIZE);
+
+	return fileHeader;
+}
+
+unsigned char* createBitmapInfoHeader (int height, int width)
+{
+	static unsigned char infoHeader[] = {
+		0,0,0,0, /// header size
+		0,0,0,0, /// image width
+		0,0,0,0, /// image height
+		0,0,     /// number of color planes
+		0,0,     /// bits per pixel
+		0,0,0,0, /// compression
+		0,0,0,0, /// image size
+		0,0,0,0, /// horizontal resolution
+		0,0,0,0, /// vertical resolution
+		0,0,0,0, /// colors in color table
+		0,0,0,0, /// important color count
+	};
+
+	infoHeader[ 0] = (unsigned char)(INFO_HEADER_SIZE);
+	infoHeader[ 4] = (unsigned char)(width      );
+	infoHeader[ 5] = (unsigned char)(width >>  8);
+	infoHeader[ 6] = (unsigned char)(width >> 16);
+	infoHeader[ 7] = (unsigned char)(width >> 24);
+	infoHeader[ 8] = (unsigned char)(height      );
+	infoHeader[ 9] = (unsigned char)(height >>  8);
+	infoHeader[10] = (unsigned char)(height >> 16);
+	infoHeader[11] = (unsigned char)(height >> 24);
+	infoHeader[12] = (unsigned char)(1);
+	infoHeader[14] = (unsigned char)(BYTES_PER_PIXEL*8);
+
+	return infoHeader;
+}
+
+void generateBitmapImage (unsigned char* image, int height, int width, char* imageFileName)
+{
+	int widthInBytes = width * BYTES_PER_PIXEL;
+
+	unsigned char padding[3] = {0, 0, 0};
+	int paddingSize = (4 - (widthInBytes) % 4) % 4;
+
+	int stride = (widthInBytes) + paddingSize;
+
+	FILE* imageFile = fopen(imageFileName, "wb");
+
+	unsigned char* fileHeader = createBitmapFileHeader(height, stride);
+	fwrite(fileHeader, 1, FILE_HEADER_SIZE, imageFile);
+
+	unsigned char* infoHeader = createBitmapInfoHeader(height, width);
+	fwrite(infoHeader, 1, INFO_HEADER_SIZE, imageFile);
+
+	int i;
+	for (i = 0; i < height; i++) {
+		fwrite(image + (i*widthInBytes), BYTES_PER_PIXEL, width, imageFile);
+		fwrite(padding, 1, paddingSize, imageFile);
+	}
+
+	fclose(imageFile);
+}
+
+/////////////////////
+
 
 Render::Render()
 {
@@ -90,6 +178,25 @@ void Render::draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite)
 
 	program->bind();
 
+	const auto now = std::chrono::system_clock::now();
+	//const std::time_t t_c = std::chrono::system_clock::to_time_t(now);
+	const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+	const auto fraction = now - seconds;
+	const auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(fraction).count();
+
+	// http://en.cppreference.com/w/cpp/chrono/c/time
+	const std::time_t currentNow = std::time(nullptr) ; // get the current time point
+	// convert it to (local) calendar time
+	// http://en.cppreference.com/w/cpp/chrono/c/localtime
+	const std::tm calendarTime = *std::localtime( std::addressof(currentNow) ) ;
+	const auto secs      = calendarTime.tm_sec;
+	const auto mins      = calendarTime.tm_min;
+	const auto hours     = calendarTime.tm_hour;
+	const int time_seed = millisecs + 1000*(secs + 60*(mins + 60*(hours)));
+
+	//program->bind();
+	glUniform1i(program->uniformLocation("timeSeed"), time_seed);
+
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		qDebug() << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!";
 
@@ -148,14 +255,24 @@ void Render::draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite)
 	vector3 compensationTerm{0.L};
 	vector3 previousForce;
 
+	////// TO REMOVE
+/*
+	unsigned char image[width][height][BYTES_PER_PIXEL];
+	char* imageFileName = (char*) "output.bmp";
+*/
+	/////////
+
 	//The texture contains: 0 for the pixels that were not rendered,
 	// or a value between (0,1) that has to be converted to (-4,4).
 
-	for(auto idxHeight = 0; idxHeight < height; idxHeight++) //iterating over Nx
+	for(auto idxWidth = 0; idxWidth < width; idxWidth++) //iterating over Nx
 	{
-		for(auto idxWidth = 0; idxWidth < width; idxWidth++) //iterating over Ny
+		for(auto idxHeight = 0; idxHeight < height; idxHeight++) //iterating over Ny
 		{
+			//The image formed by the pixels is translated. Next formula doesn't work:
 			const long unsigned int idx = (idxWidth*width+idxHeight)*3; //the force is stored in 3 cells
+			//const long unsigned int idx = (idxHeight*height+idxWidth)*3; //the force is stored in 3 cells
+
 			precision::value_type fx = localForces[idx+0];
 			precision::value_type fy = localForces[idx+1];
 			precision::value_type fz = localForces[idx+2];
@@ -164,6 +281,17 @@ void Render::draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite)
 
 			if( stencilValue == 1 )
 			{
+
+				////// TO REMOVE
+				///
+/*
+				unsigned int i = idxHeight, j = idxWidth;
+				image[j][i][2] = (unsigned char) ( fz*255 ); ///red
+				image[j][i][1] = (unsigned char) ( fy*255 ); ///green
+				image[j][i][0] = (unsigned char) ( fx*255 ); ///blue
+*/
+				///////
+
 				fx = 8.f*fx - 4.f;
 				fy = 8.f*fy - 4.f;
 				fz = 8.f*fz - 4.f;
@@ -178,8 +306,26 @@ void Render::draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite)
 				//Previously:
 				//force += vector3(fx,fy,fz);
 			}
+			////// TO REMOVE
+/*
+			else{
+
+				unsigned int i = idxHeight, j = idxWidth;
+				image[j][i][2] = (unsigned char) ( 255 ); ///red
+				image[j][i][1] = (unsigned char) ( 255 ); ///green
+				image[j][i][0] = (unsigned char) ( 255 ); ///blue
+
+			}
+*/
+			///////
+
 		}
 	}
+
+	////// TO REMOVE
+//  generateBitmapImage((unsigned char*) image, width, height, imageFileName);
+	///////
+
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

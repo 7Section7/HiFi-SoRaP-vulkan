@@ -32,6 +32,10 @@ public:
 			const vector3& V2 = DEFAULT_VEC3) = 0;
 
 	void saveResults(Grid *results);
+
+	static const float* getNormalNoiseTexture();
+	static const float* getUniformNoiseTexture();
+	static const float* getFixedUniformNoiseTexture();
 };
 
 #endif // ADVANCEDSRP_H

@@ -19,7 +19,8 @@
 #include "DataVisualization/grid.h"
 #include <QProgressBar>
 
-#define PRESSURE 4.563157e-6L //4.57e-6
+//Pressure
+#define PRESSURE  2.2753587667030186e-07L // Before: 4.563157e-6L //4.57e-6
 #define DEFAULT_VEC3 vector3{}
 
 

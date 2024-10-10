@@ -355,7 +355,8 @@ vector3 RayTraceCPU::computeFinalForce(const vector3& point, const vector3& L, i
 
 	//For optimization, we decided to create a stack 'steps'
 	//in order to save the accumulated forces of each iteration.
-    RayTraceStep steps[numSecondaryRays];
+    //RayTraceStep steps[numSecondaryRays];  // C++ variable arrays not portable (MSVC fails to compile)
+    std::vector<RayTraceStep> steps(numSecondaryRays);
 
 
 	for(uint i=0; i< numSecondaryRays; i++)

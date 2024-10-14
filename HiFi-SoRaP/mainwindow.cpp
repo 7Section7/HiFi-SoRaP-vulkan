@@ -52,6 +52,10 @@ void MainWindow::setVisualizations(std::vector<VisualizationWindow *>&vis)
 	dataVisualizations = vis;
 }
 
+void MainWindow::setVulkanInstance(QVulkanInstance* inst) {
+    this->inst = inst;
+}
+
 void MainWindow::on_bttn_loadOBJ_clicked()
 {
 	QString filename;
@@ -255,15 +259,15 @@ void MainWindow::on_bttn_generateOutput_clicked()
 	/*
 	numSecondaryRays->setValue(1);
 	numDiffuseRays->setRange(0,100);*/
-	/*
-for(int j=0; j<=5; j++)
-{
+        /*
+    for(int j=0; j<=5; j++)
+    {
 
 
-for(int i =1; i<=5; i++)
-{numDiffuseRays->setRange(0,100);
-	numDiffuseRays->setValue(pow(2,j));
-*/
+    for(int i =1; i<=5; i++)
+    {numDiffuseRays->setRange(0,100);
+        numDiffuseRays->setValue(pow(2,j));
+    */
 
 	//FI DELETE
 

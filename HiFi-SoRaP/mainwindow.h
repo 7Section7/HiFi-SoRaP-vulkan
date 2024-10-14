@@ -18,6 +18,8 @@
 #include <QFileDialog>
 #include <QProgressBar>
 
+#include <QVulkanInstance>
+
 //#include "SRP/srp.h"
 #include "SRP/CPU_SRP/cannonball.h"
 #include "SRP/CPU_SRP/nplate.h"
@@ -50,6 +52,7 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 	void setVisualizations(std::vector<VisualizationWindow *> &vis);
+    void setVulkanInstance(QVulkanInstance* inst);
 
 private slots:
 	void on_bttn_loadOBJ_clicked();
@@ -88,6 +91,8 @@ private:
 
 	SRP *srp[MAX_SRP_MODELS];
 	SRPModel model;
+
+    QVulkanInstance* inst;
 
 	std::vector<GLWindow*> glVisualizations;
 	std::vector<VisualizationWindow*> dataVisualizations;

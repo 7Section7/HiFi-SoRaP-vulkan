@@ -11,7 +11,7 @@
 
 #include <QtWidgets>
 //#include "glwidget.h"
-#include "GLVisualization/glwindow.h"
+//#include "GLVisualization/glwindow.h"
 
 #include "DataVisualization/visualizationwindow.h"
 //#include <QMainWindow>
@@ -19,6 +19,8 @@
 #include <QProgressBar>
 
 #include <QVulkanInstance>
+#include "VulkanVisualization/vkvisualization.h"
+
 
 //#include "SRP/srp.h"
 #include "SRP/CPU_SRP/cannonball.h"
@@ -94,7 +96,9 @@ private:
 
     QVulkanInstance* inst;
 
-	std::vector<GLWindow*> glVisualizations;
+    std::vector<VkVisualization*> vkVisualizations;
+
+    //std::vector<GLWindow*> glVisualizations;
 	std::vector<VisualizationWindow*> dataVisualizations;
 	std::vector<ComparisonWindow*> comparisonVisualizations;
 

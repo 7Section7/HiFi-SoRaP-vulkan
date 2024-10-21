@@ -3,8 +3,6 @@
         <file>resources/models/cube0.mtl</file>
         <file>resources/models/cube0.pix</file>
         <file>resources/images/mountain.png</file>
-        <file>resources/shaders/fshader1.glsl</file>
-        <file>resources/shaders/vshader1.glsl</file>
         <file>resources/images/chartIcon.png</file>
         <file>resources/images/satelliteIcon.png</file>
         <file>resources/images/satelliteIcon2.png</file>
@@ -22,16 +20,22 @@
         <file>resources/images/resetButton.png</file>
         <file>resources/images/stop.png</file>
         <file>resources/models/cube0.obj</file>
-        <file>resources/shaders/zbuffer_fshader.glsl</file>
-        <file>resources/shaders/raytrace_multiple_scattering_fshader.glsl</file>
-        <file>resources/shaders/render_fshader.glsl</file>
         <file>resources/sphere1.obj</file>
         <file>resources/sphere1.mtl</file>
         <file>resources/models/cube0_nplat_comma.in</file>
         <file>resources/models/cube0_nplat_dot.in</file>
         <file>resources/models/BoxPlate/nplate_boxplate_comma.in</file>
         <file>resources/models/BoxPlate/nplate_boxplate_dot.in</file>
-        <file>resources/shaders/raytrace_improved_fshader.glsl</file>
-        <file>resources/shaders/raytrace_rand_xorshift_fshader.glsl</file>
+        <file>resources/glshaders/fshader1.glsl</file>
+        <file>resources/glshaders/raytrace_improved_fshader.glsl</file>
+        <file>resources/glshaders/raytrace_multiple_scattering_fshader.glsl</file>
+        <file>resources/glshaders/raytrace_rand_xorshift_fshader.glsl</file>
+        <file>resources/glshaders/render_fshader.glsl</file>
+        <file>resources/glshaders/vshader1.glsl</file>
+        <file>resources/glshaders/zbuffer_fshader.glsl</file>
+        <file>resources/shaders/color.frag</file>
+        <file>resources/shaders/color.vert</file>
+        <file>resources/shaders/color_frag.spv</file>
+        <file>resources/shaders/color_vert.spv</file>
     </qresource>
 </RCC>

@@ -22,6 +22,12 @@ int main(int argc, char *argv[])
 
     QVulkanInstance inst;
 
+    // supported layers
+    qInfo("Supported Vulkan instance layers");
+    for(auto layer : inst.supportedLayers()) {
+        qInfo(layer.name);
+    }
+
     // set vulkan desired layers
     // VK_LAYER_KHRONOS_validation for debug purposes
     inst.setLayers(QByteArrayList() << "VK_LAYER_KHRONOS_validation");

@@ -67,6 +67,9 @@ INCLUDEPATH += Lib/glm/Core
 
 SOURCES +=  \
 	SRP/CPU_SRP/cannonball.cpp \
+    VulkanVisualization/vkvisualization.cpp \
+    VulkanVisualization/vulkanrenderer.cpp \
+    VulkanVisualization/vulkanwindow.cpp \
         main.cpp \
         mainwindow.cpp \
     MeshObjects/material.cpp \
@@ -199,6 +202,9 @@ SOURCES +=  \
 
 HEADERS += \
 	SRP/CPU_SRP/cannonball.h \
+    VulkanVisualization/vkvisualization.h \
+    VulkanVisualization/vulkanrenderer.h \
+    VulkanVisualization/vulkanwindow.h \
         mainwindow.h \
     MeshObjects/triangle.h \
     MeshObjects/material.h \

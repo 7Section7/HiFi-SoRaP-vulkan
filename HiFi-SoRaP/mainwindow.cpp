@@ -39,9 +39,9 @@ MainWindow::~MainWindow()
 	for(uint i=0; i< dataVisualizations.size();i++)
 		if(dataVisualizations[i])
 			delete dataVisualizations[i];
-	for(uint i=0; i< glVisualizations.size();i++)
-		if(glVisualizations[i])
-			delete glVisualizations[i];
+    for(uint i=0; i< vkVisualizations.size();i++)
+        if(vkVisualizations[i])
+            delete vkVisualizations[i];
 	for(uint i=0; i< comparisonVisualizations.size();i++)
 		if(comparisonVisualizations[i])
 			delete comparisonVisualizations[i];
@@ -248,7 +248,7 @@ void MainWindow::loadUserParameters()
 //considering the light coming from different points of a sphere.
 void MainWindow::on_bttn_generateOutput_clicked()
 {
-	if(ui->comboBox->currentIndex()==0){
+    if(ui->comboBox->currentIndex()==0){
 		QMessageBox msgBox;
 		msgBox.setText("No method has been selected yet.");
 		msgBox.exec();
@@ -298,7 +298,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 		}
 	}
 	QVBoxLayout * vLayout;
-
+    /*
 	if(!dynamic_cast<BasicSRP*>(srp[model])){
 		window = new QWidget;
 		vLayout = new QVBoxLayout;
@@ -323,7 +323,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 		glWidget->setMinimumSize(Nx,Ny);
 
 		vLayout->addWidget(glWidget);
-	}
+    }
 	if(!dynamic_cast<BasicSRP*>(srp[model])){
 		QProgressBar* progressBar = new QProgressBar();
 		progressBar->setMinimum(0);
@@ -349,7 +349,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 			glWidget->setSatellite(gpuMethod->getSatellite());
 
 			glWidget->setShowSatellite(false);
-		}
+        }
 
 		window->show();
 	}
@@ -382,7 +382,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 	visualization->setAZstep(az);
 
 	visualization->plotResults(results, particularNameResult);
-	dataVisualizations.push_back(visualization);
+    dataVisualizations.push_back(visualization);
 
 	//DELETE:
 	/*
@@ -393,7 +393,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 	outputName += "apendice1_cpu_256x256_RNG_polarCoordinates/gpu_psp6_newMtl_256x256_30x30_";
 	outputName += numRays+"x"+numDiffuse+"_"+std::to_string(i);
 	outputName +=".txt";
-	results->saveData(NAZ,NEL,outputName);
+    results->saveData(NAZ,NEL,outputName);
 }
 }
 */
@@ -401,6 +401,7 @@ void MainWindow::on_bttn_generateOutput_clicked()
 
 }
 
+/*
 //Load a window to visualize the satellite with particular SRP forces.
 void MainWindow::on_bttn_visualizeSatellite_clicked()
 {
@@ -422,6 +423,31 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
 	glVisualization->show();
 	glVisualization->drawSatellite();
 	glVisualizations.push_back(glVisualization);
+}
+*/
+void MainWindow::on_bttn_visualizeSatellite_clicked()
+{
+    if(ui->comboBox->currentIndex()==0){
+        QMessageBox msgBox;
+        msgBox.setText("No method has been selected yet.");
+        msgBox.exec();
+        return;
+    }
+
+    loadUserParameters();
+
+    if(errorCode<0)
+        return;
+
+    VulkanWindow* vulkanWindow = new VulkanWindow;
+    vulkanWindow->setVulkanInstance(this->inst);
+
+    VkVisualization* vkVisualization = new VkVisualization(vulkanWindow);
+    //vkVisualization->setModel(srp[model]);
+    //vkVisualization->setSatellite(srp[model]->getSatellite());
+    vkVisualization->show();
+    //vkVisualization->drawSatellite();
+    vkVisualizations.push_back(vkVisualization);
 }
 
 //Obtain the name of the model.

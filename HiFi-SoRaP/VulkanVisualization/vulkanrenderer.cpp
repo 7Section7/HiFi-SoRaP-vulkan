@@ -237,8 +237,10 @@ void VulkanRenderer::initResources() {
 
 
     // Shaders
-    VkShaderModule vertShaderModule = createShader(QStringLiteral(":/shaders/color_vert.spv"));
-    VkShaderModule fragShaderModule = createShader(QStringLiteral(":/shaders/color_frag.spv"));
+    VkShaderModule vertShaderModule = createShader(QStringLiteral(":/resources/shaders/color_vert.spv"));
+    VkShaderModule fragShaderModule = createShader(QStringLiteral(":/resources/shaders/color_frag.spv"));
+
+    qInfo("Shaders successfully created");
 
     // Graphics pipeline
     VkGraphicsPipelineCreateInfo pipelineInfo;

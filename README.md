@@ -90,7 +90,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     Inside the Qt version choosen (for example, "Qt 5.14.2"), enable also the macOS toggle:<br/>
 <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/wMhnMZTK/qt-steps-mac3.png" alt="qt-steps-mac3"/></a><br/><br/>	
 <br/>
-    When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project). For example, you can choose the clang one:
+    When opening the project for the first time, you may be asked to choose a kit (the compiler for the project). For example, you can choose the clang one:
     <a href='https://postimages.org/' target='_blank'><img src='https://i.postimg.cc/tggTP0fH/qt-step-3-5.png' border='0' alt='qt-step-3-5'/></a>
 
 <br/>
@@ -118,8 +118,9 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 <br/>
 <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/Xvphdp7k/visual-studio-1.png" alt="visual-studio-1"/></a><br/><br/>
 <br/>
-    * Check the next things when installing Visual Studio:
-    * Edit: Choose also "MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)", as MSVC2017 is the compiler for the Qt version that will be installed.
+* Check the next things when installing Visual Studio:
+
+* Edit: Choose also "MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)", as MSVC2017 is the supported compiler for the Qt version that will be installed. MSVC2019 should be also compatible, but it was not tested.
 	
 <br/>
 <a href="https://postimg.cc/8sX4zmWQ" target="_blank"><img src="https://i.postimg.cc/rFMPghwm/visual-studio-2.png" alt="visual-studio-2"/></a><br/><br/>
@@ -130,7 +131,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 <br/>
 2. Install Qt
 
-    * Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
+* Qt installer can be downloaded from <a href="https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source%3Futm_referrer%3Dhttps%253A%252F%252Fwww.qt.io%252Fdownload">here</a>.
 
 <br/>
     * Check the things in the Qt installer as here:
@@ -142,7 +143,9 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Try to open QtCreator and load the project. When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project).
     In our case, we have used the MSCV one:
 <a href="https://postimg.cc/tY7r3My4" target="_blank"><img src="https://i.postimg.cc/RVLjzkDK/qt-steps-windows2.png" alt="qt-steps-windows2"/></a><br/><br/>
-The MSVC2017 32 bit compiler is needed. If Qt doesn't automatically detects this compiler, it can be manually setup, with Inizialization pointing to "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat":
+
+The MSVC2017 32 bit compiler is needed. If Qt doesn't automatically detect this compiler, it can be manually setup, with Inizialization pointing to "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" and arguments as the image:
+
 <a href="https://postimg.cc/F1y1ptth" target="_blank"><img src="https://i.postimg.cc/nV57HZ09/image.png" alt="compiler-setup"/></a>
 
 <br/>

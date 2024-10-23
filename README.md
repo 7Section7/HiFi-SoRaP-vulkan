@@ -119,6 +119,7 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
 <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/Xvphdp7k/visual-studio-1.png" alt="visual-studio-1"/></a><br/><br/>
 <br/>
     * Check the next things when installing Visual Studio:
+    * Edit: Choose also "MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)", as MSVC2017 is the compiler for the Qt version that will be installed.
 	
 <br/>
 <a href="https://postimg.cc/8sX4zmWQ" target="_blank"><img src="https://i.postimg.cc/rFMPghwm/visual-studio-2.png" alt="visual-studio-2"/></a><br/><br/>
@@ -141,10 +142,13 @@ Operative Systems recommended: Linux, Mac. (It can also run on Windows)
     * Try to open QtCreator and load the project. When opening the project for the fisrt time, you may be asked to choose a kit (the compiler for the project).
     In our case, we have used the MSCV one:
 <a href="https://postimg.cc/tY7r3My4" target="_blank"><img src="https://i.postimg.cc/RVLjzkDK/qt-steps-windows2.png" alt="qt-steps-windows2"/></a><br/><br/>
+The MSVC2017 32 bit compiler is needed. If Qt doesn't automatically detects this compiler, it can be manually setup, with Inizialization pointing to "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat":
+<a href="https://postimg.cc/F1y1ptth" target="_blank"><img src="https://i.postimg.cc/nV57HZ09/image.png" alt="compiler-setup"/></a>
+
 <br/>
 <br/>
 3. Regarding OpenGL:
-    * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll" or the program crashes when running the project on Qt, this dll can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project.
+    * The library of OpenGL if already in the project. However, if it requires you the file "glext.dll" or the program crashes when running the project on Qt, this dll can be found in the RayTracingSRP folder. Put this dll file in the folder where there are the compiled objects of this project. This binary is 32 bits compiled, therefore the compiler needed is 32  bits.
 
 <br/>
 <br/>

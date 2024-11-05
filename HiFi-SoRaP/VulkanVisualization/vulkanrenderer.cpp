@@ -2,15 +2,25 @@
 #include <QVulkanFunctions>
 #include <QFile>
 
+
 // Note that the vertex data and the projection matrix assume OpenGL. With
 // Vulkan Y is negated in clip space and the near/far plane is at 0/1 instead
 // of -1/1. These will be corrected for by an extra transformation when
 // calculating the modelview-projection matrix.
+/*
 static float vertexData[] = { // Y up, front = CCW
-    0.0f,   0.5f,   1.0f, 0.0f, 0.0f,
-    -0.5f,  -0.5f,   0.0f, 1.0f, 0.0f,
-    0.5f,  -0.5f,   0.0f, 0.0f, 1.0f
+    0.0f,   0.0f,   1.0f, 0.0f, 0.0f,
+    -1.0f,  -1.0f,   0.0f, 1.0f, 0.0f,
+    1.0f,  -1.0f,   0.0f, 0.0f, 1.0f
 };
+*/
+
+
+struct Vertex {
+    float position[4];
+    float normal[4];
+};
+
 
 static const int UNIFORM_DATA_SIZE = 16 * sizeof(float);
 
@@ -49,7 +59,7 @@ VkShaderModule VulkanRenderer::createShader(const QString &name)
     return shaderModule;
 }
 
-VulkanRenderer::VulkanRenderer(QVulkanWindow* w)
+VulkanRenderer::VulkanRenderer(VulkanWindow* w)
     : m_window(w)
 {}
 
@@ -82,12 +92,30 @@ void VulkanRenderer::initResources() {
     const VkDeviceSize uniAlign = pDevLimits->minUniformBufferOffsetAlignment;
     qDebug("uniform buffer offset aligment is %u", (uint) uniAlign);
 
-    // create buffer to store vertexs
+    // TODO: take precision into account
+    typedef precision::value_type VertexFloat;
+
+    quint8 *vertData = reinterpret_cast<quint8*>(
+        m_window->satellite->getMesh()->replicatedVertices.data()
+    );
+    const int vertexByteSize = m_window->satellite->getMesh()->replicatedVertices.size() * sizeof(vector4);
+
+    quint8* normalsData = reinterpret_cast<quint8*>(
+        m_window->satellite->getMesh()->replicatedNormals.data()
+    );
+    const int normalsByteSize = m_window->satellite->getMesh()->replicatedNormals.size() * sizeof(vector4);
+
+    const VkDeviceSize vertexDataSize = vertexByteSize + normalsByteSize;
+
+
+    // create buffer to store vertices
     VkBufferCreateInfo bufInfo;
     memset(&bufInfo, 0, sizeof(bufInfo));
+
     bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     // Our internal layout is vertex, uniform, uniform, ... with each uniform buffer start offset aligned to uniAlign.
-    const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
+    //const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
+    const VkDeviceSize vertexAllocSize = aligned(vertexDataSize, uniAlign);
     const VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
     bufInfo.size = vertexAllocSize + concurrentFrameCount * uniformAllocSize;
     // use as both vertex buffer and uniform buffer
@@ -112,17 +140,23 @@ void VulkanRenderer::initResources() {
     err = m_devFuncs->vkAllocateMemory(dev, &memAllocInfo, nullptr, &m_bufMem);
     if (err != VK_SUCCESS)
         qFatal("Failed to allocate memory: %d", err);
+
     // bind the allocated memory to the just created buffer
     err = m_devFuncs->vkBindBufferMemory(dev, m_buf, m_bufMem, 0);
     if (err != VK_SUCCESS)
         qFatal("Failed to bind buffer memory: %d", err);
 
-    // map device memory into application address space
+    // map device memory into application address space to fill the buffer
     quint8 *p;
     err = m_devFuncs->vkMapMemory(dev, m_bufMem, 0, memReq.size, 0, reinterpret_cast<void **>(&p));
     if (err != VK_SUCCESS)
         qFatal("Failed to map memory: %d", err);
-    memcpy(p, vertexData, sizeof(vertexData));
+
+    memcpy(p, vertData, vertexByteSize);
+    memcpy(p + vertexByteSize, normalsData, normalsByteSize);
+
+    //memcpy(p + vertexByte, vertexData, sizeof(vertexData));
+
     QMatrix4x4 ident;
     memset(m_uniformBufInfo, 0, sizeof(m_uniformBufInfo));
     for (int i = 0; i < concurrentFrameCount; ++i) {
@@ -134,35 +168,61 @@ void VulkanRenderer::initResources() {
     }
     m_devFuncs->vkUnmapMemory(dev, m_bufMem);
 
-    VkVertexInputBindingDescription vertexBindingDesc = {
-        0, // binding
-        5 * sizeof(float),
-        VK_VERTEX_INPUT_RATE_VERTEX
-    };
-    VkVertexInputAttributeDescription vertexAttrDesc[] = {
-        { // position
-            0, // location
-            0, // binding
-            VK_FORMAT_R32G32_SFLOAT,
-            0
-        },
-        { // color
-            1,
-            0,
-            VK_FORMAT_R32G32B32_SFLOAT,
-            2 * sizeof(float)
-        }
-    };
+    // VERTEX ATTRIBUTES
+
+    // for interleaved data
+    /*
+    VkVertexInputBindingDescription vertexBindingDesc{};
+    vertexBindingDesc.binding = 0;
+    vertexBindingDesc.stride = sizeof(Vertex);
+    vertexBindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+
+    VkVertexInputAttributeDescription vertexAttrDesc[2];
+
+    vertexAttrDesc[0].binding = 0;
+    vertexAttrDesc[0].location = 0;
+    vertexAttrDesc[0].format = VK_FORMAT_R32G32_SFLOAT;
+    vertexAttrDesc[0].offset = offsetof(Vertex, position);
+
+    vertexAttrDesc[1].binding = 0;
+    vertexAttrDesc[1].location = 1;
+    vertexAttrDesc[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    vertexAttrDesc[1].offset = offsetof(Vertex, normal);
+    */
+
+    // for non-interleaved data
+    VkVertexInputBindingDescription vertexBindingDesc[2];
+    vertexBindingDesc[0].binding = 0;
+    vertexBindingDesc[0].stride = 4 * sizeof(float);
+    vertexBindingDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    vertexBindingDesc[1].binding = 1;
+    vertexBindingDesc[0].stride = 4 * sizeof(float);
+    vertexBindingDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+
+    VkVertexInputAttributeDescription vertexAttrDesc[2];
+
+    vertexAttrDesc[0].binding = 0;
+    vertexAttrDesc[0].location = 0;
+    vertexAttrDesc[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    vertexAttrDesc[0].offset = 0;
+
+    vertexAttrDesc[1].binding = 1;
+    vertexAttrDesc[1].location = 1;
+    vertexAttrDesc[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    vertexAttrDesc[1].offset = 0;
 
     // vertex input
     VkPipelineVertexInputStateCreateInfo vertexInputInfo;
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertexInputInfo.pNext = nullptr;
     vertexInputInfo.flags = 0;
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.pVertexBindingDescriptions = &vertexBindingDesc;
+    vertexInputInfo.vertexBindingDescriptionCount = 2;
+    vertexInputInfo.pVertexBindingDescriptions = &vertexBindingDesc[0];
     vertexInputInfo.vertexAttributeDescriptionCount = 2;
-    vertexInputInfo.pVertexAttributeDescriptions = vertexAttrDesc;
+    vertexInputInfo.pVertexAttributeDescriptions = &vertexAttrDesc[0];
 
     // Set up descriptor set and its layout.
     VkDescriptorPoolSize descPoolSizes = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, uint32_t(concurrentFrameCount) };
@@ -354,7 +414,7 @@ void VulkanRenderer::initSwapChainResources() {
     m_proj = m_window->clipCorrectionMatrix(); // adjust for Vulkan-OpenGL clip space differences
     const QSize sz = m_window->swapChainImageSize();
     m_proj.perspective(45.0f, sz.width() / (float) sz.height(), 0.01f, 100.0f);
-    m_proj.translate(0, 0, -4);
+    m_proj.translate(0, 0, -10);
 }
 
 void VulkanRenderer::releaseSwapChainResources() {
@@ -404,6 +464,7 @@ void VulkanRenderer::releaseResources() {
 
 void VulkanRenderer::startNextFrame() {
 
+    // we will be adding commands to the currentCommandBuffer managed by QVulkanWindow
     VkDevice dev = m_window->device();
     VkCommandBuffer cb = m_window->currentCommandBuffer();
     const QSize sz = m_window->swapChainImageSize();
@@ -445,6 +506,7 @@ void VulkanRenderer::startNextFrame() {
                                         &m_descSet[m_window->currentFrame()], 0, nullptr);
     VkDeviceSize vbOffset = 0;
     m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &m_buf, &vbOffset);
+    m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &m_buf, &vbOffset);
 
     VkViewport viewport;
     viewport.x = viewport.y = 0;
@@ -461,7 +523,10 @@ void VulkanRenderer::startNextFrame() {
     scissor.extent.height = viewport.height;
     m_devFuncs->vkCmdSetScissor(cb, 0, 1, &scissor);
 
-    m_devFuncs->vkCmdDraw(cb, 3, 1, 0, 0);
+    uint32_t numVertices = static_cast<uint32_t>(
+        m_window->satellite->getMesh()->replicatedVertices.size()
+    );
+    m_devFuncs->vkCmdDraw(cb, numVertices, 1, 0, 0);
 
     m_devFuncs->vkCmdEndRenderPass(cmdBuf);
 

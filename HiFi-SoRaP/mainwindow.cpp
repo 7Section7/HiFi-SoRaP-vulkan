@@ -181,7 +181,7 @@ void MainWindow::loadUserParameters()
 	srp[model]->setSatellite(satellite);
 
 	//Load the initial properties of the selected method.
-
+    /*
 	int reflectiveType =Reflective;
 	if(model == AdvancedGPUModel)
 	{
@@ -241,6 +241,7 @@ void MainWindow::loadUserParameters()
 			return;
 		}
 	}
+    */
 	errorCode=1;
 }
 
@@ -427,6 +428,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
 */
 void MainWindow::on_bttn_visualizeSatellite_clicked()
 {
+    /*
     if(ui->comboBox->currentIndex()==0){
         QMessageBox msgBox;
         msgBox.setText("No method has been selected yet.");
@@ -438,15 +440,21 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
 
     if(errorCode<0)
         return;
+    */
+
+    loadUserParameters();
 
     VulkanWindow* vulkanWindow = new VulkanWindow;
     vulkanWindow->setVulkanInstance(this->inst);
 
     VkVisualization* vkVisualization = new VkVisualization(vulkanWindow);
-    //vkVisualization->setModel(srp[model]);
-    //vkVisualization->setSatellite(srp[model]->getSatellite());
+
+    vkVisualization->setModel(srp[model]);
+    vkVisualization->setSatellite(srp[model]->getSatellite());
+
     vkVisualization->show();
     //vkVisualization->drawSatellite();
+
     vkVisualizations.push_back(vkVisualization);
 }
 

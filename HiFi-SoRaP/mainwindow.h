@@ -83,7 +83,7 @@ private:
 	Ui::MainWindow *ui;
 
 	QLineEdit * infoSatellite;
-	QDoubleSpinBox *cr, *area;
+    QDoubleSpinBox *cr, *area;
 	QSpinBox *nx,*ny,*numSecondaryRays, *numDiffuseRays;
 	QRadioButton *specularReflection, *diffuseReflection;
 

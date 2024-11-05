@@ -1,7 +1,7 @@
 #ifndef VULKANWINDOW_H
 #define VULKANWINDOW_H
 
-#include "vulkanrenderer.h"
+#include <QVulkanWindow>
 #include <QtWidgets>
 
 
@@ -29,6 +29,8 @@
 enum RenderMode{CPU=0, GPU=1};
 
 
+class VulkanRenderer;
+
 /*
  * This class creates a window that allows the user interact with the satellite and individual forces.
  * Similar to GLWidget, this class will be embeded inside VkVisualization (which is analogus to GLWindow)
@@ -39,6 +41,8 @@ class VulkanWindow : public QVulkanWindow
 public:
 
     QVulkanWindowRenderer* createRenderer() override;
+
+    VulkanRenderer* renderer;
 
     struct LineForceSRP{
         LineObject* line;

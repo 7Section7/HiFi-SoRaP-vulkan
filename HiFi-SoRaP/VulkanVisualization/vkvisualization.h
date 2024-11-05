@@ -36,11 +36,11 @@ public:
     explicit VkVisualization(VulkanWindow* w);
     //virtual ~VkVisualization();
 
-    // void setSatellite(Object* satellite);
+    void setSatellite(Object* satellite);
     // void drawSatellite();
 
     // SRP *getModel() const;
-    // void setModel(SRP *value);
+    void setModel(SRP *value);
 
 private:
     void generateAxisInformation(QHBoxLayout *axisLayoutContainer,QHBoxLayout *axisLayout,QLabel *labelAxisName,

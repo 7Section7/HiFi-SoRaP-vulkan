@@ -1,5 +1,21 @@
 #include "vkvisualization.h"
 
+void VkVisualization::setModel(SRP *value)
+{
+    model = value;
+    // TODO:
+    /*
+    if(AdvancedGPU* m=dynamic_cast<AdvancedGPU*>(model)){
+        glWidget->setRayTraceGPU(m);
+    }
+    */
+}
+
+void VkVisualization::setSatellite(Object *satellite)
+{
+    vk_window->setSatellite(satellite);
+}
+
 VkVisualization::VkVisualization(VulkanWindow* w) : QWidget(), vk_window(w)
 {
     QWidget* vkWidget = QWidget::createWindowContainer(w);

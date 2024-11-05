@@ -1,12 +1,12 @@
 #ifndef VULKANRENDERER_H
 #define VULKANRENDERER_H
 
-#include <QVulkanWindow>
+#include "vulkanwindow.h"
 
 class VulkanRenderer : public QVulkanWindowRenderer
 {
 public:
-    VulkanRenderer(QVulkanWindow* w);
+    VulkanRenderer(VulkanWindow* w);
 
     void initResources() override;
     void initSwapChainResources() override;
@@ -20,7 +20,7 @@ private:
 protected:
     VkShaderModule createShader(const QString &name);
 
-    QVulkanWindow *m_window;
+    VulkanWindow *m_window;
     QVulkanDeviceFunctions *m_devFuncs;
 
     VkDeviceMemory m_bufMem = VK_NULL_HANDLE;
@@ -33,10 +33,13 @@ protected:
 
     VkPipelineCache m_pipelineCache = VK_NULL_HANDLE;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_pipeline = VK_NULL_HANDLE;
+    VkPipeline m_pipeline = VK_NULL_HANDLE;    
 
     QMatrix4x4 m_proj;
     float m_rotation = 0.0f;
+
+
+
 };
 
 #endif // VULKANRENDERER_H

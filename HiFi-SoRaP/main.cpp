@@ -28,15 +28,26 @@ int main(int argc, char *argv[])
         qInfo(layer.name);
     }
 
+    QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
+
     // set vulkan desired layers
     // VK_LAYER_KHRONOS_validation for debug purposes
     inst.setLayers(QByteArrayList() << "VK_LAYER_KHRONOS_validation");
+    //inst.setLayers(QByteArrayList() << "VK_LAYER_LUNARG_standard_validation");
 
     if (!inst.create()) {
         qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
     }
 
     qInfo("Created vulkan instance: %d", inst.isValid());
+
+    // initialized layers
+    qInfo("Supported Vulkan instance layers");
+    for(auto layer : inst.layers()) {
+        qInfo(layer);
+    }
+
+
     w.setVulkanInstance(&inst);
 
 	w.show();

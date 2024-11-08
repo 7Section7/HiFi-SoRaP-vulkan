@@ -371,6 +371,7 @@ void VkVisualization::rotateSatellite()
     angleZ = axes[_Z_].spinBox->value()/180.0f*M_PI;
 
     //glWidget->rotateSatellite(angleX,angleY,angleZ);
+    vk_window->rotateSatellite(angleX, angleY, angleZ);
 }
 
 void VkVisualization::clearLineForces()

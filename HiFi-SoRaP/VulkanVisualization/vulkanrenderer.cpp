@@ -116,10 +116,9 @@ void VulkanRenderer::initResources() {
     // Our internal layout is vertex, uniform, uniform, ... with each uniform buffer start offset aligned to uniAlign.
     //const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
     const VkDeviceSize vertexAllocSize = aligned(vertexDataSize, uniAlign);
-    const VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
-    bufInfo.size = vertexAllocSize + concurrentFrameCount * uniformAllocSize;
+    bufInfo.size = vertexAllocSize; // + concurrentFrameCount * uniformAllocSize;
     // use as both vertex buffer and uniform buffer
-    bufInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    bufInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
     VkResult err = m_devFuncs->vkCreateBuffer(dev, &bufInfo, nullptr, &m_buf);
     if (err != VK_SUCCESS) {
@@ -156,17 +155,53 @@ void VulkanRenderer::initResources() {
     memcpy(p + vertexByteSize, normalsData, normalsByteSize);
 
     //memcpy(p + vertexByte, vertexData, sizeof(vertexData));
+    m_devFuncs->vkUnmapMemory(dev, m_bufMem);
+
+    // Uniform buffer
+    VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
+
+    VkBufferCreateInfo uboInfo;
+    memset(&uboInfo, 0, sizeof(uboInfo));
+    uboInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    uboInfo.size = concurrentFrameCount * uniformAllocSize;
+    // use as both vertex buffer and uniform buffer
+    uboInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    err = m_devFuncs->vkCreateBuffer(dev, &uboInfo, nullptr, &m_uniBuf);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to create uniform buffer: %d", err);
+
+
+    m_devFuncs->vkGetBufferMemoryRequirements(dev, m_uniBuf, &memReq);
+
+    memAllocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        nullptr,
+        memReq.size,
+        m_window->hostVisibleMemoryIndex()
+    };
+    err = m_devFuncs->vkAllocateMemory(dev, &memAllocInfo, nullptr, &m_uniBufMem);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to allocate memory: %d", err);
+    err = m_devFuncs->vkBindBufferMemory(dev, m_uniBuf, m_uniBufMem, 0);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to bind buffer memory: %d", err);
+
+    // map device memory into application address space to fill the buffer
+    quint8 *q;
+    err = m_devFuncs->vkMapMemory(dev, m_uniBufMem, 0, memReq.size, 0, reinterpret_cast<void **>(&q));
+    if (err != VK_SUCCESS)
+        qFatal("Failed to map memory: %d", err);
 
     QMatrix4x4 ident;
     memset(m_uniformBufInfo, 0, sizeof(m_uniformBufInfo));
     for (int i = 0; i < concurrentFrameCount; ++i) {
-        const VkDeviceSize offset = vertexAllocSize + i * uniformAllocSize;
-        memcpy(p + offset, ident.constData(), 16 * sizeof(float));
-        m_uniformBufInfo[i].buffer = m_buf;
+        const VkDeviceSize offset = i * uniformAllocSize;
+        memcpy(q + offset, ident.constData(), 16 * sizeof(float));
+        m_uniformBufInfo[i].buffer = m_uniBuf;
         m_uniformBufInfo[i].offset = offset;
         m_uniformBufInfo[i].range = uniformAllocSize;
     }
-    m_devFuncs->vkUnmapMemory(dev, m_bufMem);
+    m_devFuncs->vkUnmapMemory(dev, m_uniBufMem);
 
     // VERTEX ATTRIBUTES
 
@@ -415,6 +450,7 @@ void VulkanRenderer::initSwapChainResources() {
     const QSize sz = m_window->swapChainImageSize();
     m_proj.perspective(45.0f, sz.width() / (float) sz.height(), 0.01f, 100.0f);
     m_proj.translate(0, 0, -10);
+
 }
 
 void VulkanRenderer::releaseSwapChainResources() {
@@ -462,6 +498,7 @@ void VulkanRenderer::releaseResources() {
     }
 }
 
+
 void VulkanRenderer::startNextFrame() {
 
     // we will be adding commands to the currentCommandBuffer managed by QVulkanWindow
@@ -489,14 +526,24 @@ void VulkanRenderer::startNextFrame() {
     m_devFuncs->vkCmdBeginRenderPass(cmdBuf, &rpBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     quint8 *p;
-    VkResult err = m_devFuncs->vkMapMemory(dev, m_bufMem, m_uniformBufInfo[m_window->currentFrame()].offset,
+    VkResult err = m_devFuncs->vkMapMemory(dev, m_uniBufMem, m_uniformBufInfo[m_window->currentFrame()].offset,
                                            UNIFORM_DATA_SIZE, 0, reinterpret_cast<void **>(&p));
     if (err != VK_SUCCESS)
         qFatal("Failed to map memory: %d", err);
+
     QMatrix4x4 m = m_proj;
     m.rotate(m_rotation, 0, 1, 0);
-    memcpy(p, m.constData(), 16 * sizeof(float));
-    m_devFuncs->vkUnmapMemory(dev, m_bufMem);
+
+
+
+
+    Eigen::Matrix4f mvp = m_window->camera.getMVP();
+
+
+    memcpy(p, mvp.data(), 16 * sizeof(float));
+
+    //memcpy(p, m.constData(), 16 * sizeof(float));
+    m_devFuncs->vkUnmapMemory(dev, m_uniBufMem);
 
     // Not exactly a real animation system, just advance on every frame for now.
     m_rotation += 1.0f;

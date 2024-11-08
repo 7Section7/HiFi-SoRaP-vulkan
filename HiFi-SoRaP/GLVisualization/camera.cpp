@@ -235,6 +235,25 @@ void Camera::setCameraStep(double step) {
 	this->step = step;
 }
 
+
+Eigen::Matrix4f Camera::getMVP() {
+    if(abs(zNear - zFar) < 0.2){
+        zNear = 0.0001;
+        zFar = 800;
+        fieldOfView = 60;
+    }
+
+    // setViewport();
+
+    Eigen::Matrix4f projection = setProjection();
+    Eigen::Matrix4f view = setView();
+    Eigen::Matrix4f model = setModel();
+
+    Eigen::Matrix4f mvp = projection * view * model;
+
+    return mvp;
+}
+
 void Camera::toGPU(std::unique_ptr<QGLShaderProgram> &program)
 {
 	if(abs(zNear - zFar) < 0.2){
@@ -243,7 +262,7 @@ void Camera::toGPU(std::unique_ptr<QGLShaderProgram> &program)
 		fieldOfView = 60;
 	}
 
-	setViewport();
+    // setViewport();
 
 	Eigen::Matrix4f projection = setProjection();
 	Eigen::Matrix4f view = setView();
@@ -258,6 +277,7 @@ void Camera::toGPU(std::unique_ptr<QGLShaderProgram> &program)
 
 	Eigen::Vector4f camPos = view.inverse().col(3);
 
+    /*
 	GLuint projectionLocation, viewLocation, modelLocation,
 		normalMatrixLocation, camPositionLocation;
 
@@ -276,26 +296,29 @@ void Camera::toGPU(std::unique_ptr<QGLShaderProgram> &program)
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, view.data());
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, model.data());
 	glUniformMatrix3fv(normalMatrixLocation, 1, GL_FALSE, normal.data());
+    */
 }
 
 void Camera::updateModel(Eigen::Matrix4f rotationMatrix, std::unique_ptr<QGLShaderProgram> &program)
 {
 	Eigen::Matrix4f model = setModel();
 	model = rotationMatrix*model;
-
+    /*
 	program->bind();
 	GLuint modelLocation = program->uniformLocation("model");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, model.data());
+    */
 }
 void Camera::updateModel2(Eigen::Matrix4f rotationMatrix, std::unique_ptr<QGLShaderProgram> &program)
 {
 	Eigen::Matrix4f model = setModel();
 	model = model*rotationMatrix;
 
-
+    /*
 	program->bind();
 	GLuint modelLocation = program->uniformLocation("model");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, model.data());
+    */
 }
 
 void Camera::updateView(Eigen::Matrix4f rotationMatrix, std::unique_ptr<QGLShaderProgram> &program,float distance)
@@ -309,10 +332,11 @@ void Camera::updateView(Eigen::Matrix4f rotationMatrix, std::unique_ptr<QGLShade
 
 	view = kTranslation.matrix() * kRotationA.matrix() * kRotationB.matrix()* rotationMatrix;
 
+    /*
 	program->bind();
 	GLuint viewLocation = program->uniformLocation("view");
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, view.data());
-
+    */
 
 	//update info
 
@@ -326,6 +350,7 @@ void Camera::updateView(Eigen::Matrix4f rotationMatrix, std::unique_ptr<QGLShade
 
 	Eigen::Vector4f camPos = view.inverse().col(3);
 
+    /*
 	GLuint normalMatrixLocation, camPositionLocation;
 
 	normalMatrixLocation =program->uniformLocation("normalMatrix");
@@ -334,16 +359,18 @@ void Camera::updateView(Eigen::Matrix4f rotationMatrix, std::unique_ptr<QGLShade
 
 	glUniform3f(camPositionLocation,camPos[0],camPos[1],camPos[2]);
 	glUniformMatrix3fv(normalMatrixLocation, 1, GL_FALSE, normal.data());
+    */
 
 }
 
 void Camera::updateProjection(double left, double right, double bottom, double top, std::unique_ptr<QGLShaderProgram> &program)
 {
 	Eigen::Matrix4f projectionMatrix = getOrthoProjection(left,right,bottom,top,zNear,zFar);
-
+    /*
 	program->bind();
 	GLuint projectionLocation = program->uniformLocation("projection");
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projectionMatrix.data());
+    */
 }
 
 }  //  namespace dataVisualization

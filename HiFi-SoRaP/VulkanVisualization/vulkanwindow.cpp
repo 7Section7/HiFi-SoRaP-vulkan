@@ -16,6 +16,7 @@ const float kZFar = 800;
 
 VulkanWindow::VulkanWindow(QWidget *parent) : QVulkanWindow()
 {
+    camera.setProjection(kFieldOfView, kZNear, kZFar);
 }
 
 void VulkanWindow::setSatellite(Object *obj)
@@ -101,6 +102,82 @@ void VulkanWindow::setSatellite(Object *obj)
 
     */
 }
+
+
+void VulkanWindow::rotateSatellite(float angleX,float angleY,float angleZ) {
+    if(fabs(angleX-previousAxisX)>0){
+        Eigen::Matrix4f rotationX;
+        Eigen::Vector4f axisX;
+        if(firstRotation){
+            axisX= Eigen::Vector4f(1,0,0,0);
+            rotationX= Eigen::Affine3f(Eigen::AngleAxisf(angleX,Eigen::Vector3f(axisX[0],axisX[1],axisX[2]))).matrix();
+            firstRotation=false;
+        }
+        else{
+            axisX= satelliteRotation*Eigen::Vector4f(1,0,0,0);
+            rotationX= Eigen::Affine3f(Eigen::AngleAxisf(angleX-previousAxisX,Eigen::Vector3f(axisX[0],axisX[1],axisX[2]))).matrix() * satelliteRotation;
+        }
+
+        float sizeX = QVector3D(rotationX(0,0),rotationX(1,0),rotationX(2,0)).length();
+        float sizeY = QVector3D(rotationX(0,1),rotationX(1,1),rotationX(2,1)).length();
+        float sizeZ = QVector3D(rotationX(0,2),rotationX(1,2),rotationX(2,2)).length();
+        rotationX(0,0) /= sizeX; rotationX(1,0) /= sizeX; rotationX(2,0) /= sizeX;
+        rotationX(0,1) /= sizeY; rotationX(1,1) /= sizeY; rotationX(2,1) /= sizeY;
+        rotationX(0,2) /= sizeZ; rotationX(1,2) /= sizeZ; rotationX(2,2) /= sizeZ;
+
+        previousAxisX = angleX;
+        satelliteRotation = rotationX;
+    }
+    else if(fabs(angleY-previousAxisY)>0){
+        Eigen::Matrix4f rotationY;
+        Eigen::Vector4f axisY;
+        if(firstRotation){
+            axisY= Eigen::Vector4f(0,1,0,0);
+            rotationY= Eigen::Affine3f(Eigen::AngleAxisf(angleY,Eigen::Vector3f(axisY[0],axisY[1],axisY[2]))).matrix();
+            firstRotation=false;
+        }
+        else{
+            axisY= satelliteRotation*Eigen::Vector4f(0,1,0,0);
+            rotationY= Eigen::Affine3f(Eigen::AngleAxisf(angleY-previousAxisY,Eigen::Vector3f(axisY[0],axisY[1],axisY[2]))).matrix() * satelliteRotation;
+        }
+
+        float sizeX = QVector3D(rotationY(0,0),rotationY(1,0),rotationY(2,0)).length();
+        float sizeY = QVector3D(rotationY(0,1),rotationY(1,1),rotationY(2,1)).length();
+        float sizeZ = QVector3D(rotationY(0,2),rotationY(1,2),rotationY(2,2)).length();
+        rotationY(0,0) /= sizeX; rotationY(1,0) /= sizeX; rotationY(2,0) /= sizeX;
+        rotationY(0,1) /= sizeY; rotationY(1,1) /= sizeY; rotationY(2,1) /= sizeY;
+        rotationY(0,2) /= sizeZ; rotationY(1,2) /= sizeZ; rotationY(2,2) /= sizeZ;
+
+        previousAxisY = angleY;
+        satelliteRotation = rotationY;
+    }
+    else if(fabs(angleZ-previousAxisZ)>0){
+        Eigen::Matrix4f rotationZ;
+        Eigen::Vector4f axisZ;
+        if(firstRotation){
+            axisZ= Eigen::Vector4f(0,0,1,0);
+            rotationZ= Eigen::Affine3f(Eigen::AngleAxisf(angleZ,Eigen::Vector3f(axisZ[0],axisZ[1],axisZ[2]))).matrix();
+            firstRotation=false;
+        }
+        else{
+            axisZ= satelliteRotation*Eigen::Vector4f(0,0,1,0);
+            rotationZ= Eigen::Affine3f(Eigen::AngleAxisf(angleZ-previousAxisZ,Eigen::Vector3f(axisZ[0],axisZ[1],axisZ[2]))).matrix() * satelliteRotation;
+        }
+
+        float sizeX = QVector3D(rotationZ(0,0),rotationZ(1,0),rotationZ(2,0)).length();
+        float sizeY = QVector3D(rotationZ(0,1),rotationZ(1,1),rotationZ(2,1)).length();
+        float sizeZ = QVector3D(rotationZ(0,2),rotationZ(1,2),rotationZ(2,2)).length();
+        rotationZ(0,0) /= sizeX; rotationZ(1,0) /= sizeX; rotationZ(2,0) /= sizeX;
+        rotationZ(0,1) /= sizeY; rotationZ(1,1) /= sizeY; rotationZ(2,1) /= sizeY;
+        rotationZ(0,2) /= sizeZ; rotationZ(1,2) /= sizeZ; rotationZ(2,2) /= sizeZ;
+
+        previousAxisZ = angleZ;
+        satelliteRotation = rotationZ;
+    }
+
+
+}
+
 
 void VulkanWindow::setLabels(QLabel *minValue, QLabel *maxValue)
 {

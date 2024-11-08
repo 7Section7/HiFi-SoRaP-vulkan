@@ -326,6 +326,8 @@ public:
 	void updateView(Eigen::Matrix4f rotationMatrix,std::unique_ptr<QGLShaderProgram> &program, float distance=3.0f);
 
 	void updateProjection(double left, double right, double bottom, double top, std::unique_ptr<QGLShaderProgram> &program);
+
+    Eigen::Matrix4f getMVP();
 };
 
 }  //  namespace datavisualization

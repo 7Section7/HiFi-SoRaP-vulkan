@@ -24,7 +24,9 @@ protected:
     QVulkanDeviceFunctions *m_devFuncs;
 
     VkDeviceMemory m_bufMem = VK_NULL_HANDLE;
+    VkDeviceMemory m_uniBufMem = VK_NULL_HANDLE;
     VkBuffer m_buf = VK_NULL_HANDLE;
+    VkBuffer m_uniBuf = VK_NULL_HANDLE;
     VkDescriptorBufferInfo m_uniformBufInfo[QVulkanWindow::MAX_CONCURRENT_FRAME_COUNT];
 
     VkDescriptorPool m_descPool = VK_NULL_HANDLE;

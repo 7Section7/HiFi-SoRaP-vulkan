@@ -16,7 +16,62 @@ const float kZFar = 800;
 
 VulkanWindow::VulkanWindow(QWidget *parent) : QVulkanWindow()
 {
+    QSize viewportSize = this->swapChainImageSize();
+    camera.setViewport(0, 0, viewportSize.width(), viewportSize.height());
     camera.setProjection(kFieldOfView, kZNear, kZFar);
+    init();
+}
+
+void VulkanWindow::init() {
+    width=0.0;
+    height=0.0;
+    initializedGL=false;
+    initializedBuffers =false;
+    lineForces.clear();
+    renderMode = RenderMode::CPU;
+
+    vertexShaderFile   = "://resources/shaders/vshader1.glsl";
+    fragmentShaderFile = "://resources/shaders/fshader1.glsl";
+
+    previousNumForces=0;
+
+    vertexAttributeIdx = 0;
+    normalAttributeIdx = 1;
+    pdAttributeIdx = 2;
+    psAttributeIdx = 3;
+
+    showSatellite = true;
+    previousAxisX = 0;
+    previousAxisY = 0;
+    previousAxisZ = 0;
+
+    satelliteRotation << 1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+    firstRotation=true;
+
+    cube = new Object();
+    quad = new Quad();
+
+    char * nameCubeObj, *nameCubeMtl;
+    std::string cubeObj = "://resources/models/cube0.obj";
+    std::string cubeMat = "://resources/models/cube0.mtl";
+    nameCubeObj = (char*)cubeObj.c_str();
+    nameCubeMtl = (char*)cubeMat.c_str();
+
+    cube->loadOBJ(nameCubeObj,nameCubeMtl);
+
+    Sun = new Object();
+
+    char * nameObj, *nameMtl;
+    std::string obj = "://resources/sphere1.obj";
+    std::string mat = "://resources/sphere1.mtl";
+    nameObj = (char*)obj.c_str();
+    nameMtl = (char*)mat.c_str();
+
+    Sun->loadOBJ(nameObj,nameMtl);
+    Sun->setDiffuseColor(QVector3D(1,1,0));
 }
 
 void VulkanWindow::setSatellite(Object *obj)

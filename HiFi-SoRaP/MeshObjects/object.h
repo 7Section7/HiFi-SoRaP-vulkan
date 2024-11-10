@@ -14,6 +14,9 @@
 #include <QObject>
 #include <MeshObjects/trianglemesh.h>
 
+#include <QVulkanDeviceFunctions>
+
+
 #include <algorithm>
 
 /*
@@ -30,6 +33,13 @@ class Object: public QObject
 
 	void sendMaterialsToGPU(std::unique_ptr<QGLShaderProgram> &program);
 
+public:
+    VkBuffer buf = VK_NULL_HANDLE;
+    VkDeviceAddress bufMem = VK_NULL_HANDLE;
+
+    VkDevice dev;
+    QVulkanDeviceFunctions *devFuncs;
+
 protected:
 	TriangleMesh* mesh;
 
@@ -40,8 +50,16 @@ protected:
 
 public:
 	Object();
-	virtual void initializeBuffers();
+
+    virtual void initializeBuffers();
 	virtual void draw(std::unique_ptr<QGLShaderProgram> &program);
+
+    virtual void initializeBuffers(VkDevice dev, QVulkanDeviceFunctions* devFuncs, uint32_t memType);
+    virtual void vkdraw();
+
+    virtual void destroyBuffers();
+
+
 	void setMesh(TriangleMesh * mesh);
 	void prepareMaterialsToGPU();
 	Box3D computeBoundingBox();

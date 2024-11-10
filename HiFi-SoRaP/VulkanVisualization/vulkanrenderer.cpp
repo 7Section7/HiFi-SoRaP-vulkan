@@ -92,70 +92,11 @@ void VulkanRenderer::initResources() {
     const VkDeviceSize uniAlign = pDevLimits->minUniformBufferOffsetAlignment;
     qDebug("uniform buffer offset aligment is %u", (uint) uniAlign);
 
-    // TODO: take precision into account
-    typedef precision::value_type VertexFloat;
-
-    quint8 *vertData = reinterpret_cast<quint8*>(
-        m_window->satellite->getMesh()->replicatedVertices.data()
-    );
-    const int vertexByteSize = m_window->satellite->getMesh()->replicatedVertices.size() * sizeof(vector4);
-
-    quint8* normalsData = reinterpret_cast<quint8*>(
-        m_window->satellite->getMesh()->replicatedNormals.data()
-    );
-    const int normalsByteSize = m_window->satellite->getMesh()->replicatedNormals.size() * sizeof(vector4);
-
-    const VkDeviceSize vertexDataSize = vertexByteSize + normalsByteSize;
-
-
-    // create buffer to store vertices
-    VkBufferCreateInfo bufInfo;
-    memset(&bufInfo, 0, sizeof(bufInfo));
-
-    bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    // Our internal layout is vertex, uniform, uniform, ... with each uniform buffer start offset aligned to uniAlign.
-    //const VkDeviceSize vertexAllocSize = aligned(sizeof(vertexData), uniAlign);
-    const VkDeviceSize vertexAllocSize = aligned(vertexDataSize, uniAlign);
-    bufInfo.size = vertexAllocSize; // + concurrentFrameCount * uniformAllocSize;
-    // use as both vertex buffer and uniform buffer
-    bufInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-
-    VkResult err = m_devFuncs->vkCreateBuffer(dev, &bufInfo, nullptr, &m_buf);
-    if (err != VK_SUCCESS) {
-        qFatal("Failed to create buffer: %d", err);
-    }
-
+    VkResult err;
     VkMemoryRequirements memReq;
-    m_devFuncs->vkGetBufferMemoryRequirements(dev, m_buf, &memReq);
+    VkMemoryAllocateInfo memAllocInfo{};
 
-    VkMemoryAllocateInfo memAllocInfo = {
-        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        nullptr,
-        memReq.size,
-        m_window->hostVisibleMemoryIndex()
-    };
-
-    // allocate device (GPU) memory
-    err = m_devFuncs->vkAllocateMemory(dev, &memAllocInfo, nullptr, &m_bufMem);
-    if (err != VK_SUCCESS)
-        qFatal("Failed to allocate memory: %d", err);
-
-    // bind the allocated memory to the just created buffer
-    err = m_devFuncs->vkBindBufferMemory(dev, m_buf, m_bufMem, 0);
-    if (err != VK_SUCCESS)
-        qFatal("Failed to bind buffer memory: %d", err);
-
-    // map device memory into application address space to fill the buffer
-    quint8 *p;
-    err = m_devFuncs->vkMapMemory(dev, m_bufMem, 0, memReq.size, 0, reinterpret_cast<void **>(&p));
-    if (err != VK_SUCCESS)
-        qFatal("Failed to map memory: %d", err);
-
-    memcpy(p, vertData, vertexByteSize);
-    memcpy(p + vertexByteSize, normalsData, normalsByteSize);
-
-    //memcpy(p + vertexByte, vertexData, sizeof(vertexData));
-    m_devFuncs->vkUnmapMemory(dev, m_bufMem);
+    m_window->satellite->initializeBuffers(dev, m_devFuncs, m_window->hostVisibleMemoryIndex());
 
     // Uniform buffer
     VkDeviceSize uniformAllocSize = aligned(UNIFORM_DATA_SIZE, uniAlign);
@@ -496,6 +437,21 @@ void VulkanRenderer::releaseResources() {
         m_devFuncs->vkFreeMemory(dev, m_bufMem, nullptr);
         m_bufMem = VK_NULL_HANDLE;
     }
+
+    if (m_window->satellite) {
+        m_window->satellite->destroyBuffers();
+    }
+
+    if (m_uniBuf) {
+        m_devFuncs->vkDestroyBuffer(dev, m_uniBuf, nullptr);
+        m_uniBuf = VK_NULL_HANDLE;
+    }
+
+    if (m_uniBufMem) {
+        m_devFuncs->vkFreeMemory(dev, m_uniBufMem, nullptr);
+        m_uniBufMem = VK_NULL_HANDLE;
+    }
+
 }
 
 
@@ -534,10 +490,13 @@ void VulkanRenderer::startNextFrame() {
     QMatrix4x4 m = m_proj;
     m.rotate(m_rotation, 0, 1, 0);
 
+    Eigen::Matrix4f mvp;
 
+    Eigen::Matrix4f model = m_window->camera.setModel();
+    Eigen::Matrix4f view = m_window->camera.setView();
+    Eigen::Matrix4f projection = m_window->camera.setProjection();
 
-
-    Eigen::Matrix4f mvp = m_window->camera.getMVP();
+    mvp = projection * view * m_window->satelliteRotation * model;
 
 
     memcpy(p, mvp.data(), 16 * sizeof(float));
@@ -551,9 +510,6 @@ void VulkanRenderer::startNextFrame() {
     m_devFuncs->vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
     m_devFuncs->vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1,
                                         &m_descSet[m_window->currentFrame()], 0, nullptr);
-    VkDeviceSize vbOffset = 0;
-    m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &m_buf, &vbOffset);
-    m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &m_buf, &vbOffset);
 
     VkViewport viewport;
     viewport.x = viewport.y = 0;
@@ -570,9 +526,19 @@ void VulkanRenderer::startNextFrame() {
     scissor.extent.height = viewport.height;
     m_devFuncs->vkCmdSetScissor(cb, 0, 1, &scissor);
 
+
+    // satellite drawing
+    // TODO: draw indexed mesh
+    VkDeviceSize vbOffset = 0;
+
+    Object* satellite = m_window->satellite;
+
+    m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &satellite->buf, &vbOffset);
+    m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &satellite->buf, &vbOffset);
+
     uint32_t numVertices = static_cast<uint32_t>(
-        m_window->satellite->getMesh()->replicatedVertices.size()
-    );
+        satellite->getMesh()->replicatedVertices.size()
+        );
     m_devFuncs->vkCmdDraw(cb, numVertices, 1, 0, 0);
 
     m_devFuncs->vkCmdEndRenderPass(cmdBuf);

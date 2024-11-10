@@ -91,11 +91,11 @@ void Camera::setViewport(double x, double y, double w, double h) {
 	viewportWidth = w;
 	viewportHeight = h;
 
-	glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+    //glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 }
 
 void Camera::setViewport() const {
-	glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+    //glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 }
 
 Eigen::Matrix4f Camera::setIdentity() const {

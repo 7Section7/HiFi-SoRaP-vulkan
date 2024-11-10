@@ -309,19 +309,19 @@ void VkVisualization::generateAxisInformation(QHBoxLayout *axisLayoutContainer,Q
     axisLayout->addWidget(axis.slider);
     axisLayoutContainer->addLayout(axisLayout);
 
-    /*
-    GLWidget::connect(axis.slider, SIGNAL(valueChanged(int)), axis.spinBox, SLOT(setValue(int)));
-    GLWidget::connect(axis.spinBox, SIGNAL(valueChanged(int)), axis.slider, SLOT(setValue(int)));
 
-    GLWidget::connect(axis.checkBox,SIGNAL(toggled(bool)),labelAxisName,SLOT(setDisabled(bool)));
-    GLWidget::connect(axis.checkBox,SIGNAL(toggled(bool)),axis.spinBox,SLOT(setDisabled(bool)));
-    GLWidget::connect(axis.checkBox,SIGNAL(toggled(bool)),axis.slider,SLOT(setDisabled(bool)));
+    VulkanWindow::connect(axis.slider, SIGNAL(valueChanged(int)), axis.spinBox, SLOT(setValue(int)));
+    VulkanWindow::connect(axis.spinBox, SIGNAL(valueChanged(int)), axis.slider, SLOT(setValue(int)));
+
+    VulkanWindow::connect(axis.checkBox,SIGNAL(toggled(bool)),labelAxisName,SLOT(setDisabled(bool)));
+    VulkanWindow::connect(axis.checkBox,SIGNAL(toggled(bool)),axis.spinBox,SLOT(setDisabled(bool)));
+    VulkanWindow::connect(axis.checkBox,SIGNAL(toggled(bool)),axis.slider,SLOT(setDisabled(bool)));
 
     QObject::connect(axis.slider, &QSlider::valueChanged, [this]() {
         this->rotateSatellite();
-        this->addForceSRP();
+        //this->addForceSRP();
     });
-    */
+
 }
 
 void VkVisualization::lockAxis()
@@ -370,7 +370,6 @@ void VkVisualization::rotateSatellite()
     angleY = axes[_Y_].spinBox->value()/180.0f*M_PI;
     angleZ = axes[_Z_].spinBox->value()/180.0f*M_PI;
 
-    //glWidget->rotateSatellite(angleX,angleY,angleZ);
     vk_window->rotateSatellite(angleX, angleY, angleZ);
 }
 

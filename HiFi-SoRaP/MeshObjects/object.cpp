@@ -11,6 +11,14 @@
  *
  ***********************************************************************/
 
+
+static inline VkDeviceSize aligned(VkDeviceSize v, VkDeviceSize byteAlign)
+{
+    return (v + byteAlign - 1) & ~(byteAlign - 1);
+}
+
+
+
 Object::Object()
 {
 	mesh = NULL;
@@ -65,6 +73,77 @@ void Object::initializeBuffers()
 
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 }
+
+void Object::initializeBuffers(VkDevice dev, QVulkanDeviceFunctions* devFuncs, uint32_t memoryType) {
+
+    this->dev = dev;
+    this->devFuncs = devFuncs;
+
+
+    quint8 *vertData = reinterpret_cast<quint8*>(
+        mesh->replicatedVertices.data()
+    );
+    const int vertexByteSize = mesh->replicatedVertices.size() * sizeof(vector4);
+
+    quint8* normalsData = reinterpret_cast<quint8*>(
+        mesh->replicatedNormals.data()
+        );
+    const int normalsByteSize = mesh->replicatedNormals.size() * sizeof(vector4);
+
+    const VkDeviceSize vertexDataSize = vertexByteSize + normalsByteSize;
+
+    // create buffer to store vertices
+    VkBufferCreateInfo bufInfo;
+    memset(&bufInfo, 0, sizeof(bufInfo));
+    bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+
+    const VkDeviceSize vertexAllocSize = vertexDataSize;
+    bufInfo.size = vertexAllocSize;
+    bufInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+    VkResult err = devFuncs->vkCreateBuffer(dev, &bufInfo, nullptr, &buf);
+    if (err != VK_SUCCESS) {
+        qFatal("Failed to create buffer: %d", err);
+    }
+
+    VkMemoryRequirements memReq;
+    devFuncs->vkGetBufferMemoryRequirements(dev, buf, &memReq);
+
+    VkMemoryAllocateInfo memAllocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        nullptr,
+        memReq.size,
+        memoryType
+    };
+
+    // allocate device (GPU) memory
+    err = devFuncs->vkAllocateMemory(dev, &memAllocInfo, nullptr, &bufMem);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to allocate memory: %d", err);
+
+    // bind the allocated memory to the just created buffer
+    err = devFuncs->vkBindBufferMemory(dev, buf, bufMem, 0);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to bind buffer memory: %d", err);
+
+    // map device memory into application address space to fill the buffer
+    quint8 *p;
+    err = devFuncs->vkMapMemory(dev, bufMem, 0, memReq.size, 0, reinterpret_cast<void **>(&p));
+    if (err != VK_SUCCESS)
+        qFatal("Failed to map memory: %d", err);
+
+    memcpy(p, vertData, vertexByteSize);
+    memcpy(p + vertexByteSize, normalsData, normalsByteSize);
+
+    devFuncs->vkUnmapMemory(dev, bufMem);
+}
+
+
+
+void Object::vkdraw() {
+
+}
+
 
 void Object::draw(std::unique_ptr<QGLShaderProgram> &program_)
 {
@@ -431,3 +510,16 @@ void Object::sendMaterialsToGPU(std::unique_ptr<QGLShaderProgram> &program)
 		glUniform1i(idReflectiveness,this->materials[i].r);
 	}
 }
+
+void Object::destroyBuffers() {
+    if (buf) {
+        devFuncs->vkDestroyBuffer(dev, buf, nullptr);
+        buf = VK_NULL_HANDLE;
+    }
+
+    if (bufMem) {
+        devFuncs->vkFreeMemory(dev, bufMem, nullptr);
+        bufMem = VK_NULL_HANDLE;
+    }
+}
+

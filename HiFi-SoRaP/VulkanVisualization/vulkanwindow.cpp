@@ -74,6 +74,17 @@ void VulkanWindow::init() {
     Sun->setDiffuseColor(QVector3D(1,1,0));
 }
 
+const vector3& VulkanWindow::getLightDir() const
+{
+    return light.getLightDir();
+}
+
+void VulkanWindow::setLightDir(const vector3& value)
+{
+    light.setLightDir(value);
+}
+
+
 void VulkanWindow::setSatellite(Object *obj)
 {
     satellite=obj;
@@ -233,6 +244,26 @@ void VulkanWindow::rotateSatellite(float angleX,float angleY,float angleZ) {
 
 }
 
+Eigen::Matrix4f VulkanWindow::getSatelliteRotation() const {
+    return satelliteRotation;
+}
+
+/*
+QVector3D getColour(float intensity)
+{
+    QVector3D color;
+    if(intensity<0.34){
+        color = (1-intensity/0.34f)*QVector3D(0.0,0.0,0.6) + (intensity/0.34f)*QVector3D(0.4,0.4,1);
+    }
+    else if(intensity<0.68){
+        color = (1-(intensity-0.34)/0.34f)*QVector3D(0.4,0.4,1) + (intensity-0.34f)/0.34f*QVector3D(1,1,0);
+    }
+    else{
+        color = (1-(intensity-0.68)/0.32f)*QVector3D(1,1,0) + (intensity-0.68f)/0.32f*QVector3D(1,0,0);
+    }
+    return color;
+}
+*/
 
 void VulkanWindow::setLabels(QLabel *minValue, QLabel *maxValue)
 {

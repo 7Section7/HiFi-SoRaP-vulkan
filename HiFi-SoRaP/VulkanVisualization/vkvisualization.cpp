@@ -41,13 +41,6 @@ VkVisualization::VkVisualization(VulkanWindow* w) : QWidget(), vk_window(w)
     gridLayout->setObjectName(QStringLiteral("gridLayout"));
     gridGroupBox->setLayout(gridLayout);
 
-    /*
-    QGLFormat glfModern=QGLFormat::defaultFormat();
-    glfModern.setVersion(3,3);
-    glfModern.setProfile(QGLFormat::CoreProfile);
-    glfModern.setSampleBuffers(true);
-    glfModern.setSwapInterval(0);
-    glfModern.setDefaultFormat(glfModern);*/
 
     vkWidget->setGeometry(QRect(0, 0, 512, 512));
     vkWidget->setMaximumSize(512, 512);
@@ -319,7 +312,7 @@ void VkVisualization::generateAxisInformation(QHBoxLayout *axisLayoutContainer,Q
 
     QObject::connect(axis.slider, &QSlider::valueChanged, [this]() {
         this->rotateSatellite();
-        //this->addForceSRP();
+        this->addForceSRP();
     });
 
 }
@@ -351,10 +344,15 @@ void VkVisualization::addForceSRP()
 
     if (it == createdLineForces.end()) {
 
-        // const auto& lightDir = glWidget->getLightDir();
-        // Eigen::Matrix4f rotationMatrix = glWidget->getSatelliteRotation();
+        const auto& lightDir = vk_window->getLightDir();
+        Eigen::Matrix4f rotationMatrix = vk_window->getSatelliteRotation();
 
-        // const auto force = model->computeSRP(lightDir,rotationMatrix);
+        const auto force = model->computeSRP(lightDir,rotationMatrix);
+
+
+#ifdef QT_DEBUG
+        qDebug("Calculated SRP force:%f,%f,%f", force.x, force.y, force.z);
+#endif
 
         // glWidget->addNewForceSRP(force);
         // createdLineForces.insert(id);

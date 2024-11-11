@@ -195,7 +195,7 @@ void MainWindow::loadUserParameters()
 			ray->setReflectionType(reflectiveType);
 		}
 	}
-
+    */
 	if(model == CannonBallModel){
 		CannonBall* c = dynamic_cast<CannonBall*>(srp[CannonBallModel]);
 		c->cr = cr->value();
@@ -241,7 +241,7 @@ void MainWindow::loadUserParameters()
 			return;
 		}
 	}
-    */
+
 	errorCode=1;
 }
 

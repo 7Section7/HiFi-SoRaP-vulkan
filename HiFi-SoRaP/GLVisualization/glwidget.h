@@ -101,7 +101,7 @@ class GLWidget : public QGLWidget
 	 * @brief initializeGL Initializes OpenGL variables and loads, compiles and
 	 * links shaders.
 	 */
-	void initializeGL();
+    void initializeGL();
 	void initShaders(const char* vShaderFile, const char* fShaderFile, std::unique_ptr<QGLShaderProgram>& program);
 	void initializeShaders(std::string kVertexShaderFile, std::string kFragmentShaderFile,
 			std::unique_ptr<QGLShaderProgram>& program);

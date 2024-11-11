@@ -383,6 +383,7 @@ void VulkanRenderer::initResources() {
 
 }
 
+
 void VulkanRenderer::initSwapChainResources() {
     qDebug("initSwapChainResources");
 
@@ -480,6 +481,7 @@ void VulkanRenderer::startNextFrame() {
     rpBeginInfo.pClearValues = clearValues;
     VkCommandBuffer cmdBuf = m_window->currentCommandBuffer();
     m_devFuncs->vkCmdBeginRenderPass(cmdBuf, &rpBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
 
     quint8 *p;
     VkResult err = m_devFuncs->vkMapMemory(dev, m_uniBufMem, m_uniformBufInfo[m_window->currentFrame()].offset,

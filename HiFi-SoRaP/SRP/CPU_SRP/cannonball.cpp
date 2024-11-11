@@ -20,3 +20,4 @@ void CannonBall::computeStepSRP(const vector3& XS, vector3 &force, const vector3
 	const precision::value_type PS = PRESSURE;
 	force = (PS)*cr*area/msat*XS;
 }
+

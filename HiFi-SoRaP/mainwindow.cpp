@@ -442,6 +442,12 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
         return;
     */
 
+    ComputeGPU* computeModel = new ComputeGPU(this->inst->vkInstance());
+    computeModel->init();
+    computeModel->process();
+    computeModel->cleanup();
+
+    /*
     loadUserParameters();
 
     VulkanWindow* vulkanWindow = new VulkanWindow;
@@ -456,6 +462,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     //vkVisualization->drawSatellite();
 
     vkVisualizations.push_back(vkVisualization);
+    */
 }
 
 //Obtain the name of the model.

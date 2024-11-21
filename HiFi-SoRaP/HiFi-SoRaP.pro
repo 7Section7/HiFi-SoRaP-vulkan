@@ -12,6 +12,17 @@ win32 {
 LIBS += $$PWD/Lib/glext.lib
 }
 
+contains(QT_ARCH, i386) {
+    message("32 bits")
+#    LIBS += -L$$(VK_SDK_PATH)/Lib32
+} else {
+#    LIBS += -L$$(VK_SDK_PATH)/Lib
+}
+
+LIBS += -L$$(VK_SDK_PATH)/Lib32 -lvulkan-1
+
+CONFIG += c++17
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = HiFi-SoRaP
@@ -67,6 +78,7 @@ INCLUDEPATH += Lib/glm/Core
 
 SOURCES +=  \
 	SRP/CPU_SRP/cannonball.cpp \
+    SRP/Compute_SRP/computegpu.cpp \
     VulkanVisualization/vkvisualization.cpp \
     VulkanVisualization/vulkanrenderer.cpp \
     VulkanVisualization/vulkanwindow.cpp \
@@ -202,6 +214,7 @@ SOURCES +=  \
 
 HEADERS += \
 	SRP/CPU_SRP/cannonball.h \
+    SRP/Compute_SRP/computegpu.h \
     VulkanVisualization/vkvisualization.h \
     VulkanVisualization/vulkanrenderer.h \
     VulkanVisualization/vulkanwindow.h \

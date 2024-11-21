@@ -30,6 +30,8 @@
 #include "SRP/GPU_SRP/render.h"
 #include "SRP/GPU_SRP/raytracegputextures.h"
 
+#include "SRP/Compute_SRP/computegpu.h"
+
 #include "Comparison/comparisonwindow.h"
 
 #define MAX_SRP_MODELS 4

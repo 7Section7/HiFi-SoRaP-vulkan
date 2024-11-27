@@ -2,7 +2,9 @@
 #define COMPUTEGPU_H
 
 #include <vulkan/vulkan.h>  // vulkan header must be before SRP
+#include "GLVisualization/light.h"
 #include "SRP/advancedsrp.h"
+#include "GLVisualization/camera.h"
 
 
 const std::vector<const char*> validationLayers = {
@@ -85,6 +87,7 @@ public:
     void recordComputeCommandBuffer(VkCommandBuffer commandBuffer);
     void dispatchCompute();
 
+    void waitForComputeWork();
     void writeBackCPU();
 
     void init();
@@ -95,6 +98,14 @@ public:
     void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
                         const vector3& V2 = DEFAULT_VEC3) {};
 
+
+public:
+
+    dataVisualization::Camera camera;
+
+    int width, height;
+    Object *satellite;
+    Light *light;
 
 };
 

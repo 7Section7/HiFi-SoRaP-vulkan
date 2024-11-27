@@ -1,10 +1,14 @@
 #version 450
 
-layout (binding = 0) uniform ScaleUBO {
-    float scalar;
+layout (binding = 0) uniform UniformBufferObject {
+    vec3 lightDirection;
+    vec3 worldCamPos;
+    mat4 model;
+    int debugMode;
+    vec3 diffuse;
 } ubo;
 
-layout(std140, binding = 1) buffer SSBOIn {
+layout(std430, binding = 1) buffer SSBOIn {
    float dataIn[ ];
 };
 
@@ -14,5 +18,5 @@ void main()
 {
     uint index = gl_GlobalInvocationID.x;  
 
-    dataIn[index] = ubo.scalar * index;
+    dataIn[index] = ubo.lightDirection.x * ubo.debugMode * index;
 }

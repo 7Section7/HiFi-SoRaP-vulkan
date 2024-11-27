@@ -4,7 +4,11 @@
 #include <array>
 
 struct UniformBufferObject {
-    float coeff = 1.0f;
+    vector3 lightDirection;
+    vector3 worldCamPos;
+    Eigen::Matrix4f model;
+    int32_t debugMode;
+    vector3 diffuse;
 };
 
 
@@ -34,7 +38,14 @@ void ComputeGPU::init() {
 void ComputeGPU::process() {
     updateUniforms();
     recordComputeCommandBuffer(computeCommandBuffer);
+
+    auto start = std::chrono::high_resolution_clock::now();
     dispatchCompute();
+    waitForComputeWork();
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    std::cout << "Compute work took " << duration.count() << " microseconds" << std::endl;
+
     writeBackCPU();
 }
 
@@ -355,7 +366,7 @@ void ComputeGPU::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize
 }
 
 
-#define DATA_COUNT 1024 * 1024
+#define DATA_COUNT 1024 * 1024 * 25
 
 void ComputeGPU::createShaderStorageBuffers() {
 
@@ -370,7 +381,7 @@ void ComputeGPU::createShaderStorageBuffers() {
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    //memcpy(data, sampleData.data(), (size_t) bufferSize);
+    memcpy(data, sampleData.data(), (size_t) bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
 
@@ -481,9 +492,33 @@ void ComputeGPU::createSyncObjects() {
     }
 }
 
+
+namespace {
+
+const float kFieldOfView = 60;
+const float kZNear = 0.0001;
+const float kZFar = 800;
+
+}
 void ComputeGPU::updateUniforms() {
+
+    camera.setViewport(0, 0, 520, 520);
+    camera.setProjection(kFieldOfView, kZNear, kZFar);
+
+    Eigen::Matrix4f view = camera.setView();
+
+    this->light = new Light();
+
     UniformBufferObject ubo{};
-    ubo.coeff = 1.0f;
+    ubo.lightDirection = light->getLightDir();
+    ubo.model = camera.setModel();
+    ubo.debugMode = 2;
+    ubo.diffuse = vector3(1.0f, 0.0f, 0.0f);
+
+    // get camera translation via its matrix
+    Eigen::Vector4f camPosM = view.inverse().col(3);
+    vector3 camPos = vector3(camPosM[0], camPosM[1], camPosM[2]);
+    ubo.worldCamPos = camPos;
 
     memcpy(uniformBufferMapped, &ubo, sizeof(ubo));
 }
@@ -538,11 +573,12 @@ void ComputeGPU::dispatchCompute() {
 
 }
 
-void ComputeGPU::writeBackCPU() {
-
+void ComputeGPU::waitForComputeWork() {
     // wait for compute work to finish
     vkWaitForFences(device, 1, &computeFence, VK_TRUE, UINT64_MAX);
+}
 
+void ComputeGPU::writeBackCPU() {
     // Create a staging buffer used to retrieve data to the gpu
     // is this the best way to do it??
     VkDeviceSize bufferSize = DATA_COUNT * sizeof(float);
@@ -554,8 +590,8 @@ void ComputeGPU::writeBackCPU() {
 
     std::vector<float> data(DATA_COUNT);
 
-    void* bufferData;
-    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &bufferData);
+    float* bufferData;
+    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, (void **) &bufferData);
     memcpy(data.data(), bufferData, (size_t)bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
@@ -563,6 +599,16 @@ void ComputeGPU::writeBackCPU() {
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
     // print data
+    std::cout << data[0] << " ";
+    std::cout << data[1] << " ";
+    std::cout << data[2] << " ";
+    std::cout << data[3] << " ";
+    std::cout << data[4] << " ";
+    std::cout << data[5] << " ";
+    std::cout << data[6] << " ";
+    std::cout << data[7] << " ";
+    std::cout << data[8] << " ";
+    std::cout << data[9] << " ";
     for(uint32_t i = 0; i < DATA_COUNT; i = i + 1024 * 100) {
         std::cout << data[i] << " ";
     }

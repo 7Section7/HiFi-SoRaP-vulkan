@@ -443,6 +443,75 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     */
 
     ComputeGPU* computeModel = new ComputeGPU(this->inst->vkInstance());
+
+    const auto az = ui->sb_az->value();
+    const auto el = ui->sb_el->value();
+
+    computeModel->setAzimuthStep(az);
+    computeModel->setElevationStep(el);
+
+    if( ((360 % az)!=0) || ((180 % el)!=0) )
+    {
+        errorCode=-1;
+        QMessageBox msgBox;
+        msgBox.setText("Step Sizes determined for Azimuth and Elevation are not good.\n"
+                       "Choose a factor of 360 and 180, respectively.");
+        msgBox.exec();
+        return;
+    }
+
+    computeModel->setMsat(ui->dsb_msat->value());
+
+    char * nameObj, *nameMtl;
+    std::string obj = this->nameObj.toStdString();
+    std::string mat = this->nameMtl.toStdString();
+    nameObj = (char*)obj.c_str();
+    nameMtl = (char*)mat.c_str();
+
+    if(obj.length()==0 && mat.length()==0){
+        errorCode=-1;
+        QMessageBox msgBox;
+        msgBox.setText("The OBJ file AND the MAT file paths are missing.");
+        msgBox.exec();
+        return;
+    }
+    else if(obj.length()==0){
+        errorCode=-1;
+        QMessageBox msgBox;
+        msgBox.setText("The OBJ file path is missing.");
+        msgBox.exec();
+        return;
+    }
+    else if(mat.length()==0){
+        errorCode=-1;
+        QMessageBox msgBox;
+        msgBox.setText("The MAT file path is missing");
+        msgBox.exec();
+        return;
+    }
+
+    //Load the triangleMesh and materials from the files chosen.
+    Object* satellite = new Object();
+    int qq = satellite->loadOBJ(nameObj, nameMtl);
+    if(qq == 1){
+
+        errorCode=-1;
+        QMessageBox msgBox;
+        msgBox.setText("There was a problem loading the satellite information. Please check the OBJ and the MAT paths.");
+        msgBox.exec();
+        return;
+    }
+    computeModel->setSatellite(satellite);
+
+    int reflectiveType = Reflective;
+    int numRays = numSecondaryRays->value();
+    computeModel->numSecondaryRays = numRays;
+
+    int numDiffuse = numDiffuseRays->value();
+    computeModel->numDiffuseRays = numDiffuse;
+    //computeModel->setReflectionType(reflectiveType);
+    errorCode=1;
+
     computeModel->init();
     computeModel->process();
     computeModel->cleanup();

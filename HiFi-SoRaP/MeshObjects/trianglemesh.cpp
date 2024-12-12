@@ -200,7 +200,7 @@ void TriangleMesh::sendMeshToGPU(std::unique_ptr<QGLShaderProgram> &program)
 		glUniform1i(idVertex1,this->faces[i].v1);
 		glUniform1i(idVertex2,this->faces[i].v2);
 		glUniform1i(idVertex3,this->faces[i].v3);
-		glUniform1f(idMat,this->faces[i].rf);
+        glUniform1f(idMat,this->faces[i].rf); // ???
 		glUniform1f(idNormal,this->faces[i].nn);
 	}
 }

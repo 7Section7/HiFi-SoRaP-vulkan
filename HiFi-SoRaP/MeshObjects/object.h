@@ -34,8 +34,8 @@ class Object: public QObject
 	void sendMaterialsToGPU(std::unique_ptr<QGLShaderProgram> &program);
 
 public:
-    VkBuffer buf = VK_NULL_HANDLE;
-    VkDeviceAddress bufMem = VK_NULL_HANDLE;
+    VkBuffer buf; //= VK_NULL_HANDLE;
+    VkDeviceMemory bufMem;// = VK_NULL_HANDLE;
 
     VkDevice dev;
     QVulkanDeviceFunctions *devFuncs;

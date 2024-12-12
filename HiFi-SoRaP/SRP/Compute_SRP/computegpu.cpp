@@ -4,18 +4,85 @@
 #include <array>
 
 struct UniformBufferObject {
-    vector3 lightDirection;
-    vector3 worldCamPos;
-    Eigen::Matrix4f model;
-    int32_t debugMode;
-    vector3 diffuse;
+    alignas(16) Eigen::Matrix4f model;
+    alignas(16) vector3 lightDirection;
+    alignas(16) vector3 V1;  // TODO: pass to shader
+    alignas(16) vector3 V2;
+    alignas(16) vector3 worldCamPos;
+    alignas(16) vector3 diffuse;
+    alignas(4) uint32_t debugMode;
+    alignas(4) uint32_t numTriangles;
+    alignas(4) uint32_t numMaterials;
+    alignas(4) uint32_t numSecondaryRays;
+    alignas(4) uint32_t numDiffuseRays;
+    alignas(4) uint32_t Nx;  // widht
+    alignas(4) uint32_t Ny;  // height
+    alignas(4) uint32_t timeSeed; // for random
+    alignas(4) float xtot;  // grid x size
+    alignas(4) float ytot;  // grid y size
+    alignas(4) float boundingBoxDistance;  // diagonal diff
 };
 
 
 ComputeGPU::ComputeGPU(VkInstance instance) {
     this->instance = instance;
+
+    this->width = 512;
+    this->height = 512;
 }
 
+
+std::vector<cTriangle> ComputeGPU::prepareTriangles() {
+    if (this->satellite == nullptr ) {
+    }
+
+    std::vector<cTriangle> ctriangles;
+    TriangleMesh* pMesh = satellite->getMesh();
+    numTriangles = pMesh->faces.size();
+
+    for(uint32_t i = 0; i < pMesh->faces.size(); i++ ) {
+
+        int i0 = pMesh->faces[i].v1;
+        int i1 = pMesh->faces[i].v2;
+        int i2 = pMesh->faces[i].v3;
+
+
+        cTriangle t {
+            pMesh->vertices[i0],
+            pMesh->vertices[i1],
+            pMesh->vertices[i2],
+            pMesh->faces[i].rf
+        };
+        ctriangles.push_back(t);
+    }
+
+    return ctriangles;
+}
+
+std::vector<cMaterial> ComputeGPU::prepareMaterials() {
+    if (this->satellite == nullptr ) {
+    }
+
+    std::vector<cMaterial> cmaterials;
+    Object* object = this->satellite;
+    numMaterials = object->getNumMaterials();
+
+    for(uint32_t i = 0; i < object->getNumMaterials(); i++ ) {
+
+        Material m1 = object->getMaterial(i);
+
+
+        cMaterial mcp {
+            m1.ps,
+            m1.pd,
+            m1.refIdx,
+            (uint32_t) m1.r,
+        };
+        cmaterials.push_back(mcp);
+    }
+
+    return cmaterials;
+}
 
 
 // Support structs and typedefs
@@ -180,7 +247,8 @@ void ComputeGPU::createLogicalDevice() {
  * @brief Crate descriptor set layouts describing compute shader resources
  */
 void ComputeGPU::createComputeDescriptorSetLayout() {
-    VkDescriptorSetLayoutBinding layoutBindings[2];
+    #define LAYOUT_BINDING_COUNT 4
+    VkDescriptorSetLayoutBinding layoutBindings[LAYOUT_BINDING_COUNT];
 
     layoutBindings[0].binding = 0;
     layoutBindings[0].descriptorCount = 1;
@@ -194,9 +262,22 @@ void ComputeGPU::createComputeDescriptorSetLayout() {
     layoutBindings[1].pImmutableSamplers = nullptr;
     layoutBindings[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
+    layoutBindings[2].binding = 2;
+    layoutBindings[2].descriptorCount = 1;
+    layoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    layoutBindings[2].pImmutableSamplers = nullptr;
+    layoutBindings[2].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+    layoutBindings[3].binding = 3;
+    layoutBindings[3].descriptorCount = 1;
+    layoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    layoutBindings[3].pImmutableSamplers = nullptr;
+    layoutBindings[3].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 2;
+    layoutInfo.bindingCount = LAYOUT_BINDING_COUNT;
     layoutInfo.pBindings = layoutBindings;
 
     if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &computeDescriptorSetLayout) != VK_SUCCESS) {
@@ -370,9 +451,13 @@ void ComputeGPU::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize
 
 void ComputeGPU::createShaderStorageBuffers() {
 
-    std::vector<float> sampleData(DATA_COUNT, 0.0f);
+    //std::vector<float> sampleData(DATA_COUNT, 0.0f);
 
-    VkDeviceSize bufferSize = DATA_COUNT * sizeof(float);
+    // =========CREATE AND UPLOAD TRIANGLES SSBO=================
+
+    std::vector<cTriangle> triangles = prepareTriangles();
+
+    VkDeviceSize bufferSize = numTriangles * sizeof(cTriangle);
 
     // Create a staging buffer used to upload data to the gpu
     VkBuffer stagingBuffer;
@@ -381,17 +466,42 @@ void ComputeGPU::createShaderStorageBuffers() {
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, sampleData.data(), (size_t) bufferSize);
+    memcpy(data, triangles.data(), (size_t) bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
-
     // Copy data to all storage buffers
-    createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT
-                                 | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, shaderStorageBuffer, shaderStorageBufferMemory);
-    copyBuffer(stagingBuffer, shaderStorageBuffer, bufferSize);
+    createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, trianglesSSBO, trianglesSSBOMemory);
+    copyBuffer(stagingBuffer, trianglesSSBO, bufferSize);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+
+    // =========CREATE AND UPLOAD MATERIAL SSBO=================
+    std::vector<cMaterial> materials = prepareMaterials();
+
+    bufferSize =  numMaterials * sizeof(cMaterial);
+
+    // Create a staging buffer used to upload data to the gpu
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, materials.data(), (size_t) bufferSize);
+    vkUnmapMemory(device, stagingBufferMemory);
+
+    // Copy data to all storage buffers
+    createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, materialsSSBO, materialsSSBOMemory);
+    copyBuffer(stagingBuffer, materialsSSBO, bufferSize);
+
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
+
+    // =========CPU WRITE BACK BUFFER=================
+    bufferSize = width * height * sizeof(vector4);
+    createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, forcesSSBO, forcesSSBOMemory);
+
 }
 
 void ComputeGPU::createUniformBuffers() {
@@ -404,16 +514,25 @@ void ComputeGPU::createUniformBuffers() {
 }
 
 void ComputeGPU::createDescriptorPool() {
-    VkDescriptorPoolSize poolSizes[2];
+    VkDescriptorPoolSize poolSizes[4];
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(1);
 
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     poolSizes[1].descriptorCount = static_cast<uint32_t>(1);
 
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[2].descriptorCount = static_cast<uint32_t>(1);
+
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[2].descriptorCount = static_cast<uint32_t>(1);
+
+    poolSizes[3].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[3].descriptorCount = static_cast<uint32_t>(1);
+
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 2;
+    poolInfo.poolSizeCount = 4;
     poolInfo.pPoolSizes = poolSizes;
     poolInfo.maxSets = static_cast<uint32_t>(1);
 
@@ -441,7 +560,7 @@ void ComputeGPU::createComputeDescriptorSets() {
     uniformBufferInfo.offset = 0;
     uniformBufferInfo.range = sizeof(UniformBufferObject);
 
-    std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+    std::array<VkWriteDescriptorSet, 4> descriptorWrites{};
     descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[0].dstSet = computeDescriptorSets;
     descriptorWrites[0].dstBinding = 0;
@@ -451,9 +570,9 @@ void ComputeGPU::createComputeDescriptorSets() {
     descriptorWrites[0].pBufferInfo = &uniformBufferInfo;
 
     VkDescriptorBufferInfo storageBufferInfo{};
-    storageBufferInfo.buffer = shaderStorageBuffer;
+    storageBufferInfo.buffer = trianglesSSBO;
     storageBufferInfo.offset = 0;
-    storageBufferInfo.range = sizeof(float) * DATA_COUNT;
+    storageBufferInfo.range = sizeof(cTriangle) * numTriangles;
 
     descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[1].dstSet = computeDescriptorSets;
@@ -463,7 +582,33 @@ void ComputeGPU::createComputeDescriptorSets() {
     descriptorWrites[1].descriptorCount = 1;
     descriptorWrites[1].pBufferInfo = &storageBufferInfo;
 
-    vkUpdateDescriptorSets(device, 2, descriptorWrites.data(), 0, nullptr);
+    VkDescriptorBufferInfo storageBufferInfo2{};
+    storageBufferInfo2.buffer = materialsSSBO;
+    storageBufferInfo2.offset = 0;
+    storageBufferInfo2.range = sizeof(cMaterial) * numMaterials;
+
+    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[2].dstSet = computeDescriptorSets;
+    descriptorWrites[2].dstBinding = 2;
+    descriptorWrites[2].dstArrayElement = 0;
+    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrites[2].descriptorCount = 1;
+    descriptorWrites[2].pBufferInfo = &storageBufferInfo2;
+
+    VkDescriptorBufferInfo storageBufferInfo3{};
+    storageBufferInfo3.buffer = forcesSSBO;
+    storageBufferInfo3.offset = 0;
+    storageBufferInfo3.range = sizeof(vector4) * width * height;
+
+    descriptorWrites[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[3].dstSet = computeDescriptorSets;
+    descriptorWrites[3].dstBinding = 3;
+    descriptorWrites[3].dstArrayElement = 0;
+    descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrites[3].descriptorCount = 1;
+    descriptorWrites[3].pBufferInfo = &storageBufferInfo3;
+
+    vkUpdateDescriptorSets(device, 4, descriptorWrites.data(), 0, nullptr);
 
 }
 
@@ -502,18 +647,57 @@ const float kZFar = 800;
 }
 void ComputeGPU::updateUniforms() {
 
-    camera.setViewport(0, 0, 520, 520);
+    camera.setViewport(0, 0, 512, 512);
     camera.setProjection(kFieldOfView, kZNear, kZFar);
 
     Eigen::Matrix4f view = camera.setView();
 
     this->light = new Light();
 
+    // TIME SEED
+    const auto now = std::chrono::system_clock::now();
+    //const std::time_t t_c = std::chrono::system_clock::to_time_t(now);
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+    const auto fraction = now - seconds;
+    const auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(fraction).count();
+    // http://en.cppreference.com/w/cpp/chrono/c/time
+    const std::time_t currentNow = std::time(nullptr) ; // get the current time point
+    // convert it to (local) calendar time
+    // http://en.cppreference.com/w/cpp/chrono/c/localtime
+    const std::tm calendarTime = *std::localtime( std::addressof(currentNow) ) ;
+    const auto secs      = calendarTime.tm_sec;
+    const auto mins      = calendarTime.tm_min;
+    const auto hours     = calendarTime.tm_hour;
+    const int time_seed = millisecs + 1000*(secs + 60*(mins + 60*(hours)));
+
+
+    TriangleMesh *mesh = this->satellite->getMesh();
+    Eigen::Vector3f diff = mesh->max_-mesh->min_;
+    float diagonalDiff = diff.norm();
+    float errorMargin = 0.1f;
+    float distance = diagonalDiff+errorMargin;
+
+    //float xAxis = distance/2.0f;
+    //float yAxis = distance/2.0f;
+
     UniformBufferObject ubo{};
     ubo.lightDirection = light->getLightDir();
+    ubo.V1 = light->getRightDir();
+    ubo.V2 = light->getUpDir();
     ubo.model = camera.setModel();
+    ubo.worldCamPos = vector3(0.0f, 0.0f, 0.0f);
     ubo.debugMode = 2;
     ubo.diffuse = vector3(1.0f, 0.0f, 0.0f);
+    ubo.numTriangles = numTriangles;
+    ubo.numMaterials = numMaterials;
+    ubo.numSecondaryRays = numSecondaryRays;
+    ubo.numDiffuseRays = numDiffuseRays;
+    ubo.Nx = width;
+    ubo.Ny = height;
+    ubo.xtot = distance;
+    ubo.ytot = distance;
+    ubo.boundingBoxDistance = distance;
+    ubo.timeSeed = time_seed;
 
     // get camera translation via its matrix
     Eigen::Vector4f camPosM = view.inverse().col(3);
@@ -536,7 +720,10 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1, &computeDescriptorSets, 0, nullptr);
 
-    vkCmdDispatch(commandBuffer, DATA_COUNT / 256, 1, 1);
+
+    // dispatch (width / 32) * (height / 32) work groups, with a local size
+    // of 32x32, for a total of width * height individual invocations
+    vkCmdDispatch(commandBuffer, width / 32, height / 32, 1);
 
 
     VkMemoryBarrier memoryBarrier{};
@@ -581,36 +768,36 @@ void ComputeGPU::waitForComputeWork() {
 void ComputeGPU::writeBackCPU() {
     // Create a staging buffer used to retrieve data to the gpu
     // is this the best way to do it??
-    VkDeviceSize bufferSize = DATA_COUNT * sizeof(float);
+    VkDeviceSize bufferSize = width * height * sizeof(vector4);
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-    copyBuffer(shaderStorageBuffer, stagingBuffer, bufferSize);
+    copyBuffer(forcesSSBO, stagingBuffer, bufferSize);
 
-    std::vector<float> data(DATA_COUNT);
+    std::vector<vector4> forces(width * height);
 
-    float* bufferData;
+    vector4* bufferData;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, (void **) &bufferData);
-    memcpy(data.data(), bufferData, (size_t)bufferSize);
+    memcpy(forces.data(), bufferData, (size_t)bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
     // print data
-    std::cout << data[0] << " ";
-    std::cout << data[1] << " ";
-    std::cout << data[2] << " ";
-    std::cout << data[3] << " ";
-    std::cout << data[4] << " ";
-    std::cout << data[5] << " ";
-    std::cout << data[6] << " ";
-    std::cout << data[7] << " ";
-    std::cout << data[8] << " ";
-    std::cout << data[9] << " ";
-    for(uint32_t i = 0; i < DATA_COUNT; i = i + 1024 * 100) {
-        std::cout << data[i] << " ";
+    std::cout << forces[0] << " ";
+    std::cout << forces[1] << " ";
+    std::cout << forces[2] << " ";
+    std::cout << forces[3] << " ";
+    std::cout << forces[4] << " ";
+    std::cout << forces[5] << " ";
+    std::cout << forces[6] << " ";
+    std::cout << forces[7] << " ";
+    std::cout << forces[8] << " ";
+    std::cout << forces[9] << " ";
+    for(uint32_t i = 0; i < width * height; i = i + 137) {
+        std::cout << forces[i] << " ";
     }
     std::cout << std::flush;
 
@@ -630,8 +817,14 @@ void ComputeGPU::cleanup() {
 
     vkDestroyDescriptorSetLayout(device, computeDescriptorSetLayout, nullptr);
 
-    vkDestroyBuffer(device, shaderStorageBuffer, nullptr);
-    vkFreeMemory(device, shaderStorageBufferMemory, nullptr);
+    vkDestroyBuffer(device, trianglesSSBO, nullptr);
+    vkFreeMemory(device, trianglesSSBOMemory, nullptr);
+
+    vkDestroyBuffer(device, materialsSSBO, nullptr);
+    vkFreeMemory(device, materialsSSBOMemory, nullptr);
+
+    vkDestroyBuffer(device, forcesSSBO, nullptr);
+    vkFreeMemory(device, forcesSSBOMemory, nullptr);
 
 
     vkDestroyFence(device, computeFence, nullptr);

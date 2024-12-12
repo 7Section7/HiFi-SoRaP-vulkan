@@ -59,6 +59,8 @@ public:
 	void computeBoundingBox();
 
 	void sendMeshToGPU(std::unique_ptr<QGLShaderProgram> &program);
+
+    std::vector<Triangle> getTriangles();
 };
 
 #endif // TRIANGLEMESH_H

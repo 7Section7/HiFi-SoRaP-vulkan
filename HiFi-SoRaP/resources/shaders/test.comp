@@ -1,22 +1,520 @@
 #version 450
 
-layout (binding = 0) uniform UniformBufferObject {
-    vec3 lightDirection;
-    vec3 worldCamPos;
-    mat4 model;
-    int debugMode;
-    vec3 diffuse;
-} ubo;
 
-layout(std430, binding = 1) buffer SSBOIn {
-   float dataIn[ ];
+//====== DEFINITIONS======
+
+#define Reflective 0
+#define Transparent 1
+#define Lambertian 2
+
+#define MAX_SECONDARY_RAYS_DEEP_LEVEL 10
+
+// Random number constants:
+#define A 16807
+#define M 2147483647
+#define Q 127773
+#define R 2836
+
+#define M_PI 3.14159265358979323846
+
+
+
+struct Triangle {
+    vec3 v1;
+    vec3 v2;
+    vec3 v3;
+    uint materialIndex;
 };
 
-layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+struct Material {
+    float ps;
+    float pd;
+    float refIdx;
+    uint reflectiveness;
+};
+
+struct HitInfo {
+    vec3 currentPoint;
+    vec3 currentL;
+    vec3 currentN;
+    vec3 currentImportance;
+    float currentPS;
+    float currentPD;
+    float currentRefIdx;
+    int currentReflectiveness;
+};
+
+struct RayTraceStep {
+    HitInfo hitInfo;
+
+    vec3 force;
+    vec3 forcePS;
+    vec3 forcePD;
+    vec3 localForcePD;
+
+    int currentStep;
+    int currentComputation;
+};
+
+
+layout (binding = 0) uniform UniformBufferObject {
+    mat4 model;
+    vec3 lightDirection;
+    vec3 V1;
+    vec3 V2;
+    vec3 worldCamPos;
+    vec3 diffuse;
+    uint debugMode;
+    uint numTriangles;
+    uint numMaterials;
+    uint numSecondaryRays;
+    uint numDiffuseRays;
+    uint Nx;
+    uint Ny;
+    uint timeSeed;
+    float xtot;
+    float ytot;
+    float boundingBoxDistance;
+} ubo;
+
+
+float FLOAT_EPSILON = 1.192093e-7f;
+
+layout(std430, binding = 1) readonly buffer trianglesSSBO {
+   Triangle triangles[ ];
+};
+
+layout(std430, binding = 2) readonly buffer materialsSSBO {
+   Material materials[ ];
+};
+
+layout(std430, binding = 3) buffer forcesSSBO {
+   vec4 forces[ ];
+};
+
+vec3 product(vec3 a, vec3 b)
+{
+    return vec3(a.x*b.x,a.y*b.y,a.z*b.z);
+}
+
+// Compute the normal of the triangle
+vec3 computeNormal(int triangleIdx) {
+    Triangle t = triangles[triangleIdx];
+    vec3 dir1 = t.v2 - t.v1;
+    vec3 dir2 = t.v3 - t.v1;
+    vec3 N = normalize(cross(dir1, dir2));
+    return N;
+}
+
+// Computes SRP after a hit
+vec3 computeSRP(vec3 L, vec3 N, float ps, float pd)
+{
+    float costh = abs(dot(N, L));
+    // PS and Apix are multiplied back at the cpu
+    // We don't multiply initially by costh because in this approach, the area corresponds to
+    //the area of the pixel cell
+    float FSRP0 = ( (1. - ps)*L.x - 2.*( ps*costh + pd/3. )*N.x );
+    float FSRP1 = ( (1. - ps)*L.y - 2.*( ps*costh + pd/3. )*N.y );
+    float FSRP2 = ( (1. - ps)*L.z - 2.*( ps*costh + pd/3. )*N.z );
+
+    vec3 force = vec3(FSRP0,FSRP1, FSRP2);
+    return force;
+}
+
+// Computes SRP force
+vec3 computeForce(int triangleIdx, vec3 L)
+{
+    Triangle t = triangles[triangleIdx];
+    Material m = materials[t.materialIndex];
+
+    vec3 N = computeNormal(triangleIdx);
+    float ps = m.ps;
+    float pd = m.pd;
+
+    vec3 force=computeSRP(L,N,ps,pd);
+    return force;
+}
+
+// intersection between a ray (point, L) and a triangle
+bool hitTriangle(vec3 point, vec3 L, int triangleIdx, out vec3 hitPoint)
+{
+    float tMin=1.e-5f;
+    float tMax= 1000000.f;
+
+    Triangle t = triangles[triangleIdx];
+
+    vec3 v1 = t.v1;
+    vec3 N = computeNormal(triangleIdx);
+
+    float d= - dot(v1,N);
+    vec4 vNormal = vec4(N,d);
+    vec4 vPoint = vec4(point,1.f);
+    vec4 L2 = vec4(L,0.f);
+
+    float lowerPart = dot(vNormal, L2);
+    if(abs(lowerPart) < FLOAT_EPSILON)
+	return false;
+
+    float tValue = - dot(vNormal,vPoint) / lowerPart;
+
+    if(tValue > tMin && tValue < tMax)
+    {
+	vec3 v2 = t.v2;
+	vec3 v3 = t.v3;
+
+	vec3 intPoint = tValue*L + point;
+
+	vec3 dir1 = v3-v1;
+	vec3 dir2 = intPoint-v1;
+	float alpha = 0.5f * length(cross(dir1,dir2));
+
+	dir1 = v2-v3;
+	dir2 = intPoint-v3;
+	float beta = 0.5f * length(cross(dir1,dir2));
+
+	dir1 = v1-v2;
+	dir2 = intPoint-v2;
+	float gamma = 0.5f * length(cross(dir1,dir2));
+
+	dir1 = v3-v1;
+	dir2 = v2-v1;
+	float totalArea = 0.5f * length(cross(dir1,dir2));
+
+        if(abs(alpha+beta+gamma-totalArea)<1.e-5f && alpha>0 && beta>0 && gamma>0) //1.e-5f
+	{
+	    hitPoint = intPoint;
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+//Give the triangleId of the triangle that has the closest intersection to the ray.
+int hit(vec3 point, vec3 L, out vec3 hitPoint)
+{
+    vec3 intPoint;
+    float depMin = 10000000.f;
+    int triangleIdx;
+    int hitTriangleIdx = -1;
+
+    for(triangleIdx=0; triangleIdx<ubo.numTriangles; triangleIdx++)
+    {
+	if(hitTriangle(point,L,triangleIdx,intPoint))
+	{
+	    vec3 diff = point-intPoint;
+	    float depHit = length(diff);
+
+	    if(depHit<depMin)
+	    {
+		depMin=depHit;
+		hitTriangleIdx=triangleIdx;
+		hitPoint=intPoint;
+	    }
+	}
+    }
+    return hitTriangleIdx;
+}
+
+// ===Pseudo-random generator=======
+float seed;
+float rand(vec2 n)
+{
+    return fract(sin(dot(n, vec2(12.9898f, 4.1414f))) * 43758.5453f);
+}
+
+float getRandomValue()
+{
+	int newSeed = int( A*mod(seed,Q) - R*(seed/Q) );
+	if(newSeed < 0) newSeed += M;
+
+	seed = newSeed;
+
+	float randomValue = newSeed/float(M);
+
+	return randomValue;
+}
+
+vec3 randomInSphere()
+{
+    vec3 p;
+
+    //OPTION 2: Polar Coordinates Improved
+    float theta = 2 * M_PI * getRandomValue();
+    // wrong: double phi = M_PI * uniform01(generator);
+    float phi = acos(1 - 2 * getRandomValue());
+    float x = sin(phi) * cos(theta);
+    float y = sin(phi) * sin(theta);
+    float z = cos(phi);
+
+    p = vec3(x,y,z);
+
+    return p;
+}
+
+
+void scatter(inout HitInfo hitInfo)
+{
+    vec3 point = hitInfo.currentPoint;
+    vec3 dir = hitInfo.currentL;
+    float ps=hitInfo.currentPS;
+    float pd = hitInfo.currentPD;
+    float refIdx = hitInfo.currentRefIdx;
+    int reflectiveness = hitInfo.currentReflectiveness;
+    vec3 N = hitInfo.currentN;
+
+    if(reflectiveness == 0) //Reflective
+    {
+	vec3 reflected = normalize(reflect(dir,N));
+
+	point = point + 1.e-4f*reflected;
+
+	hitInfo.currentPoint = point;
+	hitInfo.currentL=reflected;
+	hitInfo.currentImportance = vec3(ps,ps,ps);
+    }
+    else //Lambertian
+    {
+	vec3 target = point + N + randomInSphere();
+	vec3 reflected = normalize(target - point);
+
+	point = point + 1.e-4f*reflected;
+
+	hitInfo.currentPoint = point;
+	hitInfo.currentL=reflected;
+	hitInfo.currentImportance = vec3(pd,pd,pd);
+    }
+}
+
+void copyHitInfo(in HitInfo hitInfo, out HitInfo outHitInfo)
+{
+    outHitInfo.currentImportance=hitInfo.currentImportance;
+    outHitInfo.currentL = hitInfo.currentL;
+    outHitInfo.currentN = hitInfo.currentN;
+    outHitInfo.currentPS = hitInfo.currentPS;
+    outHitInfo.currentPD = hitInfo.currentPD;
+    outHitInfo.currentRefIdx = hitInfo.currentRefIdx;
+    outHitInfo.currentReflectiveness= hitInfo.currentReflectiveness;
+    outHitInfo.currentPoint= hitInfo.currentPoint;
+}
+
+//Check if the ray intersects any triangle and get the closest one in order
+//to compute the force on the intersection.
+vec3 computeScatteredForce(inout HitInfo hitInfo)
+{
+    vec3 totalForce = vec3(0,0,0);
+    vec3 importance = hitInfo.currentImportance;
+    scatter(hitInfo);
+    vec3 hitPoint;
+
+    int triangleIdx = hit(hitInfo.currentPoint,hitInfo.currentL,hitPoint);
+    if(triangleIdx!=-1)
+    {
+	//hitInfo.currentImportance = product(hitInfo.currentImportance,importance);
+	//vec3 localForce = computeForce(triangleIdx,hitInfo.currentL);
+	//totalForce+= product(localForce,hitInfo.currentImportance);
+	totalForce = computeForce(triangleIdx,hitInfo.currentL);
+
+	hitInfo.currentN = computeNormal(triangleIdx);
+
+	Triangle t = triangles[triangleIdx];
+	Material m = materials[t.materialIndex];
+	hitInfo.currentPS = m.ps;
+	hitInfo.currentPD = m.pd;
+	hitInfo.currentRefIdx = m.refIdx;
+
+	hitInfo.currentPoint = hitPoint;
+    }
+    else
+    {
+	hitInfo.currentImportance=importance;
+    }
+
+    return totalForce;
+}
+
+
+//This computes the SRP force for the fragment.
+//In particular, it casts several additional rays when one of the primary
+//rays intersects with the mesh.
+vec3 computeFinalForce(vec3 point,vec3 L, out int triangleIdx)
+{
+    vec3 totalForce;
+    bool foundNextHit = true;
+
+    vec3 currentN;
+    vec3 currentL = normalize(L);
+    vec3 currentPoint = point;
+    float currentPs,currentPd,currentRefIdx;
+    uint currentReflectiveness;
+    vec3 hitPoint;
+
+    vec3 importance = vec3(1.f,1.f,1.f);
+
+    vec3 pointAux = point;
+    triangleIdx = hit(pointAux,currentL,currentPoint);
+    if(triangleIdx==-1) return vec3(0,0,0);
+
+    Triangle t = triangles[triangleIdx];
+    Material m = materials[t.materialIndex];
+
+    currentN = computeNormal(triangleIdx);
+
+    currentPs = m.ps;
+    currentPd = m.pd;
+    currentRefIdx = m.refIdx;
+    currentReflectiveness = m.reflectiveness;
+
+    vec3 force = computeForce(triangleIdx,currentL);
+    totalForce = product(force,importance);
+
+    if(ubo.numSecondaryRays == 0)
+	return totalForce;
+
+    //For optimization, we decided to create a stack 'steps'
+    //in order to save the accumulated forces of each iteration.
+    //numSecondaryRays MUST BE <= MAX_SECONDARY_RAYS_DEEP_LEVEL
+    RayTraceStep steps[MAX_SECONDARY_RAYS_DEEP_LEVEL];
+
+    for(int i=0; i < ubo.numSecondaryRays; i++)
+    {
+	steps[i].currentStep=i;
+	steps[i].currentComputation=0;
+	steps[i].force = vec3(0,0,0);
+	steps[i].hitInfo.currentReflectiveness=0;
+	steps[i].forcePS = vec3(0,0,0);
+	steps[i].forcePD = vec3(0,0,0);
+	steps[i].localForcePD = vec3(0,0,0);
+    }
+    steps[0].hitInfo.currentImportance=importance;
+    steps[0].hitInfo.currentL=L;
+    steps[0].hitInfo.currentPoint=currentPoint;
+    steps[0].hitInfo.currentPS=currentPs;
+    steps[0].hitInfo.currentPD=currentPd;
+    steps[0].hitInfo.currentN =currentN;
+
+    uint diffuseRays = ubo.numDiffuseRays;
+
+    bool stop = false;
+    int i=0;
+    int currentStep=0;
+    while(!stop && i<1000) //i is a timeout counter.
+    {
+	if(steps[currentStep].currentComputation < 1+diffuseRays)
+	{
+	    //Get the information from the previous iteration.
+	    HitInfo hitInfoAux;
+	    copyHitInfo(steps[currentStep].hitInfo,hitInfoAux);
+
+	    //Depending on the current step of computation we are in,
+	    //we compute a secondary ray based on specular or diffuse reflection.
+	    int r;
+	    if(steps[currentStep].currentComputation<1) { r=0; }
+	    else { r=2; }
+
+	    //Compute force on the intersection of the ray and add it to the accumulated force.
+	    hitInfoAux.currentReflectiveness=r;
+	    vec3 f = computeScatteredForce(hitInfoAux);
+
+	    if(steps[currentStep].currentComputation<1)
+	    { steps[currentStep].forcePS = f; }
+	    else
+	    { steps[currentStep].localForcePD = f;	}
+
+            if( length(f)<FLOAT_EPSILON || currentStep == ubo.numSecondaryRays-1 )
+	    {
+		//There was no hit for this secondary ray or we reach the maximum deep raytracing level,
+		//so we move forward on the next secondary ray computation. (next iteration).
+		if(steps[currentStep].currentComputation >= 1)
+		{ steps[currentStep].forcePD += steps[currentStep].localForcePD; }
+
+		steps[currentStep].currentComputation++;
+	    }
+	    else
+	    {
+		//Or, the secondary ray hit a triangle, then we need to compute new secondary rays from this
+		//intersected point.
+		copyHitInfo(hitInfoAux,steps[currentStep+1].hitInfo);
+		steps[currentStep+1].currentComputation=0;
+		steps[currentStep+1].force=vec3(0,0,0);
+		steps[currentStep+1].forcePS=vec3(0,0,0);
+		steps[currentStep+1].forcePD=vec3(0,0,0);
+		steps[currentStep+1].localForcePD=vec3(0,0,0);
+		steps[currentStep+1].hitInfo.currentReflectiveness=0;
+
+		currentStep++;
+	    }
+	}
+	else//Move backward.
+	{
+	    //Once all the secondary rays were computed, we move backward in the stack.
+	    float ps = steps[currentStep].hitInfo.currentPS;
+	    float pd = steps[currentStep].hitInfo.currentPD;
+	    steps[currentStep].force = ps*steps[currentStep].forcePS;
+	    if(diffuseRays > 0) steps[currentStep].force += (pd/diffuseRays)*steps[currentStep].forcePD;
+
+	    if(currentStep==0) 
+            {
+                stop=true;
+            }
+	    else
+	    {
+		if(steps[currentStep-1].currentComputation<1)
+		{ 
+                  steps[currentStep-1].forcePS += steps[currentStep].force;
+                }
+		else
+		{
+		    steps[currentStep-1].localForcePD += steps[currentStep].force;
+		    steps[currentStep-1].forcePD += steps[currentStep-1].localForcePD;
+		}
+
+		currentStep--;
+		steps[currentStep].currentComputation++;
+	    }
+	}
+
+	i++;
+    }
+
+    totalForce+= steps[0].force;
+
+    return totalForce;
+}
+
+
+
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 void main() 
 {
-    uint index = gl_GlobalInvocationID.x;  
+    // the global invocation index determines the pixel position
+    uint x = gl_GlobalInvocationID.x;
+    uint y = gl_GlobalInvocationID.y;
 
-    dataIn[index] = ubo.lightDirection.x * ubo.debugMode * index;
+    vec3 L = normalize(ubo.lightDirection.xyz);
+
+    float xpix = ubo.xtot / ubo.Nx;
+    float ypix = ubo.ytot / ubo.Ny;
+    uint ix = x + 1;
+    uint iy = y + 1;
+
+    vec3 pixelPosition = ((ix-0.5f)*xpix - ubo.xtot/2.f)*ubo.V1 +
+            ((iy-0.5f)*ypix - ubo.ytot/2.f)*ubo.V2 +
+            ubo.boundingBoxDistance*(-L);
+
+    uint idxSeed = ((ix-1)*ubo.Nx + iy) * 1000;
+    idxSeed = int( mod( float(idxSeed), float(M/100)) );
+    seed = ubo.timeSeed + idxSeed;
+
+    uint triangleIdx;
+    vec3 force = computeFinalForce(pixelPosition, L, triangleIdx);
+
+    forces[x + ubo.Nx * y] = pixelPosition;
+
+
+    //esperar
+    //addGroup();
+    //addAtomic();
+
 }

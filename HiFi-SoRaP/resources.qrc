@@ -38,5 +38,6 @@
         <file>resources/shaders/color_frag.spv</file>
         <file>resources/shaders/color_vert.spv</file>
         <file>resources/shaders/test_comp.spv</file>
+        <file>resources/shaders/test.comp</file>
     </qresource>
 </RCC>

@@ -17,10 +17,10 @@
 class Triangle
 {
 public:
-	int v1, v2, v3;
-	int rf;
-	int nn;
-	precision::value_type A;
+    int v1, v2, v3;  // vertex index
+    int rf;  // material index
+    int nn;  // normal index
+    precision::value_type A;  // face area
 
 	Triangle();
 };

@@ -19,7 +19,24 @@ const QString computeShaderFilename = ":/resources/shaders/test_comp.spv";
 
 const bool enableValidationLayers = true;
 
-class ComputeGPU : AdvancedSRP
+
+// structs
+struct cTriangle {
+    vector3 v1;
+    vector3 v2;
+    vector3 v3;
+    int materialIndex;
+};
+
+struct cMaterial {
+    float ps;
+    float pd;
+    float refIdx;
+    uint32_t reflectiveness;
+};
+
+
+class ComputeGPU : public AdvancedSRP
 {
 
     struct PhysicalDeviceProps
@@ -46,8 +63,15 @@ class ComputeGPU : AdvancedSRP
 
     VkCommandPool commandPool;
 
-    VkBuffer shaderStorageBuffer;
-    VkDeviceMemory shaderStorageBufferMemory;
+    VkBuffer trianglesSSBO;
+    VkDeviceMemory trianglesSSBOMemory;
+
+    VkBuffer materialsSSBO;
+    VkDeviceMemory materialsSSBOMemory;
+
+    VkBuffer forcesSSBO;
+    VkDeviceMemory forcesSSBOMemory;
+
 
     VkBuffer uniformBuffer;
     VkDeviceMemory uniformBufferMemory;
@@ -98,15 +122,23 @@ public:
     void computeStepSRP(const vector3& XS, vector3& force, const vector3& V1 = DEFAULT_VEC3,
                         const vector3& V2 = DEFAULT_VEC3) {};
 
+    std::vector<cTriangle> prepareTriangles();
+    std::vector<cMaterial> prepareMaterials();
+
+
 
 public:
 
     dataVisualization::Camera camera;
 
-    int width, height;
-    Object *satellite;
+    uint32_t width, height;
+    //Object *satellite;
     Light *light;
 
+    uint32_t numTriangles;
+    uint32_t numMaterials;
+    uint32_t numSecondaryRays;
+    uint32_t numDiffuseRays;
 };
 
 #endif // COMPUTEGPU_H

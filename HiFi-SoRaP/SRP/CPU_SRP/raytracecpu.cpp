@@ -109,6 +109,7 @@ void RayTraceCPU::computeStepSRP(const vector3& XS, vector3 &force, const vector
 			//int triangleIdx; F = computeFinalForce(pixelPosition, XS, triangleIdx);
 			//if(triangleIdx != -1)
 			const auto hasHit = computePixelForce(XS,pixelPosition,F);
+            std::cout << F << " ";
 			if(hasHit)
 			{
 				const auto fixedForce = F - compensationTerm;

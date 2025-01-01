@@ -23,7 +23,7 @@
 using namespace QtDataVisualization;
 using namespace std;
 
-enum SRPModel{CannonBallModel,NPlateModel,RayTraceCPUModel,AdvancedGPUModel};
+enum SRPModel{CannonBallModel,NPlateModel,RayTraceCPUModel,AdvancedGPUModel, ComputeGPUModel};
 enum VisualizationMode{MeanF=0,Fx=1,Fy=2,Fz=3};
 
 /*

@@ -113,7 +113,11 @@ vector3 AdvancedSRP::computeSRP(const vector3& XS,float angleX, float angleY, fl
 	const vector3 rotatedV1{outputV1[0],outputV1[1],outputV1[2]};
 	const vector3 rotatedV2{outputV2[0],outputV2[1],outputV2[2]};
 
-	computeStepSRP(rotatedXS,force,rotatedV1,rotatedV2);
+    //computeStepSRP(rotatedXS,force,rotatedV1,rotatedV2);
+    vector3 V1, V2;
+    V1[0] = 0;  V1[1] = 0;  V1[2] = -1;
+    V2[0] = 0;  V2[1] = -1; V2[2] = 0;
+    computeStepSRP(XS, force, V1, V2);
 
 	return force;
 }

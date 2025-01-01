@@ -121,6 +121,12 @@ void MainWindow::loadUserParameters()
 		srp[model] = new RayTraceGPUTextures();
 	}
 
+    if(model == ComputeGPUModel)
+    {
+        srp[ComputeGPUModel] = new ComputeGPU(this->inst->vkInstance());
+
+    }
+
 	const auto az = ui->sb_az->value();
 	const auto el = ui->sb_el->value();
 
@@ -196,6 +202,32 @@ void MainWindow::loadUserParameters()
 		}
 	}
     */
+
+    if(model == ComputeGPUModel) {
+
+        if (ComputeGPU* computeModel = dynamic_cast<ComputeGPU*>(srp[model])){
+
+            Reflectiveness r = Reflective;
+            computeModel->reflectiveType = r;
+
+            int numRays = numSecondaryRays->value();
+            computeModel->numSecondaryRays = numRays;
+
+            int numDiffuse = numDiffuseRays->value();
+            computeModel->numDiffuseRays = numDiffuse;
+
+
+            computeModel->width = nx->value();
+            computeModel->height = ny->value();
+
+            satellite->setReflectivenessInMaterials(r);
+            satellite->setRefractiveIndexInMaterials(1);
+
+            computeModel->init();
+        }
+    }
+
+
 	if(model == CannonBallModel){
 		CannonBall* c = dynamic_cast<CannonBall*>(srp[CannonBallModel]);
 		c->cr = cr->value();
@@ -428,7 +460,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
 */
 void MainWindow::on_bttn_visualizeSatellite_clicked()
 {
-    /*
+
     if(ui->comboBox->currentIndex()==0){
         QMessageBox msgBox;
         msgBox.setText("No method has been selected yet.");
@@ -440,8 +472,22 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
 
     if(errorCode<0)
         return;
-    */
 
+
+    const auto lightDir = new Light();
+
+    vector3 RS, V1, V2, XS, cm;
+
+    XS[0] = -1; XS[1] = 0;  XS[2] = 0;
+    V1[0] = 0;  V1[1] = 0;  V1[2] = -1;
+    V2[0] = 0;  V2[1] = -1; V2[2] = 0;
+
+
+    const vector3 force = srp[model]->computeSRP(XS, 0, 0, 0);
+
+    std::cout << "Total SRP force: " << force << std::endl;
+
+    /*
     ComputeGPU* computeModel = new ComputeGPU(this->inst->vkInstance());
 
     const auto az = ui->sb_az->value();
@@ -515,6 +561,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     computeModel->init();
     computeModel->process();
     computeModel->cleanup();
+    */
 
     /*
     loadUserParameters();
@@ -776,9 +823,18 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		ui->pushButton->show();
 		model = SRPModel::AdvancedGPUModel;
 	}
+    else if (arg1.compare(QString("RayTrace (GPU) - Compute Shader"))==0){
+        numFiability = 6;
+        numPerformance = 4;
+
+        textInfo = QString("This method takes the satellite's faces to the GPU and then, for each pixel, it is casted a ray that if it intersects with a face of the satellite, the SRP force will be computed. Additionally, each time a ray intersects a face, other rays with reflected and diffuse directions will be casted as well.");
+
+        model = SRPModel::ComputeGPUModel;
+    }
 
 	if(arg1.compare(QString("RayTrace (CPU) - Multiple Scattering"))==0 ||
-	   arg1.compare(QString("RayTrace (GPU) - Multiple Scattering"))==0)
+       arg1.compare(QString("RayTrace (GPU) - Multiple Scattering"))==0 ||
+        arg1.compare(QString("RayTrace (GPU) - Compute Shader"))==0)
 	{
 		QLabel * labelNx = new QLabel;
 		labelNx->setFont(font1);

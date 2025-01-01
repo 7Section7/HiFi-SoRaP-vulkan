@@ -1,6 +1,5 @@
 #version 450
 
-
 //====== DEFINITIONS======
 
 #define Reflective 0
@@ -23,14 +22,14 @@ struct Triangle {
     vec3 v1;
     vec3 v2;
     vec3 v3;
-    uint materialIndex;
+    int materialIndex;
 };
 
 struct Material {
     float ps;
     float pd;
     float refIdx;
-    uint reflectiveness;
+    int reflectiveness;
 };
 
 struct HitInfo {
@@ -64,11 +63,11 @@ layout (binding = 0) uniform UniformBufferObject {
     vec3 V2;
     vec3 worldCamPos;
     vec3 diffuse;
-    uint debugMode;
-    uint numTriangles;
-    uint numMaterials;
-    uint numSecondaryRays;
-    uint numDiffuseRays;
+    int debugMode;
+    int numTriangles;
+    int numMaterials;
+    int numSecondaryRays;
+    int numDiffuseRays;
     uint Nx;
     uint Ny;
     uint timeSeed;
@@ -346,7 +345,7 @@ vec3 computeFinalForce(vec3 point,vec3 L, out int triangleIdx)
     vec3 currentL = normalize(L);
     vec3 currentPoint = point;
     float currentPs,currentPd,currentRefIdx;
-    uint currentReflectiveness;
+    int currentReflectiveness;
     vec3 hitPoint;
 
     vec3 importance = vec3(1.f,1.f,1.f);
@@ -393,7 +392,7 @@ vec3 computeFinalForce(vec3 point,vec3 L, out int triangleIdx)
     steps[0].hitInfo.currentPD=currentPd;
     steps[0].hitInfo.currentN =currentN;
 
-    uint diffuseRays = ubo.numDiffuseRays;
+    int diffuseRays = ubo.numDiffuseRays;
 
     bool stop = false;
     int i=0;
@@ -492,6 +491,11 @@ void main()
     uint x = gl_GlobalInvocationID.x;
     uint y = gl_GlobalInvocationID.y;
 
+    // excess invocations should return early
+    if(x >= ubo.Nx || y >= ubo.Ny) {
+        return;
+    }
+
     vec3 L = normalize(ubo.lightDirection.xyz);
 
     float xpix = ubo.xtot / ubo.Nx;
@@ -507,11 +511,25 @@ void main()
     idxSeed = int( mod( float(idxSeed), float(M/100)) );
     seed = ubo.timeSeed + idxSeed;
 
-    uint triangleIdx;
+    int triangleIdx;
     vec3 force = computeFinalForce(pixelPosition, L, triangleIdx);
+	
+    //forces[x + ubo.Nx * y] = vec4(m.ps, m.pd, m.refIdx, m.reflectiveness);
+    forces[x + ubo.Nx * y] = vec4(force, 0);
+    return;
 
-    forces[x + ubo.Nx * y] = pixelPosition;
-
+    int iix = int(mod(x,2));
+    int iiy = int(mod(y, 16));
+    vec3 normal = computeNormal(int(mod(x, 16)));
+    if (iix == 0){
+        forces[x + ubo.Nx * y] = vec4(triangles[iiy].v1, 0);
+    }
+    else if (iix == 1) {
+        forces[x + ubo.Nx * y] = vec4(triangles[iiy].v2, 0);
+    }
+    else if (iix == 2) {
+        forces[x + ubo.Nx * y] = vec4(triangles[iiy].v3, 0);
+    }
 
     //esperar
     //addGroup();

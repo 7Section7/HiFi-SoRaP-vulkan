@@ -34,7 +34,7 @@
 
 #include "Comparison/comparisonwindow.h"
 
-#define MAX_SRP_MODELS 4
+#define MAX_SRP_MODELS 5
 
 QT_BEGIN_NAMESPACE
 class QSlider;

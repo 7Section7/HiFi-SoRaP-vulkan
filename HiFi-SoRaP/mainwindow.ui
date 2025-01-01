@@ -31,7 +31,6 @@
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -60,7 +59,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -79,7 +77,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -101,7 +98,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -117,7 +113,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -139,7 +134,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -155,7 +149,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -174,7 +167,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -199,7 +191,6 @@ border: 1px solid;
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -225,7 +216,6 @@ border: 1px solid;
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -259,7 +249,6 @@ border: 1px solid;
          </property>
          <property name="font">
           <font>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -302,7 +291,6 @@ border: 1px solid;
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -329,6 +317,11 @@ border: 1px solid;
            <item>
             <property name="text">
              <string>RayTrace (GPU) - Multiple Scattering</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RayTrace (GPU) - Compute Shader</string>
             </property>
            </item>
           </widget>
@@ -462,7 +455,6 @@ border: 1px solid;
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -510,7 +502,6 @@ border: 1px solid;
       </property>
       <property name="font">
        <font>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -557,7 +548,6 @@ border: 1px solid;
       </property>
       <property name="font">
        <font>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -576,7 +566,6 @@ border: 1px solid;
       </property>
       <property name="font">
        <font>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -594,7 +583,6 @@ border: 1px solid;
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -613,7 +601,6 @@ border: 1px solid;
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -632,7 +619,6 @@ border: 1px solid;
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -651,7 +637,6 @@ border: 1px solid;
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -671,7 +656,6 @@ border: 1px solid;
       </property>
       <property name="font">
        <font>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -696,7 +680,6 @@ border: 1px solid;
       </property>
       <property name="font">
        <font>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -739,7 +722,6 @@ border: 1px solid;
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -774,7 +756,6 @@ border: 1px solid;
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -806,7 +787,6 @@ the meantime. However, it will spend a little more to do the computation.</strin
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -847,7 +827,6 @@ the meantime. However, it will spend a little more to do the computation.</strin
       </property>
       <property name="font">
        <font>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -869,7 +848,6 @@ the meantime. However, it will spend a little more to do the computation.</strin
       </property>
       <property name="font">
        <font>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -900,7 +878,6 @@ the meantime. However, it will spend a little more to do the computation.</strin
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -919,7 +896,6 @@ the meantime. However, it will spend a little more to do the computation.</strin
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>

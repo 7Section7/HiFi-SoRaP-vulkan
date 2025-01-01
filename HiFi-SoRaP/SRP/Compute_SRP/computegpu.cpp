@@ -2,31 +2,12 @@
 #include "qfileinfo.h"
 #include <optional>
 #include <array>
-
-struct UniformBufferObject {
-    alignas(16) Eigen::Matrix4f model;
-    alignas(16) vector3 lightDirection;
-    alignas(16) vector3 V1;  // TODO: pass to shader
-    alignas(16) vector3 V2;
-    alignas(16) vector3 worldCamPos;
-    alignas(16) vector3 diffuse;
-    alignas(4) uint32_t debugMode;
-    alignas(4) uint32_t numTriangles;
-    alignas(4) uint32_t numMaterials;
-    alignas(4) uint32_t numSecondaryRays;
-    alignas(4) uint32_t numDiffuseRays;
-    alignas(4) uint32_t Nx;  // widht
-    alignas(4) uint32_t Ny;  // height
-    alignas(4) uint32_t timeSeed; // for random
-    alignas(4) float xtot;  // grid x size
-    alignas(4) float ytot;  // grid y size
-    alignas(4) float boundingBoxDistance;  // diagonal diff
-};
+#include <cmath>
 
 
 ComputeGPU::ComputeGPU(VkInstance instance) {
     this->instance = instance;
-
+    // default values
     this->width = 512;
     this->height = 512;
 }
@@ -51,9 +32,11 @@ std::vector<cTriangle> ComputeGPU::prepareTriangles() {
             pMesh->vertices[i0],
             pMesh->vertices[i1],
             pMesh->vertices[i2],
-            pMesh->faces[i].rf
+            (int32_t)pMesh->faces[i].rf
         };
         ctriangles.push_back(t);
+
+        std::cout << t.v1 << " " << t.v2 << " " << t.v3 << " " << t.materialIndex << " ";
     }
 
     return ctriangles;
@@ -71,12 +54,11 @@ std::vector<cMaterial> ComputeGPU::prepareMaterials() {
 
         Material m1 = object->getMaterial(i);
 
-
         cMaterial mcp {
             m1.ps,
             m1.pd,
             m1.refIdx,
-            (uint32_t) m1.r,
+            (int32_t) m1.r,
         };
         cmaterials.push_back(mcp);
     }
@@ -115,6 +97,63 @@ void ComputeGPU::process() {
 
     writeBackCPU();
 }
+
+
+void ComputeGPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3& V1, const vector3& V2) {
+    camera.setViewport(0, 0, 512, 512);
+    camera.setProjection(kFieldOfView, kZNear, kZFar);
+
+    Eigen::Matrix4f view = camera.setView();
+
+    int time_seed = getTimeSeed();
+
+    TriangleMesh *mesh = this->satellite->getMesh();
+    Eigen::Vector3f diff = mesh->max_-mesh->min_;
+    float diagonalDiff = diff.norm();
+    float errorMargin = 0.1f;
+    this->distance = diagonalDiff+errorMargin;
+
+    //float xAxis = distance/2.0f;
+    //float yAxis = distance/2.0f;
+
+    UniformBufferObject ubo{};
+    ubo.lightDirection = XS;
+    ubo.V1 = V1;
+    ubo.V2 = V2;
+    ubo.model = camera.setModel();
+    ubo.worldCamPos = vector3(0.0f, 0.0f, 0.0f);
+    ubo.debugMode = 2;
+    ubo.diffuse = vector3(1.0f, 0.0f, 0.0f);
+    ubo.numTriangles = numTriangles;
+    ubo.numMaterials = numMaterials;
+    ubo.numSecondaryRays = numSecondaryRays;
+    ubo.numDiffuseRays = numDiffuseRays;
+    ubo.Nx = width;
+    ubo.Ny = height;
+    ubo.xtot = distance;
+    ubo.ytot = distance;
+    ubo.boundingBoxDistance = diagonalDiff;
+    ubo.timeSeed = time_seed;
+
+    // get camera translation via its matrix
+    Eigen::Vector4f camPosM = view.inverse().col(3);
+    vector3 camPos = vector3(camPosM[0], camPosM[1], camPosM[2]);
+    ubo.worldCamPos = camPos;
+
+    updateUniforms(ubo);
+    recordComputeCommandBuffer(computeCommandBuffer);
+
+    auto start = std::chrono::high_resolution_clock::now();
+    dispatchCompute();
+    waitForComputeWork();
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    std::cout << "Compute work took " << duration.count() << " microseconds" << std::endl;
+
+    writeBackCPU();
+    force = vector3(-343.0, 0.0, 0.0);
+}
+
 
 
 /**
@@ -637,14 +676,6 @@ void ComputeGPU::createSyncObjects() {
     }
 }
 
-
-namespace {
-
-const float kFieldOfView = 60;
-const float kZNear = 0.0001;
-const float kZFar = 800;
-
-}
 void ComputeGPU::updateUniforms() {
 
     camera.setViewport(0, 0, 512, 512);
@@ -654,28 +685,14 @@ void ComputeGPU::updateUniforms() {
 
     this->light = new Light();
 
-    // TIME SEED
-    const auto now = std::chrono::system_clock::now();
-    //const std::time_t t_c = std::chrono::system_clock::to_time_t(now);
-    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
-    const auto fraction = now - seconds;
-    const auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(fraction).count();
-    // http://en.cppreference.com/w/cpp/chrono/c/time
-    const std::time_t currentNow = std::time(nullptr) ; // get the current time point
-    // convert it to (local) calendar time
-    // http://en.cppreference.com/w/cpp/chrono/c/localtime
-    const std::tm calendarTime = *std::localtime( std::addressof(currentNow) ) ;
-    const auto secs      = calendarTime.tm_sec;
-    const auto mins      = calendarTime.tm_min;
-    const auto hours     = calendarTime.tm_hour;
-    const int time_seed = millisecs + 1000*(secs + 60*(mins + 60*(hours)));
+    int time_seed = getTimeSeed();
 
 
     TriangleMesh *mesh = this->satellite->getMesh();
     Eigen::Vector3f diff = mesh->max_-mesh->min_;
     float diagonalDiff = diff.norm();
     float errorMargin = 0.1f;
-    float distance = diagonalDiff+errorMargin;
+    this->distance = diagonalDiff+errorMargin;
 
     //float xAxis = distance/2.0f;
     //float yAxis = distance/2.0f;
@@ -707,6 +724,31 @@ void ComputeGPU::updateUniforms() {
     memcpy(uniformBufferMapped, &ubo, sizeof(ubo));
 }
 
+void ComputeGPU::updateUniforms(UniformBufferObject ubo) {
+
+    memcpy(uniformBufferMapped, &ubo, sizeof(ubo));
+}
+
+
+int ComputeGPU::getTimeSeed() {
+    // TIME SEED
+    const auto now = std::chrono::system_clock::now();
+    //const std::time_t t_c = std::chrono::system_clock::to_time_t(now);
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+    const auto fraction = now - seconds;
+    const auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(fraction).count();
+    // http://en.cppreference.com/w/cpp/chrono/c/time
+    const std::time_t currentNow = std::time(nullptr) ; // get the current time point
+    // convert it to (local) calendar time
+    // http://en.cppreference.com/w/cpp/chrono/c/localtime
+    const std::tm calendarTime = *std::localtime( std::addressof(currentNow) ) ;
+    const auto secs      = calendarTime.tm_sec;
+    const auto mins      = calendarTime.tm_min;
+    const auto hours     = calendarTime.tm_hour;
+    return millisecs + 1000*(secs + 60*(mins + 60*(hours)));
+}
+
+
 
 void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
     VkCommandBufferBeginInfo beginInfo {};
@@ -723,8 +765,14 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 
     // dispatch (width / 32) * (height / 32) work groups, with a local size
     // of 32x32, for a total of width * height individual invocations
-    vkCmdDispatch(commandBuffer, width / 32, height / 32, 1);
+    //vkCmdDispatch(commandBuffer, width / 32, height / 32, 1);
 
+    int x = std::ceil((float) width / 32);
+    int y = std::ceil((float) height / 32);
+    std::cout << "Pixel grid: " << width << "x" << height << "\n";
+    std::cout << "Dispatching " << x << "x" << y << " workgroups\n";
+
+    vkCmdDispatch(commandBuffer, x, y, 1);
 
     VkMemoryBarrier memoryBarrier{};
     memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -786,6 +834,7 @@ void ComputeGPU::writeBackCPU() {
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
     // print data
+
     std::cout << forces[0] << " ";
     std::cout << forces[1] << " ";
     std::cout << forces[2] << " ";
@@ -796,10 +845,25 @@ void ComputeGPU::writeBackCPU() {
     std::cout << forces[7] << " ";
     std::cout << forces[8] << " ";
     std::cout << forces[9] << " ";
-    for(uint32_t i = 0; i < width * height; i = i + 137) {
-        std::cout << forces[i] << " ";
+    for(uint32_t i = 0; i < width * height; i = i + 1) {
+        std::cout << "at " << i << " " << forces[i] << " ";
+        //std::cout << forces[i] << " ";
     }
-    std::cout << std::flush;
+
+    vector3 totalForce = vector3(0.0f,0.0f,0.0f);
+    const uint32_t n_pixels = width * height;
+    for(uint32_t i = 0; i < n_pixels; i++) {
+        totalForce += vector3(forces[i].x, forces[i].y, forces[i].z);
+    }
+
+    std::cout << "SRP totalForce " << totalForce << " ";
+
+    float apix = distance/width * distance/height;
+    double PS = PRESSURE;
+    totalForce = PS*apix/msat*(totalForce);
+
+    std::cout << "SPR on compute " << totalForce << std::endl << std::flush;
+
 
 }
 
@@ -833,6 +897,10 @@ void ComputeGPU::cleanup() {
 
     vkDestroyDevice(device, nullptr);
 
+}
+
+ComputeGPU::~ComputeGPU() {
+    cleanup();
 }
 
 

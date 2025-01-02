@@ -145,6 +145,7 @@ public:
 
     void waitForComputeWork();
     void writeBackCPU();
+    void sumForces(vector3& force);
 
     void init();
     void process();
@@ -164,6 +165,8 @@ public:
 
     dataVisualization::Camera camera;
 
+    std::vector<vector4> forces;
+
     uint32_t width, height;
     float distance;
     //Object *satellite;
@@ -174,6 +177,7 @@ public:
     int32_t numSecondaryRays;
     int32_t numDiffuseRays;
     int reflectiveType = Reflective;
+    int xWorkgroupSize = 32;
 };
 
 #endif // COMPUTEGPU_H

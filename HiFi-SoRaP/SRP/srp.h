@@ -30,7 +30,7 @@
 class SRP
 {
 protected:
-	QProgressBar* progressBar;
+    QProgressBar* progressBar = nullptr;
 	bool stopExecution;
 	int step_AZ, step_EL;
 	std::string output;

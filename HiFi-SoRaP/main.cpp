@@ -17,10 +17,10 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
+    QVulkanInstance inst;
+
 	MainWindow w;
 	w.setWindowTitle(QString("HiFi-SoRaP"));
-
-    QVulkanInstance inst;
 
     // supported layers
     qInfo("Supported Vulkan instance layers");

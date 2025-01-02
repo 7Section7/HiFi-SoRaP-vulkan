@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	srp[NPlateModel] = new NPlate();
 	srp[RayTraceCPUModel] = new RayTraceCPU();
 	srp[AdvancedGPUModel] = new Render();
+    srp[ComputeGPUModel] = nullptr;
 
 	model =  static_cast<SRPModel>(0);
 
@@ -35,7 +36,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-	delete ui;
+    if (ComputeGPU* computeModel = dynamic_cast<ComputeGPU*>(srp[ComputeGPUModel])) {
+        delete computeModel;
+    }
+    delete ui;
 	for(uint i=0; i< dataVisualizations.size();i++)
 		if(dataVisualizations[i])
 			delete dataVisualizations[i];
@@ -223,6 +227,8 @@ void MainWindow::loadUserParameters()
             satellite->setReflectivenessInMaterials(r);
             satellite->setRefractiveIndexInMaterials(1);
 
+            //computeModel->xWorkgroupSize = workgroupSize->currentData().toInt();
+
             computeModel->init();
         }
     }
@@ -392,13 +398,16 @@ void MainWindow::on_bttn_generateOutput_clicked()
 
 		glWidget->updateGL();
 	}
+    */
 
 	srp[model]->computeSRP(results);
 
+    /*
 	if(!dynamic_cast<BasicSRP*>(srp[model]))
 		window->close();
 
 	if(srp[model]->getStopExecution()) return;
+    */
 
 	QString nameResult = getNameFromModel(model);
 
@@ -597,6 +606,9 @@ QString MainWindow::getNameFromModel(SRPModel model)
 		if(dynamic_cast<RayTraceGPUTextures*>(srp[model]))
 			name = QStringLiteral("RayTrace - GPU");
 	}
+    else if(model == ComputeGPUModel) {
+        name = QStringLiteral("RayTrace - GPU Compute Shader");
+    }
 
 	return name;
 }
@@ -827,7 +839,7 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
         numFiability = 6;
         numPerformance = 4;
 
-        textInfo = QString("This method takes the satellite's faces to the GPU and then, for each pixel, it is casted a ray that if it intersects with a face of the satellite, the SRP force will be computed. Additionally, each time a ray intersects a face, other rays with reflected and diffuse directions will be casted as well.");
+        textInfo = QString("This method takes the satellite's faces to the GPU and then, for each pixel, it is casted a ray that if it intersects with a face of the satellite, the SRP force will be computed. Additionally, each time a ray intersects a face, other rays with reflected and diffuse directions will be casted as well. This method uses compute shader.");
 
         model = SRPModel::ComputeGPUModel;
     }
@@ -974,8 +986,55 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
 		numDiffuseRays->setMinimumHeight(30);
 		extraInfoGrid->addWidget(numDiffuseRays,2,8);
 
-		gridLayout2->addLayout(extraInfoGrid,4,0,6,2);
+        /* NOT IMPLEMENTED: ComboBox to select workgroup size.
+         * To dynamically change workgroup size, the compute pipeline have to be
+         * rebuild with the new value every time it changes
+        if(arg1.compare(QString("RayTrace (GPU) - Compute Shader"))==0) {
+
+            QSpacerItem *item9 = new QSpacerItem(30,0, QSizePolicy::Fixed,QSizePolicy::Fixed);
+            extraInfoGrid->addItem(item9,0,9);
+
+            QLabel * labelWorkgroups = new QLabel;
+            labelWorkgroups->setFont(font1);
+            labelWorkgroups->setObjectName(QStringLiteral("labelWorkgroups"));
+            labelWorkgroups->setGeometry(QRect(0, 0, 31, 17));
+            labelWorkgroups->setText(QString("Workgroup size"));
+            labelWorkgroups->setContentsMargins(20,50,00,0);
+            labelWorkgroups->setMaximumWidth(100);
+            extraInfoGrid->addWidget(labelWorkgroups,0,10);
+
+            QLabel *labelIconWg = new QLabel();
+            labelIconWg->setGeometry(QRect(0, 0, 20, 20));
+            labelIconWg->setSizePolicy(sizePolicy3);
+            labelIconWg->setFont(font1);
+            labelIconWg->setMaximumWidth(20);
+            labelIconWg->setMaximumHeight(20);
+            labelIconWg->setPixmap(QPixmap(QString::fromUtf8(":/resources/images/infoIcon3.png")));
+            labelIconWg->setScaledContents(true);
+            labelIconWg->setToolTip(QApplication::translate("MainWindow", "This is the maxim number of secondary rays that will be casted (iteratively) when one of the initial rays intersect with a face of the satellite.", nullptr));
+            extraInfoGrid->addWidget(labelIconWg,0,11);
+
+            QSpacerItem *item10 = new QSpacerItem(10,0);
+            extraInfoGrid->addItem(item10,0,12);
+
+            workgroupSize = new QComboBox();
+            workgroupSize->addItem(QStringLiteral("4x4 (16)"), 4);
+            workgroupSize->addItem(QStringLiteral("8x8 (64)"), 8);
+            workgroupSize->addItem(QStringLiteral("16x16 (256)"), 16);
+            workgroupSize->addItem(QStringLiteral("32x32 (1024) "), 32);
+            workgroupSize->setObjectName(QStringLiteral("wgSize"));
+            workgroupSize->setMinimumHeight(30);
+            extraInfoGrid->addWidget(workgroupSize, 0, 13);
+
+            gridLayout2->addLayout(extraInfoGrid,4,0,6,4);
+        }
+        */
+
+        gridLayout2->addLayout(extraInfoGrid,4,0,6,2);
+
+
 	}
+
 
 	ui->gridGroupBox->setStyleSheet("border:1px solid grey; margin-left:3px;");
 

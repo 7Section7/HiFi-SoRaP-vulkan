@@ -100,8 +100,8 @@ void ComputeGPU::process() {
 
 
 void ComputeGPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3& V1, const vector3& V2) {
-    camera.setViewport(0, 0, 512, 512);
-    camera.setProjection(kFieldOfView, kZNear, kZFar);
+    //camera.setViewport(0, 0, 512, 512);
+    //camera.setProjection(kFieldOfView, kZNear, kZFar);
 
     Eigen::Matrix4f view = camera.setView();
 
@@ -151,7 +151,7 @@ void ComputeGPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3
     std::cout << "Compute work took " << duration.count() << " microseconds" << std::endl;
 
     writeBackCPU();
-    force = vector3(-343.0, 0.0, 0.0);
+    sumForces(force);
 }
 
 
@@ -767,8 +767,10 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
     // of 32x32, for a total of width * height individual invocations
     //vkCmdDispatch(commandBuffer, width / 32, height / 32, 1);
 
-    int x = std::ceil((float) width / 32);
-    int y = std::ceil((float) height / 32);
+#define WORKGROUP_SIZE 32  // workgroup size for x and y dims, should be also changed on shader
+
+    int x = std::ceil((float) width / WORKGROUP_SIZE);
+    int y = std::ceil((float) height / WORKGROUP_SIZE);
     std::cout << "Pixel grid: " << width << "x" << height << "\n";
     std::cout << "Dispatching " << x << "x" << y << " workgroups\n";
 
@@ -811,6 +813,8 @@ void ComputeGPU::dispatchCompute() {
 void ComputeGPU::waitForComputeWork() {
     // wait for compute work to finish
     vkWaitForFences(device, 1, &computeFence, VK_TRUE, UINT64_MAX);
+    // reset the fence for reuse
+    vkResetFences(device, 1, &computeFence);
 }
 
 void ComputeGPU::writeBackCPU() {
@@ -823,7 +827,7 @@ void ComputeGPU::writeBackCPU() {
 
     copyBuffer(forcesSSBO, stagingBuffer, bufferSize);
 
-    std::vector<vector4> forces(width * height);
+    forces.resize(width * height);
 
     vector4* bufferData;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, (void **) &bufferData);
@@ -833,39 +837,30 @@ void ComputeGPU::writeBackCPU() {
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
-    // print data
 
-    std::cout << forces[0] << " ";
-    std::cout << forces[1] << " ";
-    std::cout << forces[2] << " ";
-    std::cout << forces[3] << " ";
-    std::cout << forces[4] << " ";
-    std::cout << forces[5] << " ";
-    std::cout << forces[6] << " ";
-    std::cout << forces[7] << " ";
-    std::cout << forces[8] << " ";
-    std::cout << forces[9] << " ";
+
+}
+
+void ComputeGPU::sumForces(vector3& force) {
+    /*
+    // print data
     for(uint32_t i = 0; i < width * height; i = i + 1) {
         std::cout << "at " << i << " " << forces[i] << " ";
         //std::cout << forces[i] << " ";
     }
-
+    */
     vector3 totalForce = vector3(0.0f,0.0f,0.0f);
     const uint32_t n_pixels = width * height;
     for(uint32_t i = 0; i < n_pixels; i++) {
         totalForce += vector3(forces[i].x, forces[i].y, forces[i].z);
     }
 
-    std::cout << "SRP totalForce " << totalForce << " ";
-
     float apix = distance/width * distance/height;
     double PS = PRESSURE;
-    totalForce = PS*apix/msat*(totalForce);
-
-    std::cout << "SPR on compute " << totalForce << std::endl << std::flush;
-
+    force = PS*apix/msat*(totalForce);
 
 }
+
 
 void ComputeGPU::cleanup() {
 

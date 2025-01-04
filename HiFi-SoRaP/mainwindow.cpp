@@ -127,6 +127,9 @@ void MainWindow::loadUserParameters()
 
     if(model == ComputeGPUModel)
     {
+        if (ComputeGPU* model = dynamic_cast<ComputeGPU*>(srp[ComputeGPUModel])) {
+            delete model;
+        }
         srp[ComputeGPUModel] = new ComputeGPU(this->inst->vkInstance());
 
     }
@@ -228,6 +231,9 @@ void MainWindow::loadUserParameters()
             satellite->setRefractiveIndexInMaterials(1);
 
             //computeModel->xWorkgroupSize = workgroupSize->currentData().toInt();
+            bool ok;
+            computeModel->gpuSum = gpuSum->currentData().toInt(&ok);
+            if(!ok) {computeModel->gpuSum = 0;}
 
             computeModel->init();
         }
@@ -1030,7 +1036,50 @@ void MainWindow::showCPUMethodInformation(const QString &arg1){
         }
         */
 
-        gridLayout2->addLayout(extraInfoGrid,4,0,6,2);
+        if(arg1.compare(QString("RayTrace (GPU) - Compute Shader"))==0) {
+            QSpacerItem *item9 = new QSpacerItem(30,0, QSizePolicy::Fixed,QSizePolicy::Fixed);
+            extraInfoGrid->addItem(item9,0,9);
+
+            QLabel * labelGpuSum = new QLabel;
+            labelGpuSum->setFont(font1);
+            labelGpuSum->setObjectName(QStringLiteral("labelGpuSum"));
+            labelGpuSum->setGeometry(QRect(0, 0, 31, 17));
+            labelGpuSum->setText(QString("Sum on the GPU"));
+            labelGpuSum->setContentsMargins(20,50,00,0);
+            labelGpuSum->setMaximumWidth(100);
+            extraInfoGrid->addWidget(labelGpuSum,0,10);
+
+            QLabel *labelIconGpuSum = new QLabel();
+            labelIconGpuSum->setGeometry(QRect(0, 0, 20, 20));
+            labelIconGpuSum->setSizePolicy(sizePolicy3);
+            labelIconGpuSum->setFont(font1);
+            labelIconGpuSum->setMaximumWidth(20);
+            labelIconGpuSum->setMaximumHeight(20);
+            labelIconGpuSum->setPixmap(QPixmap(QString::fromUtf8(":/resources/images/infoIcon3.png")));
+            labelIconGpuSum->setScaledContents(true);
+            labelIconGpuSum->setToolTip(QApplication::translate("MainWindow", "Should the forces for each cell added on the GPU (true) or the CPU (false)", nullptr));
+            extraInfoGrid->addWidget(labelIconGpuSum,0,11);
+
+            QSpacerItem *item10 = new QSpacerItem(10,0);
+            extraInfoGrid->addItem(item10,0,12);
+
+            gpuSum = new QComboBox();
+            gpuSum->addItem(QStringLiteral("False"), 0);
+            gpuSum->addItem(QStringLiteral("True"), 1);
+            gpuSum->setObjectName(QStringLiteral("gpuSum"));
+            gpuSum->setMinimumHeight(30);
+            extraInfoGrid->addWidget(gpuSum, 0, 13);
+
+            // layout added here for compute GPU
+            gridLayout2->addLayout(extraInfoGrid,4,0,6,4);
+        }
+
+        // layout's different for GPU non-compute shader
+        if(arg1.compare(QString("RayTrace (GPU) - Compute Shader"))!=0) {
+            gridLayout2->addLayout(extraInfoGrid,4,0,6,2);
+        }
+
+
 
 
 	}

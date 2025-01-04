@@ -12,6 +12,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 const std::vector<const char*> deviceExtensions = {
+    "VK_EXT_shader_atomic_float"  // for shader atomic add floats
 };
 
 const QString computeShaderFilename = ":/resources/shaders/test_comp.spv";
@@ -49,6 +50,7 @@ struct UniformBufferObject {
     alignas(4) float xtot;  // grid x size
     alignas(4) float ytot;  // grid y size
     alignas(4) float boundingBoxDistance;  // diagonal diff
+    alignas(4) int gpuSum;  // bool, should GPU perform sum reduction
 };
 
 struct cTriangle {
@@ -178,6 +180,7 @@ public:
     int32_t numDiffuseRays;
     int reflectiveType = Reflective;
     int xWorkgroupSize = 32;
+    int gpuSum = 0;
 };
 
 #endif // COMPUTEGPU_H

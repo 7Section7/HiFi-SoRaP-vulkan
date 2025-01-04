@@ -134,6 +134,7 @@ void ComputeGPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3
     ubo.ytot = distance;
     ubo.boundingBoxDistance = diagonalDiff;
     ubo.timeSeed = time_seed;
+    ubo.gpuSum = gpuSum;
 
     // get camera translation via its matrix
     Eigen::Vector4f camPosM = view.inverse().col(3);
@@ -255,6 +256,12 @@ void ComputeGPU::createLogicalDevice() {
 
     VkPhysicalDeviceFeatures deviceFeatures{};
 
+    // enable atomic add feature for buffers
+    VkPhysicalDeviceShaderAtomicFloatFeaturesEXT floatFeatures{};
+    floatFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
+    floatFeatures.shaderBufferFloat32AtomicAdd = VK_TRUE;
+
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
@@ -265,6 +272,8 @@ void ComputeGPU::createLogicalDevice() {
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+    createInfo.pNext = &floatFeatures;  // chain additional features
 
     if (enableValidationLayers) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
@@ -715,6 +724,7 @@ void ComputeGPU::updateUniforms() {
     ubo.ytot = distance;
     ubo.boundingBoxDistance = distance;
     ubo.timeSeed = time_seed;
+    ubo.gpuSum = 0;
 
     // get camera translation via its matrix
     Eigen::Vector4f camPosM = view.inverse().col(3);
@@ -842,13 +852,13 @@ void ComputeGPU::writeBackCPU() {
 }
 
 void ComputeGPU::sumForces(vector3& force) {
-    /*
+
     // print data
     for(uint32_t i = 0; i < width * height; i = i + 1) {
         std::cout << "at " << i << " " << forces[i] << " ";
         //std::cout << forces[i] << " ";
     }
-    */
+
     vector3 totalForce = vector3(0.0f,0.0f,0.0f);
     const uint32_t n_pixels = width * height;
     for(uint32_t i = 0; i < n_pixels; i++) {

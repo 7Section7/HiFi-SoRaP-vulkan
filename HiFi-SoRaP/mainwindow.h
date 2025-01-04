@@ -88,7 +88,8 @@ private:
     QDoubleSpinBox *cr, *area;
 	QSpinBox *nx,*ny,*numSecondaryRays, *numDiffuseRays;
 	QRadioButton *specularReflection, *diffuseReflection;
-    QComboBox *workgroupSize;
+    //QComboBox *workgroupSize;
+    QComboBox *gpuSum;
 
 	QString nameMtl,nameObj;
 

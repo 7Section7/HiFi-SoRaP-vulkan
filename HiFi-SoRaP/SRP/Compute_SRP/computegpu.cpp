@@ -36,7 +36,7 @@ std::vector<cTriangle> ComputeGPU::prepareTriangles() {
         };
         ctriangles.push_back(t);
 
-        std::cout << t.v1 << " " << t.v2 << " " << t.v3 << " " << t.materialIndex << " ";
+        //std::cout << t.v1 << " " << t.v2 << " " << t.v3 << " " << t.materialIndex << " ";
     }
 
     return ctriangles;
@@ -142,17 +142,30 @@ void ComputeGPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3
     ubo.worldCamPos = camPos;
 
     updateUniforms(ubo);
-    recordComputeCommandBuffer(computeCommandBuffer);
+    //recordComputeCommandBuffer(computeCommandBuffer);
 
     auto start = std::chrono::high_resolution_clock::now();
     dispatchCompute();
     waitForComputeWork();
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << "Compute work took " << duration.count() << " microseconds" << std::endl;
+    //std::cout << "Compute work took " << duration.count() << " microseconds" << std::endl;
 
-    writeBackCPU();
-    sumForces(force);
+    // sum did happen on the GPU, write back only single value and compute
+    if (gpuSum) {
+        writeBackSingleValue();
+        float apix = distance/width * distance/height;
+        double PS = PRESSURE;
+        force = vector3(forces[0].x, forces[0].y, forces[0].z);
+        force = PS*apix/msat*(force);
+
+    }
+    // write back whole buffer and sum on CPU
+    else {
+        writeBackCPU();
+        sumForces(force);
+    }
+
 }
 
 
@@ -781,8 +794,8 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
 
     int x = std::ceil((float) width / WORKGROUP_SIZE);
     int y = std::ceil((float) height / WORKGROUP_SIZE);
-    std::cout << "Pixel grid: " << width << "x" << height << "\n";
-    std::cout << "Dispatching " << x << "x" << y << " workgroups\n";
+    //std::cout << "Pixel grid: " << width << "x" << height << "\n";
+    //std::cout << "Dispatching " << x << "x" << y << " workgroups\n";
 
     vkCmdDispatch(commandBuffer, x, y, 1);
 
@@ -846,19 +859,34 @@ void ComputeGPU::writeBackCPU() {
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
 
+void ComputeGPU::writeBackSingleValue() {
+    VkDeviceSize bufferSize = sizeof(vector4);
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
+    copyBuffer(forcesSSBO, stagingBuffer, bufferSize);
 
+    forces.resize(width * height);
+
+    vector4* bufferData;
+    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, (void **) &bufferData);
+    memcpy(forces.data(), bufferData, (size_t)bufferSize);
+    vkUnmapMemory(device, stagingBufferMemory);
+
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
 void ComputeGPU::sumForces(vector3& force) {
-
+    /*
     // print data
     for(uint32_t i = 0; i < width * height; i = i + 1) {
         std::cout << "at " << i << " " << forces[i] << " ";
-        //std::cout << forces[i] << " ";
     }
-
+    */
     vector3 totalForce = vector3(0.0f,0.0f,0.0f);
     const uint32_t n_pixels = width * height;
     for(uint32_t i = 0; i < n_pixels; i++) {

@@ -522,6 +522,8 @@ void main()
     vec4 force = vec4(forceAux, 0);
 
     if (ubo.gpuSum != 0) {
+        forces[0] = vec4(0.0, 0.0, 0.0, 0.0);
+        subgroupBarrier();
         vec4 partialSum = subgroupAdd(force);
         if(subgroupElect()) {
             atomicAdd(forces[0].x, partialSum.x);

@@ -147,6 +147,7 @@ public:
 
     void waitForComputeWork();
     void writeBackCPU();
+    void writeBackSingleValue();
     void sumForces(vector3& force);
 
     void init();

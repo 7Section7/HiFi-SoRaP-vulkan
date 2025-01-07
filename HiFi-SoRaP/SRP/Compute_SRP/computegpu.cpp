@@ -156,8 +156,8 @@ void ComputeGPU::computeStepSRP(const vector3& XS, vector3 &force, const vector3
         writeBackSingleValue();
         float apix = distance/width * distance/height;
         double PS = PRESSURE;
-        force = vector3(forces[0].x, forces[0].y, forces[0].z);
-        force = PS*apix/msat*(force);
+        vec3 totalForce = vector3(forces[0].x, forces[0].y, forces[0].z);
+        force = PS*apix/msat*(totalForce);
 
     }
     // write back whole buffer and sum on CPU
@@ -560,7 +560,7 @@ void ComputeGPU::createShaderStorageBuffers() {
 
     // =========CPU WRITE BACK BUFFER=================
     bufferSize = width * height * sizeof(vector4);
-    createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, forcesSSBO, forcesSSBOMemory);
 
 }
@@ -781,10 +781,22 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
         throw std::runtime_error("failed to begin recording compute command buffer!");
     }
 
+    if (gpuSum) {
+        // initialize forces to 0, for proper sum reduction
+        VkMemoryBarrier memoryBarrierZero{};
+        memoryBarrierZero.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        memoryBarrierZero.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        memoryBarrierZero.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+
+        vkCmdFillBuffer(commandBuffer, forcesSSBO, 0, VK_WHOLE_SIZE, 0);
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &memoryBarrierZero, 0, nullptr, 0, nullptr);
+    }
+
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1, &computeDescriptorSets, 0, nullptr);
-
 
     // dispatch (width / 32) * (height / 32) work groups, with a local size
     // of 32x32, for a total of width * height individual invocations
@@ -887,6 +899,7 @@ void ComputeGPU::sumForces(vector3& force) {
         std::cout << "at " << i << " " << forces[i] << " ";
     }
     */
+
     vector3 totalForce = vector3(0.0f,0.0f,0.0f);
     const uint32_t n_pixels = width * height;
     for(uint32_t i = 0; i < n_pixels; i++) {

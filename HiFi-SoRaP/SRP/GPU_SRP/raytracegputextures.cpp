@@ -69,7 +69,7 @@ void RayTraceGPUTextures::sendFaces(){
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	facesTexture.reserve(texFacesSize*4);
+    facesTexture.resize(texFacesSize*4);
 	for(uint i=0; i<mesh->faces.size();i++){
 		facesTexture[4*i]   = ((float)mesh->faces[i].v1) / texVerticesSize;
 		facesTexture[4*i+1] = ((float)mesh->faces[i].v2) / texVerticesSize;
@@ -107,7 +107,7 @@ void RayTraceGPUTextures::sendVertices(){
 	GLuint maxVertexComponentLocation = programGPU->uniformLocation("maxVertexComponent");
 	glUniform1f(maxVertexComponentLocation,*maxPos);
 
-	verticesTexture.reserve(texVerticesSize*3);
+    verticesTexture.resize(texVerticesSize*3);
 	for(uint i=0; i<mesh->vertices.size();i++)
 	{
 		verticesTexture[3*i  ] = (mesh->vertices[i].x - *minPos)/(*maxPos - *minPos);
@@ -132,7 +132,7 @@ void RayTraceGPUTextures::sendMaterials(){
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	reflectivitiesTexture.reserve(texMaterialsSize*3);
+    reflectivitiesTexture.resize(texMaterialsSize*3);
 	uint numMaterials = satellite->getNumMaterials();
 
 	for(uint i=0; i<numMaterials;i++){
@@ -156,7 +156,7 @@ void RayTraceGPUTextures::sendMaterials(){
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	materialTypesTexture.reserve(texMaterialsSize);
+    materialTypesTexture.resize(texMaterialsSize);
 	for(uint i=0; i<numMaterials;i++){
 		Material m = satellite->getMaterial(i);
 		float f=0;
@@ -165,7 +165,8 @@ void RayTraceGPUTextures::sendMaterials(){
 		else if(m.r == Transparent) f=0.5f;
 		else if(m.r == Lambertian) f=1;
 
-		materialTypesTexture[3*i] = f;
+        //materialTypesTexture[3*i] = f;
+        materialTypesTexture[i] = f;
 	}
 	for(uint i=numMaterials; i<texMaterialsSize; i++) materialTypesTexture[i] = 0;
 
@@ -186,7 +187,7 @@ void RayTraceGPUTextures::sendNormals(){
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	normalsTexture.reserve(texNormalsSize*3);
+    normalsTexture.resize(texNormalsSize*3);
 	for(uint i=0; i<mesh->faceNormals.size();i++){
 		normalsTexture[3*i  ] = 0.5f * (mesh->faceNormals[i].x+1);
 		normalsTexture[3*i+1] = 0.5f * (mesh->faceNormals[i].y+1);
@@ -208,7 +209,7 @@ void RayTraceGPUTextures::sendNormals(){
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	faceNormalsTexture.reserve(texFacesSize);
+    faceNormalsTexture.resize(texFacesSize);
 	for(uint i=0; i<mesh->faces.size();i++){
 		faceNormalsTexture[i] = ((float)mesh->faces[i].nn) / texNormalsSize;
 	}
@@ -218,7 +219,6 @@ void RayTraceGPUTextures::sendNormals(){
 
 	glUniform1i(programGPU->uniformLocation( "texTrianglesNormals"), 5);
 }
-
 namespace
 {
 

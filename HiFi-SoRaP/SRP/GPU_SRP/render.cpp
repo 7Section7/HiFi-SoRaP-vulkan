@@ -145,8 +145,8 @@ void Render::initializeBuffers()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	localForces.reserve(width*height*3);
-	hits.reserve(width*height);
+    localForces.resize(width*height*3);
+    hits.resize(width*height);
 }
 
 void Render::draw(std::unique_ptr<QGLShaderProgram> &program,Object * satellite)

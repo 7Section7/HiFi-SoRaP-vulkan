@@ -782,13 +782,13 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
     }
 
     if (gpuSum) {
-        // initialize forces to 0, for proper sum reduction
+        // initialize forces[0] to 0, for proper sum reduction
         VkMemoryBarrier memoryBarrierZero{};
         memoryBarrierZero.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
         memoryBarrierZero.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         memoryBarrierZero.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
 
-        vkCmdFillBuffer(commandBuffer, forcesSSBO, 0, VK_WHOLE_SIZE, 0);
+        vkCmdFillBuffer(commandBuffer, forcesSSBO, 0, 16, 0);
         vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
                              VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &memoryBarrierZero, 0, nullptr, 0, nullptr);
     }

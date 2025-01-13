@@ -498,7 +498,13 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     V2[0] = 0;  V2[1] = -1; V2[2] = 0;
 
 
+    auto start = std::chrono::steady_clock::now();
+
     const vector3 force = srp[model]->computeSRP(XS, 0, 0, 0);
+
+    auto end = std::chrono::steady_clock::now();
+    auto diff = end - start;
+    std::cout << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
 
     std::cout << "Total SRP force: " << force << std::endl;
 

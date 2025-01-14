@@ -26,6 +26,8 @@ void BasicSRP::computeSRP(Grid *results)
 	NEL = 180/ELstep+1;
 	NAZ = 360/AZstep+1;
 
+    auto start = std::chrono::steady_clock::now();
+
 	for(j = 0; j < NAZ; j++)
 	{
 		az = -180 + j*AZstep;
@@ -43,6 +45,10 @@ void BasicSRP::computeSRP(Grid *results)
 			(*results)(j,i)=Output(az, el, force.x, force.y, force.z);
 		}
 	}
+
+    auto end = std::chrono::steady_clock::now();
+    auto diff = end - start;
+    std::cout << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
 }
 
 vector3 BasicSRP::computeSRP(const vector3& XS, float angleX, float angleY, float angleZ)

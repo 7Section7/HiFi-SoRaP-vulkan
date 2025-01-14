@@ -802,7 +802,7 @@ void ComputeGPU::recordComputeCommandBuffer(VkCommandBuffer commandBuffer) {
     // of 32x32, for a total of width * height individual invocations
     //vkCmdDispatch(commandBuffer, width / 32, height / 32, 1);
 
-#define WORKGROUP_SIZE 32  // workgroup size for x and y dims, should be also changed on shader
+#define WORKGROUP_SIZE 8  // workgroup size for x and y dims, should be also changed on shader
 
     int x = std::ceil((float) width / WORKGROUP_SIZE);
     int y = std::ceil((float) height / WORKGROUP_SIZE);

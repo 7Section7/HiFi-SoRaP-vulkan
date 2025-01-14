@@ -1,5 +1,13 @@
 ## <b>Introduction</b> ##
 
+
+This repository is a fork of the HiFi-SoRaP project https://sourceforge.net/projects/hifi-sorap/.
+The original project uses OpenGL to interact with the GPU. This fork integrates the Vulkan graphics API  as a way to use compute shaders for faster computing of the SRP.
+
+Developed for the Math and Computer Science degrees final thesis by me. 
+
+Original README follows: 
+
 The  aim  of  this  project  is  to  develop  an  efficient  way  of  computing  the solar  radiation  pressure
 acceleration  that  acts  on  a  spacecraft.
 

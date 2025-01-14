@@ -1,0 +1,14 @@
+# Blender 4.0.2 MTL File: 'new_parker_solar_probe.blend'
+# www.blender.org
+
+newmtl Bus
+Kd 0.6
+Ks 0.3
+
+newmtl SolarShield
+Kd 0.6
+Ks 0.3
+
+newmtl SolarPanel
+Kd 0.044
+Ks 0.176

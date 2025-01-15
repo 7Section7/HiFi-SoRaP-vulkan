@@ -537,11 +537,12 @@ void VulkanRenderer::startNextFrame() {
         satellite->getMesh()->replicatedVertices.size()
         );
 
-    VkDeviceSize vbOffset = 0;
-    VkDeviceSize normalsOffset = numVertices * sizeof(vector4);
 
-    m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &satellite->buf, &vbOffset);
-    m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &satellite->buf, &normalsOffset);
+    VkDeviceSize offsets[2] = {0, numVertices * sizeof(vector4)};
+    VkBuffer buffers[2] = {satellite->buf, satellite->buf};
+
+    m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 2, buffers, offsets);
+    //m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &satellite->buf, &normalsOffset);
 
     m_devFuncs->vkCmdDraw(cb, numVertices, 1, 0, 0);
 

@@ -531,16 +531,18 @@ void VulkanRenderer::startNextFrame() {
 
     // satellite drawing
     // TODO: draw indexed mesh
-    VkDeviceSize vbOffset = 0;
-
+    // TODO: review normals
     Object* satellite = m_window->satellite;
-
-    m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &satellite->buf, &vbOffset);
-    m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &satellite->buf, &vbOffset);
-
     uint32_t numVertices = static_cast<uint32_t>(
         satellite->getMesh()->replicatedVertices.size()
         );
+
+    VkDeviceSize vbOffset = 0;
+    VkDeviceSize normalsOffset = numVertices * sizeof(vector4);
+
+    m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &satellite->buf, &vbOffset);
+    m_devFuncs->vkCmdBindVertexBuffers(cb, 1, 1, &satellite->buf, &normalsOffset);
+
     m_devFuncs->vkCmdDraw(cb, numVertices, 1, 0, 0);
 
     m_devFuncs->vkCmdEndRenderPass(cmdBuf);

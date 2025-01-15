@@ -14,6 +14,6 @@ out gl_PerVertex { vec4 gl_Position; };
 void main()
 {
     //v_color = color.xyz;
-    v_color = vec3(1.0f, 0.0f, 0.0f);
+    v_color = vec3(0.0f, 0.0f, 1.0f);
     gl_Position = ubuf.mvp * position;
 }

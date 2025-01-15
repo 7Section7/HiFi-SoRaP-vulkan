@@ -488,7 +488,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     if(errorCode<0)
         return;
 
-
+    /* Code to test methods for a single attitude
     const auto lightDir = new Light();
 
     vector3 RS, V1, V2, XS, cm;
@@ -507,6 +507,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     std::cout << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
 
     std::cout << "Total SRP force: " << force << std::endl;
+    */
 
     /*
     ComputeGPU* computeModel = new ComputeGPU(this->inst->vkInstance());
@@ -584,8 +585,6 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     computeModel->cleanup();
     */
 
-    /*
-    loadUserParameters();
 
     VulkanWindow* vulkanWindow = new VulkanWindow;
     vulkanWindow->setVulkanInstance(this->inst);
@@ -599,7 +598,7 @@ void MainWindow::on_bttn_visualizeSatellite_clicked()
     //vkVisualization->drawSatellite();
 
     vkVisualizations.push_back(vkVisualization);
-    */
+
 }
 
 //Obtain the name of the model.

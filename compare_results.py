@@ -18,10 +18,13 @@ content_2 = file_2.read()
 lines_2 = content_2.splitlines()
 
 table_start_1 = ["---" in x for x in lines_1].index(True) + 1
-table_end_1 = ["---" in x for x in lines_1[table_start_1:]].index(True)
+table_end_1 = ["---" in x for x in lines_1[table_start_1:]].index(True) + table_start_1
+
+print(table_start_1)
+print(table_end_1)
 
 table_start_2 = ["---" in x for x in lines_2].index(True) + 1
-table_end_2 = ["---" in x for x in lines_2[table_start_2:]].index(True)
+table_end_2 = ["---" in x for x in lines_2[table_start_2:]].index(True) + table_start_2
 
 table_1 = [line.split() for line in lines_1[table_start_1:table_end_1]]
 

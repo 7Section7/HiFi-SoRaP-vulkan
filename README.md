@@ -6,7 +6,12 @@ The original project uses OpenGL to interact with the GPU. This fork integrates 
 
 Developed for the Math and Computer Science degrees final thesis by me. 
 
-Original README follows: 
+To install the project, the installation instructions below for the correspondent platform should be followed. Note that the OpenGL libraries are still needed to compile because some definitions from OpenGL still remain in the project. This includes the `glext.dll` noted below.
+
+After installing Qt and the compiler, the Vulkan SDK should be downloaded from https://vulkan.lunarg.com/sdk/home and installed following https://vulkan.lunarg.com/doc/sdk/1.3.296.0/windows/getting_started.html.
+
+
+The README of the original project developed by Leandro Zardaín follows, with some modifications:
 
 The  aim  of  this  project  is  to  develop  an  efficient  way  of  computing  the solar  radiation  pressure
 acceleration  that  acts  on  a  spacecraft.

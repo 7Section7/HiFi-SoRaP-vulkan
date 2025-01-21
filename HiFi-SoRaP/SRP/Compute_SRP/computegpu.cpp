@@ -5,6 +5,35 @@
 #include <cmath>
 
 
+const char* vkResultToString(VkResult result) {
+    switch (result) {
+    case VK_SUCCESS: return "VK_SUCCESS";
+    case VK_NOT_READY: return "VK_NOT_READY";
+    case VK_TIMEOUT: return "VK_TIMEOUT";
+    case VK_EVENT_SET: return "VK_EVENT_SET";
+    case VK_EVENT_RESET: return "VK_EVENT_RESET";
+    case VK_INCOMPLETE: return "VK_INCOMPLETE";
+    case VK_ERROR_OUT_OF_HOST_MEMORY: return "VK_ERROR_OUT_OF_HOST_MEMORY";
+    case VK_ERROR_OUT_OF_DEVICE_MEMORY: return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+    case VK_ERROR_INITIALIZATION_FAILED: return "VK_ERROR_INITIALIZATION_FAILED";
+    case VK_ERROR_DEVICE_LOST: return "VK_ERROR_DEVICE_LOST";
+    case VK_ERROR_MEMORY_MAP_FAILED: return "VK_ERROR_MEMORY_MAP_FAILED";
+    case VK_ERROR_LAYER_NOT_PRESENT: return "VK_ERROR_LAYER_NOT_PRESENT";
+    case VK_ERROR_EXTENSION_NOT_PRESENT: return "VK_ERROR_EXTENSION_NOT_PRESENT";
+    case VK_ERROR_FEATURE_NOT_PRESENT: return "VK_ERROR_FEATURE_NOT_PRESENT";
+    case VK_ERROR_INCOMPATIBLE_DRIVER: return "VK_ERROR_INCOMPATIBLE_DRIVER";
+    case VK_ERROR_TOO_MANY_OBJECTS: return "VK_ERROR_TOO_MANY_OBJECTS";
+    case VK_ERROR_FORMAT_NOT_SUPPORTED: return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+    case VK_ERROR_FRAGMENTED_POOL: return "VK_ERROR_FRAGMENTED_POOL";
+    case VK_ERROR_OUT_OF_POOL_MEMORY: return "VK_ERROR_OUT_OF_POOL_MEMORY";
+    case VK_ERROR_INVALID_EXTERNAL_HANDLE: return "VK_ERROR_INVALID_EXTERNAL_HANDLE";
+    default: return "UNKNOWN_ERROR";
+    }
+}
+
+
+
+
 ComputeGPU::ComputeGPU(VkInstance instance) {
     this->instance = instance;
     // default values
@@ -226,6 +255,12 @@ void ComputeGPU::pickPhysicalDevice() {
 
     this->physicalDevice = physicalDevices[bestDeviceIndex];
     this->physicalDeviceProps = physicalDeviceProps[bestDeviceIndex];
+
+    uint32_t maxComputeWorkGroupX = this->physicalDeviceProps.m_Properties.limits.maxComputeWorkGroupCount[0];
+    uint32_t maxComputeWorkGroupY = this->physicalDeviceProps.m_Properties.limits.maxComputeWorkGroupCount[1];
+    uint32_t maxInvocations = this->physicalDeviceProps.m_Properties.limits.maxComputeWorkGroupInvocations;
+    std::cout << "Maximum workgroup invocations: " << maxInvocations << std::endl;
+    std::cout << "Max compute workgroup count: " << maxComputeWorkGroupX << "x" << maxComputeWorkGroupY << std::endl;
 
 }
 
@@ -831,7 +866,11 @@ void ComputeGPU::dispatchCompute() {
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    vkResetCommandBuffer(computeCommandBuffer, 0);
+    VkResult resetResult = vkResetCommandBuffer(computeCommandBuffer, 0);
+    if(resetResult != VK_SUCCESS) {
+        std::cerr << "vkResetCommandBuffer failed with error: " << vkResultToString(resetResult) << std::endl;
+        throw std::runtime_error("failed to reset compute command buffer");
+    }
     recordComputeCommandBuffer(computeCommandBuffer);
 
     submitInfo.commandBufferCount = 1;
@@ -839,7 +878,10 @@ void ComputeGPU::dispatchCompute() {
     submitInfo.signalSemaphoreCount = 0;
     submitInfo.pSignalSemaphores = nullptr;
 
-    if(vkQueueSubmit(computeQueue, 1, &submitInfo, computeFence) != VK_SUCCESS) {
+
+    VkResult result = vkQueueSubmit(computeQueue, 1, &submitInfo, computeFence);
+    if(result != VK_SUCCESS) {
+        std::cerr << "vkQueueSubmit failed with error: " << vkResultToString(result) << std::endl;
         throw std::runtime_error("failed to submit compute command buffer");
     }
 
@@ -847,7 +889,11 @@ void ComputeGPU::dispatchCompute() {
 
 void ComputeGPU::waitForComputeWork() {
     // wait for compute work to finish
-    vkWaitForFences(device, 1, &computeFence, VK_TRUE, UINT64_MAX);
+    VkResult waitResult = vkWaitForFences(device, 1, &computeFence, VK_TRUE, UINT64_MAX);
+    if(waitResult != VK_SUCCESS) {
+        std::cerr << "vkWaitForFences failed with error: " << vkResultToString(waitResult) << std::endl;
+        throw std::runtime_error("failed to wait on compute fence");
+    }
     // reset the fence for reuse
     vkResetFences(device, 1, &computeFence);
 }
@@ -948,6 +994,7 @@ void ComputeGPU::cleanup() {
 ComputeGPU::~ComputeGPU() {
     cleanup();
 }
+
 
 
 

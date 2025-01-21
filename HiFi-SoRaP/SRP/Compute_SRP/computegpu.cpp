@@ -904,16 +904,21 @@ void ComputeGPU::writeBackCPU() {
     VkDeviceSize bufferSize = width * height * sizeof(vector4);
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+                 | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, stagingBuffer, stagingBufferMemory);
 
     copyBuffer(forcesSSBO, stagingBuffer, bufferSize);
 
     forces.resize(width * height);
 
     vector4* bufferData;
-    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, (void **) &bufferData);
+    VkResult mapResult = vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, (void **) &bufferData);
+    if (mapResult != VK_SUCCESS) {
+        throw std::runtime_error("failed to map memory!");
+    }
     memcpy(forces.data(), bufferData, (size_t)bufferSize);
-    vkUnmapMemory(device, stagingBufferMemory);
+
+    //vkUnmapMemory(device, stagingBufferMemory);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
@@ -923,7 +928,8 @@ void ComputeGPU::writeBackSingleValue() {
     VkDeviceSize bufferSize = sizeof(vector4);
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+                 | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, stagingBuffer, stagingBufferMemory);
 
     copyBuffer(forcesSSBO, stagingBuffer, bufferSize);
 

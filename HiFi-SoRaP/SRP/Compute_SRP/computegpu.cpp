@@ -952,10 +952,23 @@ void ComputeGPU::sumForces(vector3& force) {
     }
     */
 
+    // kahan summation
+    vector3 compensationTerm = vector3(0.0f,0.0f,0.0f);
+    vector3 previousForce;
     vector3 totalForce = vector3(0.0f,0.0f,0.0f);
+
     const uint32_t n_pixels = width * height;
+
     for(uint32_t i = 0; i < n_pixels; i++) {
-        totalForce += vector3(forces[i].x, forces[i].y, forces[i].z);
+
+        const vector3 fixedForce = vector3(forces[i].x, forces[i].y, forces[i].z) - compensationTerm;
+        const vector3 accFixedForce = totalForce + fixedForce;
+        compensationTerm = (accFixedForce - totalForce) - fixedForce;
+
+        totalForce = accFixedForce;
+
+        // previously:
+        //totalForce += vector3(forces[i].x,forces[i].y,forces[i].z);
     }
 
     float apix = distance/width * distance/height;
